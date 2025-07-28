@@ -1,10 +1,10 @@
 :root {
-    --primary: #FF6B6B;
-    --secondary: #4ECDC4;
+    --primary: #FE4F2D;
+    --secondary: #08C2FF;
     --accent: #FFE66D;
     --light: #F7FFF7;
     --dark: #292F36;
-}
+}   
 
 * {
     box-sizing: border-box;
@@ -22,7 +22,7 @@ body {
 /* Header */
 header {
     background: linear-gradient(135deg, var(--primary), var(--secondary));
-    color: white;
+    color: #FFF8E1;
     padding: 1rem 2rem;
     text-align: center;
     box-shadow: 0 4px 12px rgba(0,0,0,0.1);
@@ -96,7 +96,7 @@ main {
 .card-header {
     font-family: 'Baloo 2', cursive;
     font-size: 1.5rem;
-    color: var(--primary);
+    color: var(--secondaryA);
     margin-bottom: 1rem;
     display: flex;
     align-items: center;
@@ -123,7 +123,7 @@ main {
 
 .button {
     background-color: var(--primary);
-    color: white;
+    color: #FDFBEE;
     border: none;
     padding: 0.8rem 1.5rem;
     border-radius: 30px;
@@ -143,11 +143,22 @@ main {
 }
         
 .button.secondary {
-    background-color: var(--secondary);
+    background-color: var(--primary);
     box-shadow: 0 4px 8px rgba(78,205,196,0.3);
 }
         
 .button.secondary:hover {
     box-shadow: 0 6px 12px rgba(78,205,196,0.4);
 }
+.activity-title {
+  text-align: center;
+  color: var(--secondary);
+  font-family: "Baloo 2", cursive;
+  font-size: 35px;
+  letter-spacing: 1px;
+  margin: 0 auto;
+  display: block;
+}
+
+
 /* End of Main Context*/
