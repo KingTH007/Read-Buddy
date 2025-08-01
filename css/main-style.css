@@ -69,7 +69,8 @@ main {
     padding: 0 1.5rem;
 }
 
-.dashboard {
+/* Story comprehension */
+.story {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     gap: 2rem;
@@ -145,15 +146,7 @@ main {
 .button.secondary:hover {
     box-shadow: 0 6px 12px rgba(78,205,196,0.4);
 }
-.activity-title {
-  text-align: center;
-  color: var(--secondary);
-  font-family: "Baloo 2", cursive;
-  font-size: 35px;
-  letter-spacing: 1px;
-  margin: 0 auto;
-  display: block;
-}
+
 
 
 /* End of Main Context*/
