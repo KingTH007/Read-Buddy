@@ -37,9 +37,10 @@ header {
         
 .logo-container {
     display: flex;
-    justify-content: center;
+    justify-content: flex-start;
     align-items: center;
     margin-bottom: 1rem;
+    gap: 1rem;
 }
         
 .logo-text {
@@ -50,18 +51,12 @@ header {
     margin-left: 1rem;
 }
         
-.subtitle {
-    font-size: 1.2rem;
-    margin-bottom: 1rem;
-    opacity: 0.9;
-}
-        
 .bookworm {
-    position: absolute;
-    width: 100px;
-    height: 100px;
+    position: relative;
+    width: 70px;
+    height: 70px;
     top: 10px;
-    right: 20px;
+    left: 20px;
     opacity: 0.8;
     transform: rotate(-10deg);
 }
