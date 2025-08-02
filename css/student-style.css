@@ -72,8 +72,8 @@ main {
     background: #ffffff;
     padding: 20px;
     border-radius: 12px;
-    max-width: 1000px;
-    margin: auto;
+    max-width: 1200px;
+    margin: 1rem;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
@@ -91,15 +91,19 @@ main {
 /*Story Comprehension*/
 .story{
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-    gap: 2rem;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.8rem;
+    justify-items: center;
+    padding: 1rem;
 }
      
 .card {
-  padding: 1rem;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-  transition: transform 0.3s ease;
-  text-align: center;
+    width: 100%;
+    max-width: 260px; 
+    height: 330px;
+    padding: 0.5rem;
+    text-align: left;
+    transition: transform 0.3s ease;
 }
 
 .card:hover {
