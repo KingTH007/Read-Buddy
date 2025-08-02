@@ -148,3 +148,23 @@ main {
 }
 
 /* End of Main Context*/
+
+/*Responsive Layout*/
+@media (max-width: 1024px) {
+    
+    .story {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .story {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 480px) {
+    .story {
+        grid-template-columns: 1fr;
+    }
+}
