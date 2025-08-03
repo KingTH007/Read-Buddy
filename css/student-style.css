@@ -156,12 +156,39 @@ main {
 }
 
 @media (max-width: 768px) {
+    .logo {
+        width: 50px;
+        height: 50px;
+        top: 5px;
+        left: 10px;
+    }
+
+    .logo-text {
+        font-size: 1.8rem;
+    }
+
+    .logo-container {
+        gap: 0.5rem;
+        margin-bottom: 0.5rem;
+    }
+
     .act-card {
         grid-template-columns: repeat(2, 1fr);
     }
 }
 
 @media (max-width: 480px) {
+    .logo {
+        width: 40px;
+        height: 40px;
+        top: 0;
+        left: 5px;
+    }
+
+    .logo-text {
+        font-size: 1.5rem;
+    }
+    
     .act-card {
         grid-template-columns: 1fr;
     }
