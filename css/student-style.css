@@ -95,8 +95,9 @@ main {
     justify-items: center;
     padding: 1rem;
 }
-     
-.card {
+
+/* Story Comprehension */
+.story {
     width: 100%;
     max-width: 260px; 
     height: 330px;
@@ -105,11 +106,11 @@ main {
     transition: transform 0.3s ease;
 }
 
-.card:hover {
+.story:hover {
     transform: translateY(-5px);
 }
 
-.card-image {
+.story-image {
     width: 100%;
     height: 180px;
     border-radius: 8px;
@@ -117,13 +118,78 @@ main {
     margin-bottom: 1rem;
 }
         
-.card-image img {
+.story-image img {
     width: 100%;
     height: 100%;
     object-fit: cover;
 }
 
-.card p {
+.story p {
+    margin: 0.5rem 0;
+    font-size: 0.95rem;
+}
+
+/* Learning Act */
+.learn {
+    width: 100%;
+    max-width: 260px; 
+    height: 330px;
+    padding: 0.5rem;
+    text-align: left;
+    transition: transform 0.3s ease;
+}
+
+.learn:hover {
+    transform: translateY(-5px);
+}
+
+.learn-image {
+    width: 100%;
+    height: 180px;
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 1rem;
+}
+        
+.learn-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.learn p {
+    margin: 0.5rem 0;
+    font-size: 0.95rem;
+}
+/* Word games */
+.game {
+    width: 100%;
+    max-width: 260px; 
+    height: 330px;
+    padding: 0.5rem;
+    text-align: left;
+    transition: transform 0.3s ease;
+}
+
+.game:hover {
+    transform: translateY(-5px);
+}
+
+.game-image {
+    width: 100%;
+    height: 180px;
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 1rem;
+}
+        
+.game-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.game p {
     margin: 0.5rem 0;
     font-size: 0.95rem;
 }
