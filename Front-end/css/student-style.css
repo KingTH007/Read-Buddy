@@ -79,7 +79,7 @@ main {
 
 .act-header {
     font-family: 'Baloo 2', cursive;
-    font-size: 18px;
+    font-size: 24px;
     color: var(--secondaryA);
     margin-bottom: 1.5rem;
     display: flex;
