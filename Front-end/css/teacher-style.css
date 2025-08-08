@@ -1,5 +1,5 @@
 :root {
-    --primary: #FE4F2D;
+    --primary: #FF6B6B;
     --secondary: #08C2FF;
     --accent: #FFE66D;
     --light: #F7FFF7;
@@ -23,7 +23,7 @@ body {
 header {
     background: linear-gradient(135deg, var(--primary), var(--secondary));
     color: #FFF8E1;
-    padding: 1rem 2rem;
+    padding: 0.3rem 2rem;
     text-align: center;
     box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     position: relative;
@@ -33,6 +33,9 @@ header {
 .header-content {
     position: relative;
     z-index: 2;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
         
 .logo-container {
@@ -49,16 +52,57 @@ header {
     font-weight: 700;
     text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
     margin-left: 1rem;
+    margin-top: 0.3rem;
 }
         
 .logo {
     position: relative;
-    width: 70px;
-    height: 70px;
+    width: 60px;
+    height: 60px;
     top: 10px;
     left: 20px;
     opacity: 0.8;
     transform: rotate(-10deg);
+}
+
+.link {
+    display: flex;
+    align-items: center;
+    gap: 2.4rem;
+}
+
+.link a {
+    font-family: 'Baloo 2', cursive;
+    font-size: 1.5rem;
+    text-decoration: none;
+    color: white;
+    font-weight: 600;
+    padding: 0.4rem 0.9rem;
+    border-radius: 30px;
+    transition: background 0.3s ease, transform 0.2s ease;
+}
+
+.link a:hover {
+    background: rgba(255, 255, 255, 0.15);
+    transform: translateY(-2px);
+}
+
+.link .login-btn {
+    background-color: var(--primary);
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.link .login-btn:hover {
+    background-color: #f74d2b;
+}
+
+.hamburger {
+    font-size: 2rem;
+    cursor: pointer;
+    color: white;
+    display: none;
 }
 
 /* End of Header */
@@ -314,6 +358,14 @@ main {
         margin-bottom: 0.5rem;
     }
 
+    .link {
+        gap: 1.8rem;
+    }
+
+    .link a {
+        font-size: 1rem;
+    }
+
     /* Activity */ 
     .act-card {
         grid-template-columns: repeat(2, 1fr);
@@ -371,6 +423,27 @@ main {
         font-size: 1.5rem;
     }
 
+    .hamburger {
+        display: block;
+    }
+
+    .link {
+        position: absolute;
+        top: 70px;
+        right: 20px;
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 1rem;
+        gap: 1rem;
+        border-radius: 10px;
+        display: none; /* Hidden by default */
+    }
+
+    .link.show {
+        display: flex; /* Show when toggled */
+    }
+    
     /* Activities */
     .act-card {
         grid-template-columns: 1fr;
