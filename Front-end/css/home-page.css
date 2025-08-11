@@ -147,22 +147,24 @@ header {
 
     .hamburger {
         display: block;
+        z-index: 1001;
     }
 
     .link {
-        position: absolute;
-        top: 70px;
-        right: 20px;
-        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        position: fixed;
+        top: 0;
+        right: -170px;
         flex-direction: column;
-        align-items: flex-start;
-        padding: 1rem;
-        gap: 1rem;
-        border-radius: 10px;
-        display: none; /* Hidden by default */
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        height: 100vh;
+        width: 170px;
+        padding: 4rem 0.5rem;
+        gap: 1.5rem;
+        transition: right 0.3s ease;
+        z-index: 1000s;
     }
 
     .link.show {
-        display: flex; /* Show when toggled */
+        right: 0;
     }
 }
