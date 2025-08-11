@@ -358,14 +358,6 @@ main {
         margin-bottom: 0.5rem;
     }
 
-    .link {
-        gap: 1.8rem;
-    }
-
-    .link a {
-        font-size: 1.3rem;
-    }
-
     /* Activity */ 
     .act-card {
         grid-template-columns: repeat(2, 1fr);
