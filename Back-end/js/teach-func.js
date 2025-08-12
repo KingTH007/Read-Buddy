@@ -3,48 +3,86 @@ document.addEventListener('DOMContentLoaded', () => {
     const overlay = document.querySelector('.overlay-color');
     const overlapModal = document.querySelector('.overlap');
     const cancelBtn = document.getElementById('overlap-cancel');
+    const uploadBtn = document.getElementById('overlap-upload');
 
-fileInput.addEventListener('change', async (e) => {
-    const file = e.target.files[0];
+    let imageUrl = "";
 
-    if (file && file.type === "application/pdf") {
-        overlay.style.display = "block";
-        overlapModal.style.display = "block";
+    fileInput.addEventListener('change', async (e) => {
+        const file = e.target.files[0];
 
-        // Prepare form data
-        const formData = new FormData();
-        formData.append("pdf", file);
+        if (file && file.type === "application/pdf") {
+            overlay.style.display = "block";
+            overlapModal.style.display = "block";
 
-        try {
-            const response = await fetch("../Back-end/py/teach-ai.py", {
-                method: "POST",
-                body: formData
-            });
+            const fileReader = new FileReader();
+            fileReader.onload = async function () {
+                const typedarray = new Uint8Array(this.result);
 
-            if (!response.ok) throw new Error("Failed to process PDF");
+                // Load PDF
+                const pdf = await pdfjsLib.getDocument(typedarray).promise;
+                let fullText = "";
 
-            const data = await response.json();
+                // Extract text from all pages
+                for (let i = 1; i <= pdf.numPages; i++) {
+                    const page = await pdf.getPage(i);
+                    const textContent = await page.getTextContent();
+                    const pageText = textContent.items.map(item => item.str).join(" ");
+                    fullText += pageText + "\n";
+                }
 
-            // Fill in modal content
-            document.getElementById("title").value = data.title;
-            document.getElementById("context").value = data.story;
-            document.querySelector(".over-img img").src = data.imageUrl;
+                // Generate title (first sentence or first 8 words)
+                let titleGuess = fullText.split(/[.!?]/)[0];
+                titleGuess = titleGuess.split(" ").slice(0, 8).join(" ");
 
-        } catch (error) {
-            alert("Error extracting story: " + error.message);
-            overlay.style.display = "none";
-            overlapModal.style.display = "none";
-            fileInput.value = "";
+                // Generate placeholder image based on first keyword
+                const keyword = titleGuess.split(" ")[0] || "story";
+                imageUrl = `https://source.unsplash.com/512x512/?${encodeURIComponent(keyword)}`;
+
+                // Fill the modal with defaults
+                document.getElementById("title").value = titleGuess;
+                document.getElementById("context").value = fullText.trim();
+                // document.querySelector(".over-img img").src = imageUrl;
+            };
+
+            fileReader.readAsArrayBuffer(file);
+        } else {
+            alert("Please upload a valid PDF file.");
+            fileInput.value = '';
         }
-    } else {
-        alert("Please upload a valid PDF file.");
-        fileInput.value = '';
-    }
-});
+    });
+
+    // Upload button handler (reads updated values)
+    uploadBtn.addEventListener('click', () => {
+        const editedTitle = document.getElementById("title").value;
+        const editedContext = document.getElementById("context").value;
+
+        // Create new story card
+        const newStory = document.createElement("div");
+        newStory.classList.add("story", "show");
+
+        newStory.innerHTML = `
+            <div class="story-image">
+                <img src="${imageUrl}" alt="Story Image" />
+            </div>
+            <p>${editedTitle}</p>
+            <button class="button">Read Now</button>
+        `;
+
+        // Append to the activity card container
+        document.querySelector(".act-card").appendChild(newStory);
+
+        // Optionally log the full context in console
+        console.log("Uploaded Story:", { title: editedTitle, context: editedContext });
+
+        // Hide modal
+        overlay.style.display = "none";
+        overlapModal.style.display = "none";
+    });
+
 
     cancelBtn.addEventListener('click', () => {
         overlay.style.display = "none";
         overlapModal.style.display = "none";
-        fileInput.value = ''; // Optional: reset file input when cancelled
+        fileInput.value = ''; // reset file input
     });
 });

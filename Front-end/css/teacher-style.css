@@ -180,6 +180,12 @@ main {
     padding: 0.5rem;
     text-align: left;
     transition: transform 0.3s ease;
+    
+    display: none; /* Hidden by default */
+}
+
+.story.show {
+    display: block; /* Show when file uploaded */
 }
 
 .story:hover {
