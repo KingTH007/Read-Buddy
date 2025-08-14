@@ -1,0 +1,150 @@
+:root {
+    --primary: #FF6B6B;
+    --secondary: #08C2FF;
+    --accent: #FFE66D;
+    --light: #F7FFF7;
+    --dark: #292F36;
+}   
+
+/* Header */
+header {
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    color: #FFF8E1;
+    padding: 0.3rem 2rem;
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    position: relative;
+    overflow: hidden;
+}
+        
+.header-content {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+        
+.logo-container {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    margin-bottom: 1rem;
+    gap: 1rem;
+}
+        
+.logo-text {
+    font-family: 'Baloo 2', cursive;
+    font-size: 2.5rem;
+    font-weight: 700;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+    margin-left: 1rem;
+    margin-top: 0.3rem;
+}
+        
+.logo {
+    position: relative;
+    width: 60px;
+    height: 60px;
+    top: 10px;
+    left: 20px;
+    opacity: 0.8;
+    transform: rotate(-10deg);
+}
+
+.link {
+    display: flex;
+    align-items: center;
+    gap: 2.4rem;
+}
+
+.link a {
+    font-family: 'Baloo 2', cursive;
+    font-size: 1.5rem;
+    text-decoration: none;
+    color: white;
+    font-weight: 600;
+    padding: 0.4rem 0.9rem;
+    border-radius: 30px;
+    transition: background 0.3s ease, transform 0.2s ease;
+}
+
+.link a:hover {
+    background: rgba(255, 255, 255, 0.15);
+    transform: translateY(-2px);
+}
+
+.link .login-btn {
+    background-color: var(--primary);
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.link .login-btn:hover {
+    background-color: #f74d2b;
+}
+
+.hamburger {
+    font-size: 2rem;
+    cursor: pointer;
+    color: white;
+    display: none;
+}
+
+/* End of Header */
+
+/*Responsive Layout*/
+@media (max-width: 768px) {
+    .logo {
+        width: 50px;
+        height: 50px;
+        top: 5px;
+        left: 10px;
+    }
+
+    .logo-text {
+        font-size: 1.8rem;
+    }
+
+    .logo-container {
+        gap: 0.5rem;
+        margin-bottom: 0.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .logo {
+        width: 40px;
+        height: 40px;
+        top: 0;
+        left: 5px;
+    }
+
+    .logo-text {
+        font-size: 1.5rem;
+    }
+
+    .hamburger {
+        display: block;
+        z-index: 1001;
+    }
+
+    .link {
+        position: fixed;
+        top: 0;
+        right: -170px;
+        flex-direction: column;
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        height: 100vh;
+        width: 170px;
+        padding: 4rem 0.5rem;
+        gap: 1.5rem;
+        transition: right 0.3s ease;
+        z-index: 1000s;
+    }
+
+    .link.show {
+        right: 0;
+    }
+}
