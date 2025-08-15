@@ -5,9 +5,45 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Baloo+2:wght@700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../css/learn-act.css">
+    <link rel="stylesheet" href="../css/header.css">
     <title>Read Buddy - Learning Activity</title>
 </head>
 <body>
-    
+    <header>
+        <div class="header-content">
+            <div class="logo-container">
+                <img src="https://placehold.co/60x60" alt="ReadBuddy Logo" class="logo">
+                <h1 class="logo-text">ReadBuddy</h1>
+            </div>
+
+            <div class="hamburger" id="hamburger">
+                ☰
+            </div>
+
+            <div class="link" id="nav-menu">
+                <a href="#" class="nav-btn">Download</a>
+                <a href="#" class="nav-btn login-btn">Log In</a>
+            </div>
+        </div>
+    </header>
+    <main>
+        <div class="game-container">
+            <h2>Grade 3 English – Lesson: Verbs</h2>
+            <p>Select your difficulty level:</p>
+            <div class="mode-btns">
+                <button onclick="startGame('beginner')">Beginner</button>
+                <button onclick="startGame('standard')">Standard</button>
+                <button onclick="startGame('difficult')">Difficult</button>
+            </div>
+            <div id="activity-box" class="activity"></div>
+            <div class="input-box">
+                <input type="text" id="answer" placeholder="Type your answer here">
+            </div>
+            <button class="submit-btn" onclick="checkAnswer()">Submit</button>
+            <div class="feedback" id="feedback"></div>
+        </div>
+    </main>
+    <script src="../../Back-end/js/header-func.js"></script>
+    <script src="../../Back-end/js/learn.js"></script>
 </body>
 </html>

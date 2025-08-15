@@ -1,0 +1,64 @@
+:root {
+    --primary: #FF6B6B;
+    --secondary: #08C2FF;
+    --accent: #FFE66D;
+    --light: #F7FFF7;
+    --dark: #292F36;
+}   
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+        
+body {
+    font-family: 'Poppins', sans-serif;
+    background-color: #F0F8FF;
+    color: var(--dark);
+    line-height: 1.6;
+}
+
+.game-container {
+    max-width: 800px;
+    margin: 20px auto;
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.mode-btns button {
+    background: var(--secondary);
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    margin: 5px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+}
+        
+.activity {
+    margin-top: 15px;
+    font-size: 1.1rem;
+}
+        
+.input-box {
+    margin: 10px 0;
+}
+        
+.submit-btn {
+    background: var(--primary);
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+}
+        
+.feedback {
+            margin-top: 10px;
+            font-weight: bold;
+        }
