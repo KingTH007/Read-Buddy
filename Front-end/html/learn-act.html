@@ -27,21 +27,35 @@
         </div>
     </header>
     <main>
-        <div class="game-container">
-            <h2>Grade 3 English – Lesson: Verbs</h2>
-            <p>Select your difficulty level:</p>
-            <div class="mode-btns">
-                <button onclick="startGame('beginner')">Beginner</button>
-                <button onclick="startGame('standard')">Standard</button>
-                <button onclick="startGame('difficult')">Difficult</button>
+        <!-- Sidebar -->
+        <div class="content">
+            <aside class="sidebar">
+                <h2>📘 Learning<br>Activities</h2>
+                <button class="side-btn">Learning Title</button>
+                <button class="side-btn">Learning Title</button>
+                <button class="side-btn">Learning Title</button>
+            </aside>
+
+        <!-- Main Content -->
+            <div class="content-container">
+                <div class="content-header">
+                    <h2>LEARNING TITLE</h2>
+                    <div class="mode-btns">
+                        <button>Beginner</button>
+                        <button>Standard</button>
+                        <button>Difficult</button>
+                    </div>
+                </div>
+
+                <div class="content-box">
+                    <!-- Placeholder for lesson/activity -->
+                </div>
+
+                <div class="start-btn-container">
+                    <button class="start-btn">START</button>
+                </div>
             </div>
-            <div id="activity-box" class="activity"></div>
-            <div class="input-box">
-                <input type="text" id="answer" placeholder="Type your answer here">
-            </div>
-            <button class="submit-btn" onclick="checkAnswer()">Submit</button>
-            <div class="feedback" id="feedback"></div>
-        </div>
+        </section>
     </main>
     <script src="../../Back-end/js/header-func.js"></script>
     <script src="../../Back-end/js/learn.js"></script>

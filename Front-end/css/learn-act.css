@@ -19,46 +19,104 @@ body {
     line-height: 1.6;
 }
 
-.game-container {
-    max-width: 800px;
-    margin: 20px auto;
-    background: white;
-    padding: 20px;
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+.content {
+    display: flex;
 }
 
-.mode-btns button {
-    background: var(--secondary);
+/* Sidebar fixed under the header */
+.sidebar {
+    display: fixed;
+    top: 60px; /* adjust to match your header height */
+    left: 0;
+    height: calc(100vh - 60px); /* full height minus header */
+    width: 220px;
+    background: #ff6b6b;
     color: white;
-    border: none;
-    padding: 10px 15px;
-    margin: 5px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-weight: bold;
+    padding: 20px;
+    box-shadow: 2px 0 6px rgba(0,0,0,0.1);
+    overflow-y: auto; /* scroll only inside sidebar if content overflows */
 }
-        
-.activity {
-    margin-top: 15px;
+
+.sidebar h2 {
     font-size: 1.1rem;
+    margin-bottom: 20px;
+    font-weight: 700;
 }
-        
-.input-box {
+
+.side-btn {
+    display: block;
+    width: 100%;
     margin: 10px 0;
-}
-        
-.submit-btn {
-    background: var(--primary);
-    color: white;
+    padding: 10px;
     border: none;
-    padding: 10px 15px;
     border-radius: 8px;
+    background: white;
+    color: #292f36;
+    font-weight: 600;
     cursor: pointer;
-    font-weight: bold;
 }
-        
-.feedback {
-            margin-top: 10px;
-            font-weight: bold;
-        }
+
+/* Container for all activity content */
+.content-container {
+    width: 100%;
+    max-width: 1000px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    display: flex;
+    flex-direction: column;
+
+    margin-left: 40px;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    padding: 20px;
+    
+}
+
+/* Header (title + buttons) */
+.content-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.content-header h2 {
+    font-weight: 700;
+}
+
+/* Mode buttons */
+.mode-btns button {
+    background: #08c2ff;
+    border: none;
+    color: white;
+    padding: 8px 14px;
+    margin-left: 10px;
+    border-radius: 20px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+/* Gray content box */
+.content-box {
+    background: #e0e0e0;
+    flex: 1;
+    margin: 20px 0;
+    border-radius: 10px;
+    min-height: 300px;
+}
+
+/* Start button */
+.start-btn-container {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.start-btn {
+    background: #ff6b6b;
+    border: none;
+    color: white;
+    font-weight: bold;
+    padding: 10px 25px;
+    border-radius: 20px;
+    cursor: pointer;
+}
