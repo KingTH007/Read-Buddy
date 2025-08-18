@@ -29,7 +29,7 @@
     <main>
         <section class="first">
         <div class="first-image">
-            <img src="firstpic.png">
+            <img src="../asset/firstpic.png" alt="introPic">
         </div>
         <div class="first-text">
             <h2>The Fun Way to Improve <br> Reading Comprehension</h2>
@@ -65,24 +65,8 @@
     </main>
     
 
-  <script src="../../Back-end/js/header-func.js"></script>
-
-    <!-- 👇 Add this script for scroll-triggered animations -->
-    <script>
-        const elements = document.querySelectorAll('.animate-on-scroll');
-
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('fade-in');
-                } else {
-                    entry.target.classList.remove('fade-in'); // 👈 removes when out of view (so it can replay)
-                }
-            });
-        }, { threshold: 0.2 });
-
-        elements.forEach(el => observer.observe(el));
-    </script>
+    <script src="../../Back-end/js/header-func.js"></script>
+    <script src="../../Back-end/js/home-func.js"> </script>
 
 </body>
 </html>
