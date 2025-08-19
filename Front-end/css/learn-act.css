@@ -30,7 +30,7 @@ body {
     left: 0;
     height: calc(100vh - 60px); /* full height minus header */
     width: 220px;
-    background: #ff6b6b;
+    background: #ff8080;
     color: white;
     padding: 20px;
     box-shadow: 2px 0 6px rgba(0,0,0,0.1);
