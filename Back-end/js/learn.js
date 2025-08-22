@@ -35,9 +35,21 @@ const stories = {
         {
             text: "Ben has a pet cat. The cat is white and small. Ben feeds the cat every morning.",
             questions: [
-                { q: "What pet does Ben have?", a: ["cat"] },
-                { q: "What color is the cat?", a: ["white"] },
-                { q: "When does Ben feed it?", a: ["morning", "every morning"] }
+                { 
+                    q: "What pet does Ben have?", 
+                    choices: ["Cat", "Dog", "Fish", "Hamster"], 
+                    correct: "Cat" 
+                },
+                { 
+                    q: "What color is the cat?", 
+                    choices: ["White", "Black", "Brown", "Gray"], 
+                    correct: "White" 
+                },
+                { 
+                    q: "When does Ben feed it?", 
+                    choices: ["At night", "In the morning", "At noon", "In the evening"], 
+                    correct: "In the morning" 
+                }
             ]
         }
     ],
@@ -119,36 +131,39 @@ function startStory() {
 // Ask current question
 function askQuestion() {
     if (currentQuestionIndex < currentStory.questions.length) {
-        let qText = currentStory.questions[currentQuestionIndex].q;
-        addMessage(`${qText}`, "system");
+        let currentQ = currentStory.questions[currentQuestionIndex];
+        addMessage(currentQ.q, "system");
+
+        // Update answer buttons
+        const answerBtns = document.querySelectorAll(".answer-btn");
+        currentQ.choices.forEach((choice, i) => {
+            answerBtns[i].textContent = `${String.fromCharCode(65 + i)}. ${choice}`;
+            answerBtns[i].dataset.answer = choice; // store actual text for checking
+        });
     } else {
-        addMessage("All questions answered for this story!", "system");
+        addMessage("🎉 All questions answered for this story!", "system");
     }
 }
 
 // Check answer
-submitAnswerBtn.addEventListener("click", () => {
-    const answer = answerInput.value.trim().toLowerCase();
-    if (!answer) {
-        addMessage("⚠ Please type an answer!", "system");
-        return;
-    }
+document.querySelectorAll(".answer-btn").forEach(button => {
+    button.addEventListener("click", () => {
+        const selectedAnswer = button.dataset.answer;
+        addMessage(selectedAnswer, "user");
 
-    addMessage(answer, "user"); // show user bubble
-    answerInput.value = "";
+        let currentQ = currentStory.questions[currentQuestionIndex];
+        if (selectedAnswer === currentQ.correct) {
+            addMessage("✅ Correct!", "system");
+        } else {
+            addMessage(`❌ Incorrect. Correct answer: ${currentQ.correct}`, "system");
+        }
 
-    // Check correctness
-    let correctAnswers = currentStory.questions[currentQuestionIndex].a;
-    if (correctAnswers.some(ans => answer.includes(ans))) {
-        addMessage("Correct!", "system");
-    } else {
-        addMessage(`Incorrect. Correct answer: ${correctAnswers[0]}`, "system");
-    }
-
-    // Move to next question
-    currentQuestionIndex++;
-    setTimeout(() => askQuestion(), 1200);
+        // Move to next question
+        currentQuestionIndex++;
+        setTimeout(() => askQuestion(), 1200);
+    });
 });
+
 
 // Stop TTS on reload
 window.addEventListener("beforeunload", () => {
