@@ -10,6 +10,7 @@ let currentStoryIndex = 0;
 let currentQuestionIndex = 0;
 let currentStory = null;
 let speechSynthesisUtterance = null;
+let stories = {};
 
 // TTS function
 function speak(text) {
@@ -30,47 +31,21 @@ function addMessage(text, type = "system") {
 }
 
 // Stories with correct answers
-const stories = {
-    Beginner: [
-        {
-            text: "Ben has a pet cat. The cat is white and small. Ben feeds the cat every morning.",
-            questions: [
-                { 
-                    q: "What pet does Ben have?", 
-                    choices: ["Cat", "Dog", "Fish", "Hamster"], 
-                    correct: "Cat" 
-                },
-                { 
-                    q: "What color is the cat?", 
-                    choices: ["White", "Black", "Brown", "Gray"], 
-                    correct: "White" 
-                },
-                { 
-                    q: "When does Ben feed it?", 
-                    choices: ["At night", "In the morning", "At noon", "In the evening"], 
-                    correct: "In the morning" 
-                }
-            ]
-        }
-    ],
-    Standard: [
-        {
-            text: "Rico loves playing basketball. After school, he practices shooting with his friends. He also watches games on TV to learn new moves.",
-            questions: [
-                { q: "What sport does Rico play?", a: ["basketball"] },
-                { q: "Who does he practice with?", a: ["friends", "his friends"] },
-                { q: "What does he watch?", a: ["games", "tv", "basketball games"] },
-                { q: "What’s the main idea?", a: ["rico loves basketball", "playing basketball"] }
-            ]
-        }
-    ]
-};
+
+fetch("../../Back-end/json/rau-stories.json")
+  .then(res => res.json())
+  .then(data => {
+    stories = data;
+    console.log("Stories loaded:", stories);
+  })
+  .catch(err => console.error("Error loading stories:", err));
+
 
 // Mode instructions
 const modeInstructions = {
-    Beginner: "Beginner Mode: 10 short and simple stories. Focus on recall and facts.",
-    Standard: "Standard Mode: 10 medium-length stories. Focus on sequence and main idea.",
-    Difficult: "Difficult Mode: 10 longer passages. Focus on inference and deeper meaning."
+    Easy: "Easy Mode: 10 short and simple stories. Focus on recall and facts.",
+    Medium: "Medium Mode: 10 medium-length stories. Focus on sequence and main idea.",
+    Hard: "Hard Mode: 10 longer passages. Focus on inference and deeper meaning."
 };
 
 // Mode selection
@@ -80,14 +55,14 @@ modeButtons.forEach(button => {
         currentStoryIndex = 0;
         currentQuestionIndex = 0;
         contentBox.innerHTML = "";
-        addMessage(modeInstructions[selectedMode] + "Click START to begin.", "system");
+        addMessage(modeInstructions[selectedMode] + " Click START to begin.", "system");
     });
 });
 
 // START button
 startBtn.addEventListener("click", () => {
     if (!selectedMode) {
-        addMessage("⚠ Please select a mode first!", "system");
+        addMessage("Please select a mode first!", "system");
         return;
     }
     // lock mode buttons
@@ -102,15 +77,19 @@ restartBtn.addEventListener("click", () => {
 
 // Reset function
 function resetAll() {
+    if (storyTimeout) clearTimeout(storyTimeout);
+
     selectedMode = null;
     currentStoryIndex = 0;
     currentQuestionIndex = 0;
     currentStory = null;
     contentBox.innerHTML = "";
-    addMessage("📘 Select a mode to see the instructions.", "system");
+    addMessage("Select a mode to see the instructions.", "system");
     answerInput.value = "";
-    // unlock mode buttons
+
+    // unlock mode buttons for fresh start
     modeButtons.forEach(btn => btn.disabled = false);
+
     // stop TTS
     window.speechSynthesis.cancel();
 }
@@ -123,9 +102,9 @@ function startStory() {
     addMessage(`Story ${currentStoryIndex + 1}: ${currentStory.text}`, "system");
 
     // Show first question after short delay
-    setTimeout(() => {
+    storyTimeout = setTimeout(() => {
         askQuestion();
-    }, 8000);
+    }, 12000);
 }
 
 // Ask current question
@@ -141,7 +120,21 @@ function askQuestion() {
             answerBtns[i].dataset.answer = choice; // store actual text for checking
         });
     } else {
-        addMessage("🎉 All questions answered for this story!", "system");
+        // Finished all questions for this story
+        addMessage("Story finished!", "system");
+
+        // Move to next story
+        currentStoryIndex++;
+        if (currentStoryIndex < stories[selectedMode].length) {
+            setTimeout(() => {
+                startStory(); // load next story
+            }, 2000);
+        } else {
+            addMessage(`You finished ALL stories in ${selectedMode} mode!`, "system");
+
+            // Unlock restart
+            modeButtons.forEach(btn => btn.disabled = false);
+        }
     }
 }
 
@@ -153,14 +146,14 @@ document.querySelectorAll(".answer-btn").forEach(button => {
 
         let currentQ = currentStory.questions[currentQuestionIndex];
         if (selectedAnswer === currentQ.correct) {
-            addMessage("✅ Correct!", "system");
+            addMessage("Correct!", "system");
         } else {
-            addMessage(`❌ Incorrect. Correct answer: ${currentQ.correct}`, "system");
+            addMessage(`Incorrect. Correct answer: ${currentQ.correct}`, "system");
         }
 
         // Move to next question
         currentQuestionIndex++;
-        setTimeout(() => askQuestion(), 1200);
+        setTimeout(() => askQuestion(), 3200);
     });
 });
 
