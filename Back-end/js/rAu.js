@@ -11,6 +11,7 @@ let currentQuestionIndex = 0;
 let currentStory = null;
 let speechSynthesisUtterance = null;
 let stories = {};
+let storyTimeout = null; // <-- ensure defined globally
 
 // TTS function
 function speak(text) {
@@ -30,8 +31,16 @@ function addMessage(text, type = "system") {
     if (type === "system") speak(text);
 }
 
-// Stories with correct answers
+// Reset choice buttons back to plain A–D
+function resetChoiceButtons() {
+    const answerBtns = document.querySelectorAll(".answer-btn");
+    answerBtns.forEach((btn, i) => {
+        btn.textContent = String.fromCharCode(65 + i); // A, B, C, D
+        btn.dataset.answer = ""; // clear stored choice
+    });
+}
 
+// Stories with correct answers
 fetch("../../Back-end/json/rau-stories.json")
   .then(res => res.json())
   .then(data => {
@@ -39,7 +48,6 @@ fetch("../../Back-end/json/rau-stories.json")
     console.log("Stories loaded:", stories);
   })
   .catch(err => console.error("Error loading stories:", err));
-
 
 // Mode instructions
 const modeInstructions = {
@@ -85,10 +93,12 @@ function resetAll() {
     currentStory = null;
     contentBox.innerHTML = "";
     addMessage("Select a mode to see the instructions.", "system");
-    answerInput.value = "";
 
     // unlock mode buttons for fresh start
     modeButtons.forEach(btn => btn.disabled = false);
+
+    // reset choices
+    resetChoiceButtons();
 
     // stop TTS
     window.speechSynthesis.cancel();
@@ -130,10 +140,12 @@ function askQuestion() {
                 startStory(); // load next story
             }, 2000);
         } else {
+            // FINISHED ALL STORIES
             addMessage(`You finished ALL stories in ${selectedMode} mode!`, "system");
 
-            // Unlock restart
+            // unlock modes & reset choices
             modeButtons.forEach(btn => btn.disabled = false);
+            resetChoiceButtons();
         }
     }
 }
@@ -141,6 +153,8 @@ function askQuestion() {
 // Check answer
 document.querySelectorAll(".answer-btn").forEach(button => {
     button.addEventListener("click", () => {
+        if (!button.dataset.answer) return; // ignore empty buttons
+
         const selectedAnswer = button.dataset.answer;
         addMessage(selectedAnswer, "user");
 
@@ -156,7 +170,6 @@ document.querySelectorAll(".answer-btn").forEach(button => {
         setTimeout(() => askQuestion(), 3200);
     });
 });
-
 
 // Stop TTS on reload
 window.addEventListener("beforeunload", () => {
