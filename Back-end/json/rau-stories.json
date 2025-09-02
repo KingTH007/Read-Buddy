@@ -23,22 +23,6 @@
         { "q": "Who baked the cake?", "choices": ["Mia", "Her mom", "Her dad", "Her brother"], "correct": "Mia" },
         { "q": "How did her mom feel?", "choices": ["Sad", "Angry", "Happy", "Tired"], "correct": "Happy" }
       ]
-    },
-    {
-      "text": "It rained all day. Tim wore his raincoat and boots. He splashed in puddles with his little sister.",
-      "questions": [
-        { "q": "What did Tim wear?", "choices": ["Jacket and hat", "Shirt and shorts", "Raincoat and boots", "Pajamas"], "correct": "Raincoat and boots" },
-        { "q": "Who joined Tim?", "choices": ["His teacher", "His sister", "His cousin", "His friend"], "correct": "His sister" },
-        { "q": "What did Tim do in the puddles?", "choices": ["Swam", "Splashed", "Cried", "Slept"], "correct": "Splashed" }
-      ]
-    },
-    {
-      "text": "The school bus came early. Ben waved at the driver. He sat beside his best friend, Jay.",
-      "questions": [
-        { "q": "What came early?", "choices": ["The train", "The car", "The school bus", "The bike"], "correct": "The school bus" },
-        { "q": "Who waved at the driver?", "choices": ["Jay", "Ben", "Anna", "Leo"], "correct": "Ben" },
-        { "q": "Who sat with Ben?", "choices": ["His brother", "His best friend Jay", "His teacher", "His sister"], "correct": "His best friend Jay" }
-      ]
     }
   ],
   "Medium": [
@@ -65,22 +49,6 @@
         { "q": "What did they eat?", "choices": ["Rice", "Pizza", "Sandwiches", "Cake"], "correct": "Sandwiches" },
         { "q": "How was the day?", "choices": ["Boring", "Fun and happy", "Rainy", "Sad"], "correct": "Fun and happy" }
       ]
-    },
-    {
-      "text": "Tom caught a big fish at the lake. His dad helped him pull it out. They cooked it for dinner and shared with the family.",
-      "questions": [
-        { "q": "Who caught the fish?", "choices": ["Tom", "His dad", "His mom", "His friend"], "correct": "Tom" },
-        { "q": "Where did they catch the fish?", "choices": ["At the river", "At the pond", "At the lake", "At the sea"], "correct": "At the lake" },
-        { "q": "What did they do with the fish?", "choices": ["Kept it in water", "Threw it back", "Cooked it", "Sold it"], "correct": "Cooked it" }
-      ]
-    },
-    {
-      "text": "Ella bought new shoes for the school party. She danced all night with her friends. Her shoes sparkled under the lights.",
-      "questions": [
-        { "q": "Why did Ella buy new shoes?", "choices": ["For a picnic", "For a school party", "For a play", "For a trip"], "correct": "For a school party" },
-        { "q": "What did she do at the party?", "choices": ["Ate food", "Sang songs", "Danced with friends", "Read books"], "correct": "Danced with friends" },
-        { "q": "How did her shoes look under the lights?", "choices": ["Old", "Sparkly", "Dirty", "Plain"], "correct": "Sparkly" }
-      ]
     }
   ],
   "Hard": [
@@ -106,22 +74,6 @@
         { "q": "Who loved painting?", "choices": ["Lily", "Anna", "Ben", "Tom"], "correct": "Lily" },
         { "q": "What did Lily paint?", "choices": ["A house", "The mountains and the river", "A flower", "A tree"], "correct": "The mountains and the river" },
         { "q": "What did the teacher say about Lily?", "choices": ["She was lazy", "She was talented", "She was tired", "She was funny"], "correct": "She was talented" }
-      ]
-    },
-    {
-      "text": "Max, the dog, saw a boy crying because he dropped his toy. Max picked up the toy and gave it back. The boy hugged Max and smiled.",
-      "questions": [
-        { "q": "What was the dog’s name?", "choices": ["Max", "Leo", "Ben", "Sam"], "correct": "Max" },
-        { "q": "Why was the boy crying?", "choices": ["He was hungry", "He dropped his toy", "He was sick", "He was lost"], "correct": "He dropped his toy" },
-        { "q": "What did Max do?", "choices": ["Barked loudly", "Gave the toy back", "Ran away", "Slept"], "correct": "Gave the toy back" }
-      ]
-    },
-    {
-      "text": "Mrs. Cruz gave free pencils to her students who forgot theirs. She always smiled and helped everyone in the class. Her students loved her very much.",
-      "questions": [
-        { "q": "What did Mrs. Cruz give?", "choices": ["Books", "Pencils", "Papers", "Bags"], "correct": "Pencils" },
-        { "q": "How did Mrs. Cruz treat her students?", "choices": ["She ignored them", "She was angry", "She smiled and helped them", "She was strict"], "correct": "She smiled and helped them" },
-        { "q": "How did the students feel about her?", "choices": ["They hated her", "They loved her", "They ignored her", "They feared her"], "correct": "They loved her" }
       ]
     }
   ]

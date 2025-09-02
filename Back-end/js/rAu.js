@@ -22,13 +22,34 @@ function speak(text) {
 }
 
 // Add chat bubble
-function addMessage(text, type = "system") {
+function addMessage(text, type = "system", isStoryOrQuestion = false) {
     const bubble = document.createElement("div");
     bubble.classList.add("bubble", type);
-    bubble.textContent = text;
+
+    // message text
+    const messageText = document.createElement("span");
+    messageText.textContent = text;
+    bubble.appendChild(messageText);
+
+    // only add 🔊 for story or question bubbles
+    if (type === "system" && isStoryOrQuestion) {
+        const speakBtn = document.createElement("button");
+        speakBtn.innerHTML = "🔊"; // speaker icon
+        speakBtn.classList.add("speak-btn");
+
+        speakBtn.addEventListener("click", () => {
+            speak(text);
+        });
+
+        bubble.appendChild(speakBtn);
+        speak(text); // speak automatically first time
+    } else if (type === "system") {
+        // still speak system messages without icon
+        speak(text);
+    }
+
     contentBox.appendChild(bubble);
     contentBox.scrollTop = contentBox.scrollHeight;
-    if (type === "system") speak(text);
 }
 
 // Reset choice buttons back to plain A–D
@@ -51,9 +72,9 @@ fetch("../../Back-end/json/rau-stories.json")
 
 // Mode instructions
 const modeInstructions = {
-    Easy: "Easy Mode: 10 short and simple stories. Focus on recall and facts.",
-    Medium: "Medium Mode: 10 medium-length stories. Focus on sequence and main idea.",
-    Hard: "Hard Mode: 10 longer passages. Focus on inference and deeper meaning."
+    Easy: "Easy Mode: 3 short and simple stories. Focus on recall and facts.",
+    Medium: "Medium Mode: 3 medium-length stories. Focus on sequence and main idea.",
+    Hard: "Hard Mode: 3 longer passages. Focus on inference and deeper meaning."
 };
 
 // Mode selection
@@ -109,19 +130,19 @@ function startStory() {
     currentStory = stories[selectedMode][currentStoryIndex];
     currentQuestionIndex = 0;
     contentBox.innerHTML = "";
-    addMessage(`Story ${currentStoryIndex + 1}: ${currentStory.text}`, "system");
+    addMessage(`Story ${currentStoryIndex + 1}: ${currentStory.text}`, "system", true);
 
     // Show first question after short delay
     storyTimeout = setTimeout(() => {
         askQuestion();
-    }, 12000);
+    }, 15000);
 }
 
 // Ask current question
 function askQuestion() {
     if (currentQuestionIndex < currentStory.questions.length) {
         let currentQ = currentStory.questions[currentQuestionIndex];
-        addMessage(currentQ.q, "system");
+        addMessage(currentQ.q, "system", true);
 
         // Update answer buttons
         const answerBtns = document.querySelectorAll(".answer-btn");
