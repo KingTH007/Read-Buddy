@@ -12,6 +12,9 @@ let currentStory = null;
 let speechSynthesisUtterance = null;
 let stories = {};
 let storyTimeout = null; // <-- ensure defined globally
+let storyScores = []; // stores per-story scores
+let correctCount = 0; // total correct answers across all stories
+let totalQuestions = 0;
 
 // TTS function
 function speak(text) {
@@ -154,6 +157,11 @@ function askQuestion() {
         // Finished all questions for this story
         addMessage("Story finished!", "system");
 
+        // Save this story's result
+        let storyCorrect = correctCount - storyScores.reduce((sum, s) => sum + s.correct, 0);
+        let storyTotal = currentStory.questions.length;
+        storyScores.push({ story: currentStoryIndex + 1, correct: storyCorrect, total: storyTotal });
+
         // Move to next story
         currentStoryIndex++;
         if (currentStoryIndex < stories[selectedMode].length) {
@@ -162,13 +170,44 @@ function askQuestion() {
             }, 2000);
         } else {
             // FINISHED ALL STORIES
-            addMessage(`You finished ALL stories in ${selectedMode} mode!`, "system");
+            addMessage("All stories finished! Preparing your results...", "system");
 
-            // unlock modes & reset choices
-            modeButtons.forEach(btn => btn.disabled = false);
-            resetChoiceButtons();
+            setTimeout(() => {
+                contentBox.innerHTML = ""; 
+                showResults();             
+                modeButtons.forEach(btn => btn.disabled = false);
+                resetChoiceButtons();
+            }, 2500); // delay for effect
         }
     }
+}
+// Show final results
+function showResults() {
+    addMessage("Here are your results:", "system");
+
+    // Show per story
+    storyScores.forEach(score => {
+        addMessage(`Story ${score.story}: ${score.correct}/${score.total}`, "system");
+    });
+
+    // Show total
+    addMessage(`Total: ${correctCount}/${totalQuestions}`, "system");
+
+    // Feedback for Grade 3 student
+    let feedback = "";
+    let percent = (correctCount / totalQuestions) * 100;
+
+    if (percent === 100) {
+        feedback = "Excellent! You got everything correct. Great job, super reader!";
+    } else if (percent >= 80) {
+        feedback = "Very good! You understood most of the stories. Keep practicing!";
+    } else if (percent >= 50) {
+        feedback = "Good effort! You got some answers right. Let’s try reading more carefully next time.";
+    } else {
+        feedback = "Don’t give up! Reading takes practice. Try again and you’ll improve!";
+    }
+
+    addMessage(feedback, "system");
 }
 
 // Check answer
@@ -182,9 +221,12 @@ document.querySelectorAll(".answer-btn").forEach(button => {
         let currentQ = currentStory.questions[currentQuestionIndex];
         if (selectedAnswer === currentQ.correct) {
             addMessage("Correct!", "system");
+            correctCount++;
         } else {
             addMessage(`Incorrect. Correct answer: ${currentQ.correct}`, "system");
         }
+
+        totalQuestions++;
 
         // Move to next question
         currentQuestionIndex++;

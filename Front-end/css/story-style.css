@@ -1,0 +1,131 @@
+:root {
+    --primary: #FF6B6B;
+    --secondary: #08C2FF;
+    --accent: #FFE66D;
+    --light: #F7FFF7;
+    --dark: #292F36;
+}   
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+        
+body {
+    font-family: 'Poppins', sans-serif;
+    background-color: #F0F8FF;
+    color: var(--dark);
+    line-height: 1.6;
+}
+
+.content {
+    display: flex;
+}
+
+/* Sidebar fixed under the header */
+.sidebar {
+    display: fixed;
+    top: 60px; /* adjust to match your header height */
+    left: 0;
+    height: calc(100vh - 60px); /* full height minus header */
+    width: 220px;
+    background: #ff8080;
+    color: white;
+    padding: 20px;
+    box-shadow: 2px 0 6px rgba(0,0,0,0.1);
+    overflow-y: auto; /* scroll only inside sidebar if content overflows */
+}
+
+.sidebar h2 {
+    font-size: 1.1rem;
+    margin-bottom: 20px;
+    font-weight: 700;
+}
+
+.side-btn {
+    display: block;
+    width: 100%;
+    margin: 10px 0;
+    padding: 10px;
+    border: none;
+    border-radius: 8px;
+    background: white;
+    color: #292f36;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+/* Container for all activity content */
+.content-container {
+    width: 100%;
+    max-width: 1000px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    display: flex;
+    flex-direction: column;
+
+    margin-left: 40px;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    padding: 20px;
+
+    max-height: calc(100vh - 120px);
+    overflow-y: auto;
+}
+
+/* Header (title + buttons) */
+.content-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.content-header h2 {
+    font-weight: 700;
+}
+
+/* Time */
+.time span{
+    background: #08c2ff;
+    border: none;
+    color: white;
+    padding: 8px 14px;
+    margin-left: 10px;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 1.4rem;
+}
+
+/* Gray content box */
+.content-box {
+    background: #fdfdfd;
+    flex: 1;
+    margin: 20px 0;
+    border-radius: 12px;
+    min-height: 300px;
+    padding: 15px;
+    overflow-y: auto;
+    box-shadow: inset 0 0 8px rgba(0,0,0,0.1);
+    display: flex;
+    flex-direction: column; /* bubbles stack straight down */
+}
+
+/* Start button */
+.start-btn-container {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.start-btn {
+    background: #ff6b6b;
+    border: none;
+    color: white;
+    font-weight: bold;
+    font-size: 1.2rem;
+    padding: 10px 25px;
+    border-radius: 20px;
+    cursor: pointer;
+    margin-left: 10px;
+}
