@@ -7,6 +7,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let imageUrl = "";
 
+    // Function to generate questions using OpenAI
+    async function generateQuestionsFromContext(context) {
+        try {
+            const response = await fetch("http://localhost:5000/api/generate-questions", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ context })
+            });
+
+            const data = await response.json();
+            return data.questions;
+        } catch (error) {
+            console.error("Error fetching questions:", error);
+            return "Failed to generate questions. Please try again.";
+        }
+    }
+
+
     fileInput.addEventListener('change', async (e) => {
         const file = e.target.files[0];
 
@@ -42,6 +62,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.getElementById("title").value = titleGuess;
                 document.getElementById("context").value = fullText.trim();
                 // document.querySelector(".over-img img").src = imageUrl;
+
+                const questions = await generateQuestionsFromContext(fullText.trim());
+                document.getElementById("questions").value = questions;
             };
 
             fileReader.readAsArrayBuffer(file);
