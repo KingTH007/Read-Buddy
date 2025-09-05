@@ -11,11 +11,9 @@ document.addEventListener('DOMContentLoaded', () => {
     async function generateQuestionsFromContext(context) {
         try {
             const response = await fetch("http://localhost:5000/api/generate-questions", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ context })
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ context }),
             });
 
             const data = await response.json();
@@ -25,6 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return "Failed to generate questions. Please try again.";
         }
     }
+
 
 
     fileInput.addEventListener('change', async (e) => {
@@ -109,3 +108,6 @@ document.addEventListener('DOMContentLoaded', () => {
         fileInput.value = ''; // reset file input
     });
 });
+
+
+// note: run in terminal "node Back-end/js/upload-ai.js" to start the server
