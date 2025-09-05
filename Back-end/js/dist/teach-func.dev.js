@@ -168,4 +168,4 @@ document.addEventListener('DOMContentLoaded', function () {
     overlapModal.style.display = "none";
     fileInput.value = ''; // reset file input
   });
-});
+}); // note: run in terminal "node Back-end/js/upload-ai.js" to start the server
