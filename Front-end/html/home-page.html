@@ -62,105 +62,59 @@
                 </p>
             </div>
         </section>
-    </main>
-
-    <script src="../../Back-end/js/header-func.js"></script>
-    <script src="../../Back-end/js/home-func.js"> </script>
-
-      <!-- Dropdown for role selection -->
-    <div class="login-dropdown" id="loginDropdown">
-        <button class="dropdown-option" id="studentOption">Student</button>
-        <button class="dropdown-option" id="teacherOption">Teacher</button>
-    </div>
 
     <!-- Student Overlay -->
-    <div class="login-overlay" id="studentOverlay">
-        <div class="login-modal">
-            <h2>Student Login</h2>
+    <div class="login-overlay" >
+        <div class="login-model">
+            <div class="change-btn">
+                <button class="toggle-btn" id="teacherToogle">Teacher</button>
+                <button class="toggle-btn" id="studentToogle">Student</button>
+            </div>
+            
+            <div class="login-forms teacher-active" id="loginForms">
+                <div class="login" id="teacherOverlay">
+                    <h2>Teacher Login</h2>
+                    <form>
+                        <input type="text" placeholder="Email Address" required>
+                        <input type="password" placeholder="Password" required>
+                        <p class="signup-text">No account? <span>Sign up here!</span></p>
+                    </form>
+                </div>
+
+                <div class="login" id="studentOverlay">
+                    <h2>Student Login</h2>
+                    <form>
+                        <input type="text" placeholder="Class Code" required>
+                        <input type="text" placeholder="Username" required>
+                    </form>
+                </div>
+            </div>
+
+            <div class="login-actions">
+                <button class="close-btn" id="closeBtn">Close</button>
+                <button class="login-submit" id="loginSubmit">Log In</button>
+            </div>
+        </div>
+
+        <div class="register-model">
+            <h2>Teacher Registration</h2>
             <form>
-                <input type="text" placeholder="Username" required>
+                <input type="text" placeholder="Full Name" required>
+                <input type="text" placeholder="Email Address" required>
                 <input type="password" placeholder="Password" required>
-                <input type="text" placeholder="Class Code" required>
-                <button type="submit">Login</button>
+                <input type="password" placeholder="Confirm Password" required>
+                <p class="signup-text">Already have an account? <span id="backToLogin">Log in here!</span></p>
             </form>
-            <p class="switch-text" id="toTeacher">Login as Teacher</p>
-            <button class="close-btn" id="closeStudent">&times;</button>
+
+            <div class="register-actions">
+                <button class="close-btn" id="closeRegister">Close</button>
+                <button class="register-submit" id="registerSubmit">Sign Up</button>
+            </div>
         </div>
     </div>
 
-    <!-- Teacher Overlay -->
-    <div class="login-overlay" id="teacherOverlay">
-        <div class="login-modal">
-            <h2>Teacher Login</h2>
-            <form>
-                <input type="text" placeholder="Username" required>
-                <input type="password" placeholder="Password" required>
-                <input type="text" placeholder="Class Code" required>
-                <button type="submit">Login</button>
-            </form>
-            <p class="switch-text" id="toStudent">Login as Student</p>
-            <p class="signup-text">No account? <span>Sign up here!</span></p>
-            <button class="close-btn" id="closeTeacher">&times;</button>
-        </div>
-    </div>
 
     <script src="../../Back-end/js/header-func.js"></script>
-
-    <!-- Login Script -->
-    <script>
-        const loginBtn = document.querySelector(".login-btn");
-        const dropdown = document.getElementById("loginDropdown");
-
-        const studentOverlay = document.getElementById("studentOverlay");
-        const teacherOverlay = document.getElementById("teacherOverlay");
-
-        const studentOption = document.getElementById("studentOption");
-        const teacherOption = document.getElementById("teacherOption");
-
-        const closeStudent = document.getElementById("closeStudent");
-        const closeTeacher = document.getElementById("closeTeacher");
-
-        const toTeacher = document.getElementById("toTeacher");
-        const toStudent = document.getElementById("toStudent");
-
-        // Show dropdown
-        loginBtn.addEventListener("click", (e) => {
-            e.preventDefault();
-            dropdown.style.display = dropdown.style.display === "flex" ? "none" : "flex";
-        });
-
-        // Student overlay
-        studentOption.addEventListener("click", () => {
-            dropdown.style.display = "none";
-            studentOverlay.style.display = "flex";
-        });
-
-        // Teacher overlay
-        teacherOption.addEventListener("click", () => {
-            dropdown.style.display = "none";
-            teacherOverlay.style.display = "flex";
-        });
-
-        // Close overlays
-        closeStudent.addEventListener("click", () => studentOverlay.style.display = "none");
-        closeTeacher.addEventListener("click", () => teacherOverlay.style.display = "none");
-
-        // Switch between overlays
-        toTeacher.addEventListener("click", () => {
-            studentOverlay.style.display = "none";
-            teacherOverlay.style.display = "flex";
-        });
-        toStudent.addEventListener("click", () => {
-            teacherOverlay.style.display = "none";
-            studentOverlay.style.display = "flex";
-        });
-
-        // Click outside to close
-        window.addEventListener("click", (e) => {
-            if (e.target === studentOverlay) studentOverlay.style.display = "none";
-            if (e.target === teacherOverlay) teacherOverlay.style.display = "none";
-        });
-    </script>
-
+    <script src="../../Back-end/js/home-func.js"></script>
 </body>
 </html>
