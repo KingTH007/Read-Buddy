@@ -175,6 +175,17 @@ body {
     font-family: Arial, sans-serif;
 }
 
+@keyframes fadeSlideUp {
+    from {
+        opacity: 0;
+        transform: translateY(40px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
 /* Modal Box */
 .login-model{
     background: #fff;
@@ -187,6 +198,7 @@ body {
     box-shadow: 0px 10px 25px rgba(0,0,0,0.2);
     position: relative;
     overflow: hidden;
+    animation: fadeSlideUp 0.4s ease;
 }
 
 .login-forms {
@@ -308,5 +320,87 @@ body {
 }
 
 .login-submit:hover {
+    opacity: 0.9;
+}
+
+/* Register Modal */
+.register-model {
+    background: #fff;
+    padding: 2rem;
+    border-radius: 16px;
+    width: 400px;
+    max-width: 90%;
+    text-align: center;
+    box-shadow: 0px 10px 25px rgba(0,0,0,0.2);
+    position: relative;
+    display: none; /* hidden by default */
+    animation: fadeSlideUp 0.4s ease;
+}
+
+/* Register Input Fields */
+.register-model input[type="text"],
+.register-model input[type="password"],
+.register-model input[type="email"] {
+    width: 100%;
+    padding: 0.8rem;
+    border: none;
+    border-bottom: 2px solid #ddd;
+    margin: 0.8rem 0;
+    font-size: 1rem;
+    outline: none;
+    transition: border-color 0.3s;
+}
+
+.register-model input:focus {
+    border-color: var(--secondary);
+}
+
+/* Register Signup Text */
+.register-model .signup-text {
+    margin-top: 0.8rem;
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.register-model .signup-text span {
+    color: var(--primary);
+    cursor: pointer;
+    font-weight: 600;
+}
+
+/* Register Actions */
+.register-actions {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 1.5rem;
+    gap: 1rem;
+}
+
+/* Register Close Button */
+.register-actions .close-btn {
+    flex: 1;
+    padding: 0.7rem;
+    border: none;
+    border-radius: 999px;
+    background: #ddd;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+/* Register Submit Button */
+.register-actions .register-submit {
+    flex: 2;
+    padding: 0.7rem;
+    border: none;
+    border-radius: 999px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    color: #fff;
+    background: linear-gradient(90deg, var(--secondary), var(--primary));
+    transition: opacity 0.3s;
+}
+
+.register-actions .register-submit:hover {
     opacity: 0.9;
 }
