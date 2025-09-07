@@ -11,7 +11,8 @@ var loginModel = document.querySelector('.login-model');
 var registerModel = document.querySelector('.register-model');
 var signupLink = document.querySelector('#teacherOverlay .signup-text span');
 var backToLogin = document.getElementById('backToLogin');
-var closeRegister = document.getElementById('closeRegister'); // Show Register when clicking "Sign up here!"
+var closeRegister = document.getElementById('closeRegister');
+var studentLogin = document.querySelector('.student-btn'); // Show Register when clicking "Sign up here!"
 
 signupLink.addEventListener('click', function () {
   loginModel.style.display = 'none';
@@ -21,6 +22,15 @@ signupLink.addEventListener('click', function () {
 backToLogin.addEventListener('click', function () {
   registerModel.style.display = 'none';
   loginModel.style.display = 'block';
+});
+studentLogin.addEventListener('click', function () {
+  loginOverlay.style.display = 'flex'; // show overlay
+
+  loginForms.classList.remove('teacher-active');
+  loginForms.classList.add('student-active'); // switch to student login
+
+  teacherBtn.classList.remove('active');
+  studentBtn.classList.add('active');
 }); // Show overlay with Teacher first
 
 loginBtn.addEventListener('click', function () {
@@ -57,4 +67,32 @@ registerSubmit.addEventListener('click', function (e) {
   alert("Registration Submitted ✅ (replace with your logic)");
   registerModel.style.display = 'none';
   document.querySelector('.login-model').style.display = 'block';
+});
+var loginSubmit = document.getElementById('loginSubmit');
+loginSubmit.addEventListener('click', function (e) {
+  e.preventDefault();
+
+  if (loginForms.classList.contains('teacher-active')) {
+    // Redirect to Teacher Page
+    window.location.href = "../../Front-end/html/teacher-front.html"; // change this to your teacher page
+  } else if (loginForms.classList.contains('student-active')) {
+    // Redirect to Student Page
+    window.location.href = "../../Front-end/html/student-front.html"; // change this to your student page
+  }
+}); // SCROLL REVEAL
+
+var sections = document.querySelectorAll('.second-section');
+var observer = new IntersectionObserver(function (entries) {
+  entries.forEach(function (entry) {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+    } else {
+      entry.target.classList.remove('visible');
+    }
+  });
+}, {
+  threshold: 0.5
+});
+sections.forEach(function (section) {
+  observer.observe(section);
 });
