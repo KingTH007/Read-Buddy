@@ -73,11 +73,11 @@ loginSubmit.addEventListener('click', function (e) {
   e.preventDefault();
 
   if (loginForms.classList.contains('teacher-active')) {
-    // Redirect to Teacher Page
-    window.location.href = "../../Front-end/html/teacher-front.html"; // change this to your teacher page
+    // change it soon when database is ready
+    window.location.href = "../../Front-end/html/teacher-front.html";
   } else if (loginForms.classList.contains('student-active')) {
-    // Redirect to Student Page
-    window.location.href = "../../Front-end/html/student-front.html"; // change this to your student page
+    // change it soon when database is ready
+    window.location.href = "../../Front-end/html/student-front.html";
   }
 }); // SCROLL REVEAL
 
