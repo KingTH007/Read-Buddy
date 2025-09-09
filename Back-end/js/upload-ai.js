@@ -60,6 +60,7 @@ app.post("/api/generate-questions", async (req, res) => {
 
 // API route for generating image
 // API route for generating images using Ghibli API
+//FIX IT AFTER 24HRS
 app.post("/api/generate-image", async (req, res) => {
   const { image_url } = req.body;
 
@@ -103,3 +104,6 @@ app.post("/api/generate-image", async (req, res) => {
 app.listen(PORT, () => {
   console.log(`✅ Server running at http://localhost:${PORT}`);
 });
+
+
+// note: run in terminal "node Back-end/js/upload-ai.js" to start the server

@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Baloo+2:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="../css/teacher-style.css">
     <link rel="stylesheet" href="../css/header.css">
     <title>Read Buddy - Reading Helper</title>
@@ -74,6 +75,51 @@
                 <div class="button-row">
                     <button class="overlap-button" id="overlap-cancel">CANCEL</button>
                     <button class="overlap-button" id="overlap-upload">UPLOAD</button>
+                </div>
+            </div>
+        </div>
+
+        <!--End of Overlap-->
+
+        <!-- Create Class Section -->
+        <section class="class">
+            <div class="class-header">
+                <div class="act-header">
+                    <span class="act-icon">🏫</span>
+                    Class Management
+                </div>
+                <div class="create-class">
+                <button class="create-btn" id="create-class-btn">
+                    <span>Create a New Class +</span>
+                </button>
+                </div>
+            </div>
+
+            <div class="class-list">
+                <ul id="class-list-ul">
+                    <!-- Class items will be dynamically added here -->
+                </ul>
+            </div>
+        </section>
+
+        <!--Class Create Overlay-->
+        <div class="class-overlay-color"></div>
+
+        <div class="class-overlap">
+            <div class="class-border">
+                <h2>Create New Class</h2>
+                
+                <!-- Class Name Input -->
+                <label for="class-name">Class Name: </label>
+                <input type="text" id="class-name" placeholder="Enter class name" required>
+                
+                <!-- Class Code Display (Read-only) -->
+                <label for="class-code">Class Code: </label>
+                <input type="text" id="class-code" readonly>
+
+                <div class="class-button-row">
+                    <button class="class-overlap-button" id="class-overlap-cancel">CANCEL</button>
+                    <button class="class-overlap-button" id="class-overlap-create">CREATE</button>
                 </div>
             </div>
         </div>

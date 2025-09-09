@@ -84,6 +84,7 @@ app.post("/api/generate-questions", function _callee(req, res) {
   }, null, null, [[3, 15]]);
 }); // API route for generating image
 // API route for generating images using Ghibli API
+//FIX IT AFTER 24HRS
 
 app.post("/api/generate-image", function _callee2(req, res) {
   var image_url, url, options, response, errorText, result;
@@ -172,4 +173,4 @@ app.post("/api/generate-image", function _callee2(req, res) {
 });
 app.listen(PORT, function () {
   console.log("\u2705 Server running at http://localhost:".concat(PORT));
-});
+}); // note: run in terminal "node Back-end/js/upload-ai.js" to start the server

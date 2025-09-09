@@ -216,5 +216,82 @@ document.addEventListener('DOMContentLoaded', function () {
     overlay.style.display = "none";
     overlapModal.style.display = "none";
     fileInput.value = ''; // reset file input
+  }); //create class
+  // Elements
+
+  var createClassBtn = document.getElementById("create-class-btn");
+  var classOverlay = document.querySelector(".class-overlay-color");
+  var classOverlap = document.querySelector(".class-overlap");
+  var cancelBtn1 = document.getElementById("class-overlap-cancel");
+  var codeInput = document.getElementById("class-code");
+  var createBtn = document.getElementById("class-overlap-create");
+  var classListUl = document.getElementById("class-list-ul");
+  var classNameInput = document.getElementById("class-name"); // Function: Generate random class code
+
+  function generateClassCode() {
+    return Math.floor(1000 + Math.random() * 9000); // ensures it’s always 4 digits (1000–9999)
+  }
+
+  document.addEventListener("DOMContentLoaded", function () {
+    var codeField = document.getElementById("class-code");
+    codeField.value = generateClassCode();
+  }); // Example: regenerate code every time "CREATE NEW CLASS" section appears
+
+  document.getElementById("class-overlap-create").addEventListener("click", function () {
+    alert("Class Created ✅ with Code: " + document.getElementById("class-code").value);
+  }); // Open modal
+
+  createClassBtn.addEventListener("click", function () {
+    codeInput.value = generateClassCode(); // Auto-generate code
+
+    classOverlay.style.display = "block";
+    classOverlap.style.display = "block";
+  }); // Close modal (cancel button or background click)
+
+  cancelBtn1.addEventListener("click", function () {
+    classOverlay.style.display = "none";
+    classOverlap.style.display = "none";
   });
-}); // note: run in terminal "node Back-end/js/upload-ai.js" to start the server
+  classOverlay.addEventListener("click", function () {
+    classOverlay.style.display = "none";
+    classOverlap.style.display = "none";
+  }); // Create new class on click
+
+  createBtn.addEventListener("click", function () {
+    var className = classNameInput.value.trim();
+    var classCode = codeInput.value;
+
+    if (className === "") {
+      alert("Please enter a class name!");
+      return;
+    } // Create list item
+
+
+    var li = document.createElement("li");
+    li.classList.add("class-card");
+    li.innerHTML = "\n            <h3>".concat(className, "</h3>\n            <p>\n                Class Code: \n                <span class=\"class-code\" data-code=\"").concat(classCode, "\">****</span>\n                <button class=\"toggle-code\" aria-label=\"Toggle Code Visibility\">\n                    <i class=\"fa fa-eye\"></i>\n                </button>\n            </p>\n            <p>Students: <span class=\"student-count\">0</span></p>\n        "); // Append to class list
+
+    classListUl.appendChild(li); // Reset form & close modal
+
+    classNameInput.value = "";
+    classOverlay.style.display = "none";
+    classOverlap.style.display = "none"; // Add toggle functionality for code
+
+    var toggleBtn = li.querySelector(".toggle-code");
+    var codeSpan = li.querySelector(".class-code");
+    var isHidden = true;
+    toggleBtn.addEventListener("click", function () {
+      if (isHidden) {
+        codeSpan.textContent = codeSpan.dataset.code; // show real code
+
+        toggleBtn.innerHTML = "<i class=\"fa fa-eye-slash\"></i>"; // eye-slash icon
+      } else {
+        codeSpan.textContent = "****"; // hide as asterisks
+
+        toggleBtn.innerHTML = "<i class=\"fa fa-eye\"></i>"; // eye icon
+      }
+
+      isHidden = !isHidden;
+    });
+  });
+});
