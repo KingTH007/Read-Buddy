@@ -33,7 +33,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
           case 6:
             data = _context.sent;
-            return _context.abrupt("return", data.questions);
+            return _context.abrupt("return", data.questions || "No questions generated.");
 
           case 10:
             _context.prev = 10;
@@ -47,13 +47,58 @@ document.addEventListener('DOMContentLoaded', function () {
         }
       }
     }, null, null, [[0, 10]]);
+  } // Function to generate AI image using backend
+
+
+  function generateImageFromKeyword(keyword) {
+    var response, data;
+    return regeneratorRuntime.async(function generateImageFromKeyword$(_context2) {
+      while (1) {
+        switch (_context2.prev = _context2.next) {
+          case 0:
+            _context2.prev = 0;
+            _context2.next = 3;
+            return regeneratorRuntime.awrap(fetch("http://localhost:5000/api/generate-image", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json"
+              },
+              body: JSON.stringify({
+                image_url: "https://source.unsplash.com/512x512/?cat" // example
+
+              })
+            }));
+
+          case 3:
+            response = _context2.sent;
+            _context2.next = 6;
+            return regeneratorRuntime.awrap(response.json());
+
+          case 6:
+            data = _context2.sent;
+            console.log("AI Image Generated:", data.generatedImage);
+            _context2.next = 14;
+            break;
+
+          case 10:
+            _context2.prev = 10;
+            _context2.t0 = _context2["catch"](0);
+            console.error("Error generating image:", _context2.t0);
+            return _context2.abrupt("return", "https://source.unsplash.com/512x512/?".concat(encodeURIComponent(keyword)));
+
+          case 14:
+          case "end":
+            return _context2.stop();
+        }
+      }
+    }, null, null, [[0, 10]]);
   }
 
   fileInput.addEventListener('change', function _callee2(e) {
     var file, fileReader;
-    return regeneratorRuntime.async(function _callee2$(_context3) {
+    return regeneratorRuntime.async(function _callee2$(_context4) {
       while (1) {
-        switch (_context3.prev = _context3.next) {
+        switch (_context4.prev = _context4.next) {
           case 0:
             file = e.target.files[0];
 
@@ -64,37 +109,37 @@ document.addEventListener('DOMContentLoaded', function () {
 
               fileReader.onload = function _callee() {
                 var typedarray, pdf, fullText, i, page, textContent, pageText, titleGuess, keyword, questions;
-                return regeneratorRuntime.async(function _callee$(_context2) {
+                return regeneratorRuntime.async(function _callee$(_context3) {
                   while (1) {
-                    switch (_context2.prev = _context2.next) {
+                    switch (_context3.prev = _context3.next) {
                       case 0:
                         typedarray = new Uint8Array(this.result); // Load PDF
 
-                        _context2.next = 3;
+                        _context3.next = 3;
                         return regeneratorRuntime.awrap(pdfjsLib.getDocument(typedarray).promise);
 
                       case 3:
-                        pdf = _context2.sent;
+                        pdf = _context3.sent;
                         fullText = ""; // Extract text from all pages
 
                         i = 1;
 
                       case 6:
                         if (!(i <= pdf.numPages)) {
-                          _context2.next = 18;
+                          _context3.next = 18;
                           break;
                         }
 
-                        _context2.next = 9;
+                        _context3.next = 9;
                         return regeneratorRuntime.awrap(pdf.getPage(i));
 
                       case 9:
-                        page = _context2.sent;
-                        _context2.next = 12;
+                        page = _context3.sent;
+                        _context3.next = 12;
                         return regeneratorRuntime.awrap(page.getTextContent());
 
                       case 12:
-                        textContent = _context2.sent;
+                        textContent = _context3.sent;
                         pageText = textContent.items.map(function (item) {
                           return item.str;
                         }).join(" ");
@@ -102,7 +147,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
                       case 15:
                         i++;
-                        _context2.next = 6;
+                        _context3.next = 6;
                         break;
 
                       case 18:
@@ -111,21 +156,25 @@ document.addEventListener('DOMContentLoaded', function () {
                         titleGuess = titleGuess.split(" ").slice(0, 8).join(" "); // Generate placeholder image based on first keyword
 
                         keyword = titleGuess.split(" ")[0] || "story";
-                        imageUrl = "https://source.unsplash.com/512x512/?".concat(encodeURIComponent(keyword)); // Fill the modal with defaults
+                        _context3.next = 23;
+                        return regeneratorRuntime.awrap(generateImageFromKeyword(keyword));
 
+                      case 23:
+                        imageUrl = _context3.sent;
+                        // Fill the modal with defaults
                         document.getElementById("title").value = titleGuess;
-                        document.getElementById("context").value = fullText.trim(); // document.querySelector(".over-img img").src = imageUrl;
-
-                        _context2.next = 26;
+                        document.getElementById("context").value = fullText.trim();
+                        document.querySelector(".over-img img").src = imageUrl;
+                        _context3.next = 29;
                         return regeneratorRuntime.awrap(generateQuestionsFromContext(fullText.trim()));
 
-                      case 26:
-                        questions = _context2.sent;
+                      case 29:
+                        questions = _context3.sent;
                         document.getElementById("questions").value = questions;
 
-                      case 28:
+                      case 31:
                       case "end":
-                        return _context2.stop();
+                        return _context3.stop();
                     }
                   }
                 }, null, this);
@@ -139,7 +188,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
           case 2:
           case "end":
-            return _context3.stop();
+            return _context4.stop();
         }
       }
     });

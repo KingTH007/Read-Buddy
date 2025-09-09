@@ -11,16 +11,37 @@ document.addEventListener('DOMContentLoaded', () => {
     async function generateQuestionsFromContext(context) {
         try {
             const response = await fetch("http://localhost:5000/api/generate-questions", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ context }),
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ context }),
             });
 
             const data = await response.json();
-            return data.questions;
+
+            // ✅ make sure the backend actually returns { questions: "..." }
+            return data.questions || "No questions generated.";
         } catch (error) {
             console.error("Error fetching questions:", error);
             return "Failed to generate questions. Please try again.";
+        }
+    }
+
+    // Function to generate AI image using backend
+    async function generateImageFromKeyword(keyword) {
+        try {
+            const response = await fetch("http://localhost:5000/api/generate-image", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    image_url: "https://source.unsplash.com/512x512/?cat" // example
+                }),
+            });
+
+            const data = await response.json();
+            console.log("AI Image Generated:", data.generatedImage);
+        } catch (error) {
+            console.error("Error generating image:", error);
+            return `https://source.unsplash.com/512x512/?${encodeURIComponent(keyword)}`;
         }
     }
 
@@ -55,12 +76,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 // Generate placeholder image based on first keyword
                 const keyword = titleGuess.split(" ")[0] || "story";
-                imageUrl = `https://source.unsplash.com/512x512/?${encodeURIComponent(keyword)}`;
+                imageUrl = await generateImageFromKeyword(keyword);
 
                 // Fill the modal with defaults
                 document.getElementById("title").value = titleGuess;
                 document.getElementById("context").value = fullText.trim();
-                // document.querySelector(".over-img img").src = imageUrl;
+                document.querySelector(".over-img img").src = imageUrl;
 
                 const questions = await generateQuestionsFromContext(fullText.trim());
                 document.getElementById("questions").value = questions;
