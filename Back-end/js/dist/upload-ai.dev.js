@@ -40,7 +40,7 @@ app.post("/api/generate-questions", function _callee(req, res) {
           options = {
             method: "POST",
             headers: {
-              "x-rapidapi-key": "1098f4e1fbmsha80729b29b72a9ep12b064jsn104e5f142388",
+              "x-rapidapi-key": process.env.RAPIDAPI_KEY,
               "x-rapidapi-host": "chatgpt-42.p.rapidapi.com",
               "Content-Type": "application/json"
             },
