@@ -67,23 +67,70 @@ closeRegister.addEventListener('click', () => {
 });
 
 const registerSubmit = document.getElementById('registerSubmit');
-registerSubmit.addEventListener('click', (e) => {
+registerSubmit.addEventListener('click', async (e) => {
     e.preventDefault();
-    alert("Registration Submitted ✅ (replace with your logic)");
-    registerModel.style.display = 'none';
-    document.querySelector('.login-model').style.display = 'block';
+
+    const fullname = document.querySelector('.register-model input[placeholder="Full Name"]').value;
+    const email = document.querySelector('.register-model input[placeholder="Email Address"]').value;
+    const password = document.querySelector('.register-model input[placeholder="Password"]').value;
+    const confirmPassword = document.querySelector('.register-model input[placeholder="Confirm Password"]').value;
+
+    if (password !== confirmPassword) {
+        alert("Passwords do not match!");
+        return;
+    }
+
+    try {
+        const response = await fetch("http://localhost:5000/register", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ fullname, email, password }),
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            alert("Registration successful ✅ Please log in.");
+            registerModel.style.display = 'none';
+            document.querySelector('.login-model').style.display = 'block';
+        } else {
+            alert(data.message || "Registration failed.");
+        }
+    } catch (error) {
+        console.error(error);
+        alert("Error connecting to server.");
+    }
 });
 
 const loginSubmit = document.getElementById('loginSubmit');
-loginSubmit.addEventListener('click', (e) => {
+loginSubmit.addEventListener('click', async (e) => {
     e.preventDefault();
 
     if (loginForms.classList.contains('teacher-active')) {
-        // change it soon when database is ready
-        window.location.href = "../../Front-end/html/teacher-front.html";
+        const email = document.querySelector('#teacherOverlay input[placeholder="Email Address"]').value;
+        const password = document.querySelector('#teacherOverlay input[placeholder="Password"]').value;
+
+        try {
+            const response = await fetch("http://localhost:5000/login", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email, password }),
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                alert("Login successful ✅");
+                window.location.href = "../../Front-end/html/teacher-front.html";
+            } else {
+                alert(data.message || "Invalid email or password.");
+            }
+        } catch (error) {
+            console.error(error);
+            alert("Error connecting to server.");
+        }
     } 
     else if (loginForms.classList.contains('student-active')) {
-        // change it soon when database is ready
         window.location.href = "../../Front-end/html/student-front.html";
     }
 });
