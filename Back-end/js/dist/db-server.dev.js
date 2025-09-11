@@ -160,6 +160,140 @@ app.post("/login", function _callee2(req, res) {
     }
   }, null, null, [[0, 15]]);
 });
+/**
+ * Create a Class (Teacher)
+ */
+
+app.post("/create-class", function _callee3(req, res) {
+  var _req$body3, name, code, teacher_id, existing, newClass;
+
+  return regeneratorRuntime.async(function _callee3$(_context3) {
+    while (1) {
+      switch (_context3.prev = _context3.next) {
+        case 0:
+          _context3.prev = 0;
+          _req$body3 = req.body, name = _req$body3.name, code = _req$body3.code, teacher_id = _req$body3.teacher_id; // Check if code already exists
+
+          _context3.next = 4;
+          return regeneratorRuntime.awrap(pool.query("SELECT * FROM class WHERE code = $1", [code]));
+
+        case 4:
+          existing = _context3.sent;
+
+          if (!(existing.rows.length > 0)) {
+            _context3.next = 7;
+            break;
+          }
+
+          return _context3.abrupt("return", res.status(400).json({
+            success: false,
+            message: "Class code already exists."
+          }));
+
+        case 7:
+          _context3.next = 9;
+          return regeneratorRuntime.awrap(pool.query("INSERT INTO class (code, name, teacher_id) VALUES ($1, $2, $3) RETURNING *", [code, name, teacher_id]));
+
+        case 9:
+          newClass = _context3.sent;
+          res.json({
+            success: true,
+            "class": newClass.rows[0]
+          });
+          _context3.next = 17;
+          break;
+
+        case 13:
+          _context3.prev = 13;
+          _context3.t0 = _context3["catch"](0);
+          console.error(_context3.t0);
+          res.status(500).json({
+            success: false,
+            message: "Failed to create class"
+          });
+
+        case 17:
+        case "end":
+          return _context3.stop();
+      }
+    }
+  }, null, null, [[0, 13]]);
+});
+/**
+ * Student "Login" (auto-register if new)
+ */
+
+app.post("/student-login", function _callee4(req, res) {
+  var _req$body4, fullname, code, classExists, student;
+
+  return regeneratorRuntime.async(function _callee4$(_context4) {
+    while (1) {
+      switch (_context4.prev = _context4.next) {
+        case 0:
+          _context4.prev = 0;
+          _req$body4 = req.body, fullname = _req$body4.fullname, code = _req$body4.code; // Check if class exists
+
+          _context4.next = 4;
+          return regeneratorRuntime.awrap(pool.query("SELECT * FROM class WHERE code = $1", [code]));
+
+        case 4:
+          classExists = _context4.sent;
+
+          if (!(classExists.rows.length === 0)) {
+            _context4.next = 7;
+            break;
+          }
+
+          return _context4.abrupt("return", res.status(400).json({
+            success: false,
+            field: "code",
+            message: "Invalid class code"
+          }));
+
+        case 7:
+          _context4.next = 9;
+          return regeneratorRuntime.awrap(pool.query("SELECT * FROM students WHERE fullname = $1 AND code = $2", [fullname, code]));
+
+        case 9:
+          student = _context4.sent;
+
+          if (!(student.rows.length === 0)) {
+            _context4.next = 16;
+            break;
+          }
+
+          _context4.next = 13;
+          return regeneratorRuntime.awrap(pool.query("INSERT INTO students (fullname, code) VALUES ($1, $2) RETURNING *", [fullname, code]));
+
+        case 13:
+          student = _context4.sent;
+          _context4.next = 16;
+          return regeneratorRuntime.awrap(pool.query("UPDATE class SET no_students = no_students + 1 WHERE code = $1", [code]));
+
+        case 16:
+          res.json({
+            success: true,
+            student: student.rows[0]
+          });
+          _context4.next = 23;
+          break;
+
+        case 19:
+          _context4.prev = 19;
+          _context4.t0 = _context4["catch"](0);
+          console.error("❌ Student login error:", _context4.t0.message);
+          res.status(500).json({
+            success: false,
+            message: "Student login failed"
+          });
+
+        case 23:
+        case "end":
+          return _context4.stop();
+      }
+    }
+  }, null, null, [[0, 19]]);
+});
 app.listen(PORT, function () {
   console.log("Server running on http://localhost:".concat(PORT));
 }); //RUN THE SERVER WITH: node Back-end/js/db-server.js

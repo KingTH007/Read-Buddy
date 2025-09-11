@@ -153,18 +153,25 @@ registerSubmit.addEventListener('click', function _callee(e) {
 });
 var loginSubmit = document.getElementById('loginSubmit');
 loginSubmit.addEventListener('click', function _callee2(e) {
-  var email, password, response, data;
+  var email, password, response, data, fullname, code, res, _data;
+
   return regeneratorRuntime.async(function _callee2$(_context2) {
     while (1) {
       switch (_context2.prev = _context2.next) {
         case 0:
-          e.preventDefault();
-          email = document.getElementById("loginEmail");
-          password = document.getElementById("loginPassword"); // Clear errors
+          e.preventDefault(); // Check if we're on teacher or student mode
 
+          if (!loginForms.classList.contains("teacher-active")) {
+            _context2.next = 21;
+            break;
+          }
+
+          // Teacher login
+          email = document.getElementById("loginEmail");
+          password = document.getElementById("loginPassword");
           [email, password].forEach(clearError);
-          _context2.prev = 4;
-          _context2.next = 7;
+          _context2.prev = 5;
+          _context2.next = 8;
           return regeneratorRuntime.awrap(fetch("http://localhost:5000/login", {
             method: "POST",
             headers: {
@@ -176,15 +183,16 @@ loginSubmit.addEventListener('click', function _callee2(e) {
             })
           }));
 
-        case 7:
+        case 8:
           response = _context2.sent;
-          _context2.next = 10;
+          _context2.next = 11;
           return regeneratorRuntime.awrap(response.json());
 
-        case 10:
+        case 11:
           data = _context2.sent;
 
           if (data.success) {
+            localStorage.setItem("teacher", JSON.stringify(data.teacher));
             window.location.href = "../../Front-end/html/teacher-front.html";
           } else {
             if (data.field === "email") {
@@ -196,21 +204,86 @@ loginSubmit.addEventListener('click', function _callee2(e) {
             }
           }
 
-          _context2.next = 18;
+          _context2.next = 19;
           break;
 
-        case 14:
-          _context2.prev = 14;
-          _context2.t0 = _context2["catch"](4);
+        case 15:
+          _context2.prev = 15;
+          _context2.t0 = _context2["catch"](5);
           console.error(_context2.t0);
           alert("Error connecting to server.");
 
-        case 18:
+        case 19:
+          _context2.next = 42;
+          break;
+
+        case 21:
+          if (!loginForms.classList.contains("student-active")) {
+            _context2.next = 42;
+            break;
+          }
+
+          // Student login
+          fullname = document.getElementById("studentName");
+          code = document.getElementById("classCode");
+          [fullname, code].forEach(clearError);
+
+          if (!(!fullname.value.trim() || !code.value.trim())) {
+            _context2.next = 28;
+            break;
+          }
+
+          alert("Please enter your name and class code.");
+          return _context2.abrupt("return");
+
+        case 28:
+          _context2.prev = 28;
+          _context2.next = 31;
+          return regeneratorRuntime.awrap(fetch("http://localhost:5000/student-login", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+              fullname: fullname.value.trim(),
+              code: code.value.trim()
+            })
+          }));
+
+        case 31:
+          res = _context2.sent;
+          _context2.next = 34;
+          return regeneratorRuntime.awrap(res.json());
+
+        case 34:
+          _data = _context2.sent;
+
+          if (_data.success) {
+            localStorage.setItem("student", JSON.stringify(_data.student));
+            window.location.href = "../../Front-end/html/student-front.html";
+          } else {
+            if (_data.field === "code") {
+              showError(code, "Invalid class code.");
+            } else {
+              alert(_data.message || "Login failed.");
+            }
+          }
+
+          _context2.next = 42;
+          break;
+
+        case 38:
+          _context2.prev = 38;
+          _context2.t1 = _context2["catch"](28);
+          console.error(_context2.t1);
+          alert("Error connecting to server.");
+
+        case 42:
         case "end":
           return _context2.stop();
       }
     }
-  }, null, null, [[4, 14]]);
+  }, null, null, [[5, 15], [28, 38]]);
 }); // SCROLL REVEAL
 
 var sections = document.querySelectorAll('.second-section');

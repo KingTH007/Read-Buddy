@@ -85,6 +85,69 @@ app.post("/login", async (req, res) => {
   }
 });
 
+/**
+ * Create a Class (Teacher)
+ */
+app.post("/create-class", async (req, res) => {
+  try {
+    const { name, code, teacher_id } = req.body;
+
+    // Check if code already exists
+    const existing = await pool.query("SELECT * FROM class WHERE code = $1", [code]);
+    if (existing.rows.length > 0) {
+      return res.status(400).json({ success: false, message: "Class code already exists." });
+    }
+
+    const newClass = await pool.query(
+      "INSERT INTO class (code, name, teacher_id) VALUES ($1, $2, $3) RETURNING *",
+      [code, name, teacher_id]
+    );
+
+    res.json({ success: true, class: newClass.rows[0] });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: "Failed to create class" });
+  }
+});
+
+/**
+ * Student "Login" (auto-register if new)
+ */
+app.post("/student-login", async (req, res) => {
+  try {
+    const { fullname, code } = req.body;
+
+    // Check if class exists
+    const classExists = await pool.query("SELECT * FROM class WHERE code = $1", [code]);
+    if (classExists.rows.length === 0) {
+      return res.status(400).json({ success: false, field: "code", message: "Invalid class code" });
+    }
+
+    // Check if student already exists in this class
+    let student = await pool.query(
+      "SELECT * FROM students WHERE fullname = $1 AND code = $2",
+      [fullname, code]
+    );
+
+    if (student.rows.length === 0) {
+      // If not exists → insert student
+      student = await pool.query(
+        "INSERT INTO students (fullname, code) VALUES ($1, $2) RETURNING *",
+        [fullname, code]
+      );
+
+      // Update class student count
+      await pool.query("UPDATE class SET no_students = no_students + 1 WHERE code = $1", [code]);
+    }
+
+    res.json({ success: true, student: student.rows[0] });
+
+  } catch (err) {
+    console.error("❌ Student login error:", err.message);
+    res.status(500).json({ success: false, message: "Student login failed" });
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });

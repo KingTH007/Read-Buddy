@@ -216,8 +216,7 @@ document.addEventListener('DOMContentLoaded', function () {
     overlay.style.display = "none";
     overlapModal.style.display = "none";
     fileInput.value = ''; // reset file input
-  }); //create class
-  // Elements
+  }); // Create Class Section
 
   var createClassBtn = document.getElementById("create-class-btn");
   var classOverlay = document.querySelector(".class-overlay-color");
@@ -226,27 +225,19 @@ document.addEventListener('DOMContentLoaded', function () {
   var codeInput = document.getElementById("class-code");
   var createBtn = document.getElementById("class-overlap-create");
   var classListUl = document.getElementById("class-list-ul");
-  var classNameInput = document.getElementById("class-name"); // Function: Generate random class code
+  var classNameInput = document.getElementById("class-name"); // Generate random 4-digit class code
 
   function generateClassCode() {
-    return Math.floor(1000 + Math.random() * 9000); // ensures it’s always 4 digits (1000–9999)
-  }
+    return Math.floor(1000 + Math.random() * 9000);
+  } // Open modal
 
-  document.addEventListener("DOMContentLoaded", function () {
-    var codeField = document.getElementById("class-code");
-    codeField.value = generateClassCode();
-  }); // Example: regenerate code every time "CREATE NEW CLASS" section appears
-
-  document.getElementById("class-overlap-create").addEventListener("click", function () {
-    alert("Class Created ✅ with Code: " + document.getElementById("class-code").value);
-  }); // Open modal
 
   createClassBtn.addEventListener("click", function () {
     codeInput.value = generateClassCode(); // Auto-generate code
 
     classOverlay.style.display = "block";
     classOverlap.style.display = "block";
-  }); // Close modal (cancel button or background click)
+  }); // Close modal
 
   cancelBtn1.addEventListener("click", function () {
     classOverlay.style.display = "none";
@@ -257,41 +248,106 @@ document.addEventListener('DOMContentLoaded', function () {
     classOverlap.style.display = "none";
   }); // Create new class on click
 
-  createBtn.addEventListener("click", function () {
-    var className = classNameInput.value.trim();
-    var classCode = codeInput.value;
+  createBtn.addEventListener("click", function _callee3() {
+    var className, classCode, teacherData, teacherId, response, data, li, toggleBtn, codeSpan, isHidden;
+    return regeneratorRuntime.async(function _callee3$(_context5) {
+      while (1) {
+        switch (_context5.prev = _context5.next) {
+          case 0:
+            className = classNameInput.value.trim();
+            classCode = codeInput.value;
 
-    if (className === "") {
-      alert("Please enter a class name!");
-      return;
-    } // Create list item
+            if (!(className === "")) {
+              _context5.next = 5;
+              break;
+            }
 
+            alert("Please enter a class name!");
+            return _context5.abrupt("return");
 
-    var li = document.createElement("li");
-    li.classList.add("class-card");
-    li.innerHTML = "\n            <h3>".concat(className, "</h3>\n            <p>\n                Class Code: \n                <span class=\"class-code\" data-code=\"").concat(classCode, "\">****</span>\n                <button class=\"toggle-code\" aria-label=\"Toggle Code Visibility\">\n                    <i class=\"fa fa-eye\"></i>\n                </button>\n            </p>\n            <p>Students: <span class=\"student-count\">0</span></p>\n        "); // Append to class list
+          case 5:
+            // Get teacher ID (assuming you saved it in localStorage after login)
+            teacherData = JSON.parse(localStorage.getItem("teacher"));
 
-    classListUl.appendChild(li); // Reset form & close modal
+            if (teacherData) {
+              _context5.next = 9;
+              break;
+            }
 
-    classNameInput.value = "";
-    classOverlay.style.display = "none";
-    classOverlap.style.display = "none"; // Add toggle functionality for code
+            alert("Please log in again. Teacher not found.");
+            return _context5.abrupt("return");
 
-    var toggleBtn = li.querySelector(".toggle-code");
-    var codeSpan = li.querySelector(".class-code");
-    var isHidden = true;
-    toggleBtn.addEventListener("click", function () {
-      if (isHidden) {
-        codeSpan.textContent = codeSpan.dataset.code; // show real code
+          case 9:
+            teacherId = teacherData.id;
+            _context5.prev = 10;
+            _context5.next = 13;
+            return regeneratorRuntime.awrap(fetch("http://localhost:5000/create-class", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json"
+              },
+              body: JSON.stringify({
+                name: className,
+                code: classCode,
+                teacher_id: teacherId
+              })
+            }));
 
-        toggleBtn.innerHTML = "<i class=\"fa fa-eye-slash\"></i>"; // eye-slash icon
-      } else {
-        codeSpan.textContent = "****"; // hide as asterisks
+          case 13:
+            response = _context5.sent;
+            _context5.next = 16;
+            return regeneratorRuntime.awrap(response.json());
 
-        toggleBtn.innerHTML = "<i class=\"fa fa-eye\"></i>"; // eye icon
+          case 16:
+            data = _context5.sent;
+
+            if (data.success) {
+              alert("Class Created ✅ with Code: " + data["class"].code); // Create list item
+
+              li = document.createElement("li");
+              li.classList.add("class-card");
+              li.innerHTML = "\n                    <h3>".concat(data["class"].name, "</h3>\n                    <p>\n                        Class Code: \n                        <span class=\"class-code\" data-code=\"").concat(data["class"].code, "\">****</span>\n                        <button class=\"toggle-code\" aria-label=\"Toggle Code Visibility\">\n                            <i class=\"fa fa-eye\"></i>\n                        </button>\n                    </p>\n                    <p>Students: <span class=\"student-count\">").concat(data["class"].no_students, "</span></p>\n                "); // Append to class list
+
+              classListUl.appendChild(li); // Reset form & close modal
+
+              classNameInput.value = "";
+              classOverlay.style.display = "none";
+              classOverlap.style.display = "none"; // Add toggle functionality for code
+
+              toggleBtn = li.querySelector(".toggle-code");
+              codeSpan = li.querySelector(".class-code");
+              isHidden = true;
+              toggleBtn.addEventListener("click", function () {
+                if (isHidden) {
+                  codeSpan.textContent = codeSpan.dataset.code; // show real code
+
+                  toggleBtn.innerHTML = "<i class=\"fa fa-eye-slash\"></i>";
+                } else {
+                  codeSpan.textContent = "****"; // hide as asterisks
+
+                  toggleBtn.innerHTML = "<i class=\"fa fa-eye\"></i>";
+                }
+
+                isHidden = !isHidden;
+              });
+            } else {
+              alert("Error: " + data.message);
+            }
+
+            _context5.next = 24;
+            break;
+
+          case 20:
+            _context5.prev = 20;
+            _context5.t0 = _context5["catch"](10);
+            console.error("Error creating class:", _context5.t0);
+            alert("Failed to create class. Please try again.");
+
+          case 24:
+          case "end":
+            return _context5.stop();
+        }
       }
-
-      isHidden = !isHidden;
-    });
+    }, null, null, [[10, 20]]);
   });
 });

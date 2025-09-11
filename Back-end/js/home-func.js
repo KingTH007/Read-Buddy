@@ -129,41 +129,79 @@ const loginSubmit = document.getElementById('loginSubmit');
 loginSubmit.addEventListener('click', async (e) => {
     e.preventDefault();
 
-    const email = document.getElementById("loginEmail");
-    const password = document.getElementById("loginPassword");
+    // Check if we're on teacher or student mode
+    if (loginForms.classList.contains("teacher-active")) {
+        // Teacher login
+        const email = document.getElementById("loginEmail");
+        const password = document.getElementById("loginPassword");
 
-    // Clear errors
-    [email, password].forEach(clearError);
+        [email, password].forEach(clearError);
 
-    try {
-        const response = await fetch("http://localhost:5000/login", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ email: email.value, password: password.value }),
-        });
+        try {
+            const response = await fetch("http://localhost:5000/login", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email: email.value, password: password.value }),
+            });
 
-        const data = await response.json();
+            const data = await response.json();
 
-        if (data.success) {
-            window.location.href = "../../Front-end/html/teacher-front.html";
-        } else {
-            if (data.field === "email") {
-                showError(email, "Email not found.");
-            } else if (data.field === "password") {
-                showError(password, "Incorrect password.");
+            if (data.success) {
+                localStorage.setItem("teacher", JSON.stringify(data.teacher));
+                window.location.href = "../../Front-end/html/teacher-front.html";
             } else {
-                alert(data.message || "Invalid credentials.");
+                if (data.field === "email") {
+                    showError(email, "Email not found.");
+                } else if (data.field === "password") {
+                    showError(password, "Incorrect password.");
+                } else {
+                    alert(data.message || "Invalid credentials.");
+                }
             }
+        } catch (error) {
+            console.error(error);
+            alert("Error connecting to server.");
         }
-    } catch (error) {
-        console.error(error);
-        alert("Error connecting to server.");
+    } else if (loginForms.classList.contains("student-active")) {
+        // Student login
+        const fullname = document.getElementById("studentName");
+        const code = document.getElementById("classCode");
+
+        [fullname, code].forEach(clearError);
+
+        if (!fullname.value.trim() || !code.value.trim()) {
+            alert("Please enter your name and class code.");
+            return;
+        }
+
+        try {
+            const res = await fetch("http://localhost:5000/student-login", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ fullname: fullname.value.trim(), code: code.value.trim() }),
+            });
+
+            const data = await res.json();
+
+            if (data.success) {
+                localStorage.setItem("student", JSON.stringify(data.student));
+                window.location.href = "../../Front-end/html/student-front.html";
+            } else {
+                if (data.field === "code") {
+                    showError(code, "Invalid class code.");
+                } else {
+                    alert(data.message || "Login failed.");
+                }
+            }
+        } catch (err) {
+            console.error(err);
+            alert("Error connecting to server.");
+        }
     }
 });
 
 // SCROLL REVEAL
 const sections = document.querySelectorAll('.second-section');
-
 const observer = new IntersectionObserver((entries) => {
   entries.forEach(entry => {
     if (entry.isIntersecting) {

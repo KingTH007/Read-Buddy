@@ -117,8 +117,11 @@
                 <div class="login" id="studentOverlay">
                     <h2>Student Login</h2>
                     <form>
-                        <input type="text" placeholder="Class Code" required>
-                        <input type="text" placeholder="Username" required>
+                        <input type="text" id="classCode" placeholder="Class Code" required>
+                        <span class="error-message"></span>
+
+                        <input type="text" id="studentName" placeholder="Full Name" required>
+                        <span class="error-message"></span>
                     </form>
                 </div>
             </div>
