@@ -26,6 +26,16 @@ app.post("/register", async (req, res) => {
   try {
     const { fullname, email, password } = req.body;
 
+    // Check if email already exists
+    const existing = await pool.query("SELECT * FROM teachers WHERE email = $1", [email]);
+    if (existing.rows.length > 0) {
+      return res.status(400).json({ 
+        success: false, 
+        field: "email", 
+        message: "This email has been used, please use another." 
+      });
+    }
+
     // hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -51,13 +61,21 @@ app.post("/login", async (req, res) => {
     const teacher = await pool.query("SELECT * FROM teachers WHERE email = $1", [email]);
 
     if (teacher.rows.length === 0) {
-      return res.status(400).json({ success: false, message: "Invalid email or password" });
+      return res.status(400).json({ 
+        success: false, 
+        field: "email", 
+        message: "Email not found" 
+      });
     }
 
     const validPassword = await bcrypt.compare(password, teacher.rows[0].password);
 
     if (!validPassword) {
-      return res.status(400).json({ success: false, message: "Invalid email or password" });
+      return res.status(400).json({ 
+        success: false, 
+        field: "password", 
+        message: "Incorrect password" 
+      });
     }
 
     res.json({ success: true, teacher: teacher.rows[0] });

@@ -60,7 +60,21 @@ closeLogin.addEventListener('click', function () {
 });
 closeRegister.addEventListener('click', function () {
   loginOverlay.style.display = 'none';
-});
+}); // Helper: show error message beside input
+
+function showError(input, message) {
+  input.classList.add("error");
+  var errorSpan = input.nextElementSibling;
+  if (errorSpan) errorSpan.textContent = message;
+} // Helper: clear error
+
+
+function clearError(input) {
+  input.classList.remove("error");
+  var errorSpan = input.nextElementSibling;
+  if (errorSpan) errorSpan.textContent = "";
+}
+
 var registerSubmit = document.getElementById('registerSubmit');
 registerSubmit.addEventListener('click', function _callee(e) {
   var fullname, email, password, confirmPassword, response, data;
@@ -69,40 +83,42 @@ registerSubmit.addEventListener('click', function _callee(e) {
       switch (_context.prev = _context.next) {
         case 0:
           e.preventDefault();
-          fullname = document.querySelector('.register-model input[placeholder="Full Name"]').value;
-          email = document.querySelector('.register-model input[placeholder="Email Address"]').value;
-          password = document.querySelector('.register-model input[placeholder="Password"]').value;
-          confirmPassword = document.querySelector('.register-model input[placeholder="Confirm Password"]').value;
+          fullname = document.getElementById("regName");
+          email = document.getElementById("regEmail");
+          password = document.getElementById("regPassword");
+          confirmPassword = document.getElementById("regConfirm"); // Clear previous errors
 
-          if (!(password !== confirmPassword)) {
-            _context.next = 8;
+          [fullname, email, password, confirmPassword].forEach(clearError);
+
+          if (!(password.value !== confirmPassword.value)) {
+            _context.next = 9;
             break;
           }
 
-          alert("Passwords do not match!");
+          showError(confirmPassword, "Passwords do not match!");
           return _context.abrupt("return");
 
-        case 8:
-          _context.prev = 8;
-          _context.next = 11;
+        case 9:
+          _context.prev = 9;
+          _context.next = 12;
           return regeneratorRuntime.awrap(fetch("http://localhost:5000/register", {
             method: "POST",
             headers: {
               "Content-Type": "application/json"
             },
             body: JSON.stringify({
-              fullname: fullname,
-              email: email,
-              password: password
+              fullname: fullname.value,
+              email: email.value,
+              password: password.value
             })
           }));
 
-        case 11:
+        case 12:
           response = _context.sent;
-          _context.next = 14;
+          _context.next = 15;
           return regeneratorRuntime.awrap(response.json());
 
-        case 14:
+        case 15:
           data = _context.sent;
 
           if (data.success) {
@@ -110,24 +126,30 @@ registerSubmit.addEventListener('click', function _callee(e) {
             registerModel.style.display = 'none';
             document.querySelector('.login-model').style.display = 'block';
           } else {
-            alert(data.message || "Registration failed.");
+            if (data.field === "email") {
+              showError(email, "This email has been used, please use another.");
+            } else if (data.field === "password") {
+              showError(password, "Password is too weak.");
+            } else {
+              alert(data.message || "Registration failed.");
+            }
           }
 
-          _context.next = 22;
+          _context.next = 23;
           break;
 
-        case 18:
-          _context.prev = 18;
-          _context.t0 = _context["catch"](8);
+        case 19:
+          _context.prev = 19;
+          _context.t0 = _context["catch"](9);
           console.error(_context.t0);
           alert("Error connecting to server.");
 
-        case 22:
+        case 23:
         case "end":
           return _context.stop();
       }
     }
-  }, null, null, [[8, 18]]);
+  }, null, null, [[9, 19]]);
 });
 var loginSubmit = document.getElementById('loginSubmit');
 loginSubmit.addEventListener('click', function _callee2(e) {
@@ -137,14 +159,10 @@ loginSubmit.addEventListener('click', function _callee2(e) {
       switch (_context2.prev = _context2.next) {
         case 0:
           e.preventDefault();
+          email = document.getElementById("loginEmail");
+          password = document.getElementById("loginPassword"); // Clear errors
 
-          if (!loginForms.classList.contains('teacher-active')) {
-            _context2.next = 20;
-            break;
-          }
-
-          email = document.querySelector('#teacherOverlay input[placeholder="Email Address"]').value;
-          password = document.querySelector('#teacherOverlay input[placeholder="Password"]').value;
+          [email, password].forEach(clearError);
           _context2.prev = 4;
           _context2.next = 7;
           return regeneratorRuntime.awrap(fetch("http://localhost:5000/login", {
@@ -153,8 +171,8 @@ loginSubmit.addEventListener('click', function _callee2(e) {
               "Content-Type": "application/json"
             },
             body: JSON.stringify({
-              email: email,
-              password: password
+              email: email.value,
+              password: password.value
             })
           }));
 
@@ -167,10 +185,15 @@ loginSubmit.addEventListener('click', function _callee2(e) {
           data = _context2.sent;
 
           if (data.success) {
-            alert("Login successful ✅");
             window.location.href = "../../Front-end/html/teacher-front.html";
           } else {
-            alert(data.message || "Invalid email or password.");
+            if (data.field === "email") {
+              showError(email, "Email not found.");
+            } else if (data.field === "password") {
+              showError(password, "Incorrect password.");
+            } else {
+              alert(data.message || "Invalid credentials.");
+            }
           }
 
           _context2.next = 18;
@@ -183,15 +206,6 @@ loginSubmit.addEventListener('click', function _callee2(e) {
           alert("Error connecting to server.");
 
         case 18:
-          _context2.next = 21;
-          break;
-
-        case 20:
-          if (loginForms.classList.contains('student-active')) {
-            window.location.href = "../../Front-end/html/student-front.html";
-          }
-
-        case 21:
         case "end":
           return _context2.stop();
       }

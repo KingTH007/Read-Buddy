@@ -184,6 +184,19 @@ body {
 }
 
 /* Each form */
+
+input.error {
+    border: 2px solid red;
+    background-color: #ffe6e6;
+}
+
+.error-message {
+    font-size: 12px;
+    color: red;
+    display: block;
+    margin-top: 2px;
+}
+
 .login {
     width: 50%;
     flex-shrink: 0;

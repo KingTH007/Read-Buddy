@@ -105,8 +105,11 @@
                 <div class="login" id="teacherOverlay">
                     <h2>Teacher Login</h2>
                     <form>
-                        <input type="text" placeholder="Email Address" required>
-                        <input type="password" placeholder="Password" required>
+                        <input type="text" id="loginEmail" placeholder="Email Address" required>
+                        <span class="error-message"></span>
+
+                        <input type="password" id="loginPassword" placeholder="Password" required>
+                        <span class="error-message"></span>
                         <p class="signup-text">No account? <span>Sign up here!</span></p>
                     </form>
                 </div>
@@ -129,10 +132,17 @@
         <div class="register-model">
             <h2>Teacher Registration</h2>
             <form>
-                <input type="text" placeholder="Full Name" required>
-                <input type="text" placeholder="Email Address" required>
-                <input type="password" placeholder="Password" required>
-                <input type="password" placeholder="Confirm Password" required>
+                <input type="text" id="regName" placeholder="Full Name" required>
+                <span class="error-message"></span>
+
+                <input type="text" id="regEmail" placeholder="Email Address" required>
+                <span class="error-message"></span>
+
+                <input type="password" id="regPassword" placeholder="Password" required>
+                <span class="error-message"></span>
+
+                <input type="password" id="regConfirm" placeholder="Confirm Password" required>
+                <span class="error-message"></span>
                 <p class="signup-text">Already have an account? <span id="backToLogin">Log in here!</span></p>
             </form>
 

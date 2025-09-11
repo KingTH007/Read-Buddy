@@ -28,34 +28,52 @@ app.use(bodyParser.json());
  */
 
 app.post("/register", function _callee(req, res) {
-  var _req$body, fullname, email, password, hashedPassword, newTeacher;
+  var _req$body, fullname, email, password, existing, hashedPassword, newTeacher;
 
   return regeneratorRuntime.async(function _callee$(_context) {
     while (1) {
       switch (_context.prev = _context.next) {
         case 0:
           _context.prev = 0;
-          _req$body = req.body, fullname = _req$body.fullname, email = _req$body.email, password = _req$body.password; // hash password
+          _req$body = req.body, fullname = _req$body.fullname, email = _req$body.email, password = _req$body.password; // Check if email already exists
 
           _context.next = 4;
-          return regeneratorRuntime.awrap(bcrypt.hash(password, 10));
+          return regeneratorRuntime.awrap(pool.query("SELECT * FROM teachers WHERE email = $1", [email]));
 
         case 4:
-          hashedPassword = _context.sent;
-          _context.next = 7;
-          return regeneratorRuntime.awrap(pool.query("INSERT INTO teachers (fullname, email, password) VALUES ($1, $2, $3) RETURNING *", [fullname, email, hashedPassword]));
+          existing = _context.sent;
+
+          if (!(existing.rows.length > 0)) {
+            _context.next = 7;
+            break;
+          }
+
+          return _context.abrupt("return", res.status(400).json({
+            success: false,
+            field: "email",
+            message: "This email has been used, please use another."
+          }));
 
         case 7:
+          _context.next = 9;
+          return regeneratorRuntime.awrap(bcrypt.hash(password, 10));
+
+        case 9:
+          hashedPassword = _context.sent;
+          _context.next = 12;
+          return regeneratorRuntime.awrap(pool.query("INSERT INTO teachers (fullname, email, password) VALUES ($1, $2, $3) RETURNING *", [fullname, email, hashedPassword]));
+
+        case 12:
           newTeacher = _context.sent;
           res.json({
             success: true,
             teacher: newTeacher.rows[0]
           });
-          _context.next = 15;
+          _context.next = 20;
           break;
 
-        case 11:
-          _context.prev = 11;
+        case 16:
+          _context.prev = 16;
           _context.t0 = _context["catch"](0);
           console.error(_context.t0);
           res.status(500).json({
@@ -63,12 +81,12 @@ app.post("/register", function _callee(req, res) {
             message: "Registration failed"
           });
 
-        case 15:
+        case 20:
         case "end":
           return _context.stop();
       }
     }
-  }, null, null, [[0, 11]]);
+  }, null, null, [[0, 16]]);
 });
 /**
  * Teacher Login
@@ -96,7 +114,8 @@ app.post("/login", function _callee2(req, res) {
 
           return _context2.abrupt("return", res.status(400).json({
             success: false,
-            message: "Invalid email or password"
+            field: "email",
+            message: "Email not found"
           }));
 
         case 7:
@@ -113,7 +132,8 @@ app.post("/login", function _callee2(req, res) {
 
           return _context2.abrupt("return", res.status(400).json({
             success: false,
-            message: "Invalid email or password"
+            field: "password",
+            message: "Incorrect password"
           }));
 
         case 12:

@@ -66,17 +66,34 @@ closeRegister.addEventListener('click', () => {
     loginOverlay.style.display = 'none';
 });
 
+// Helper: show error message beside input
+function showError(input, message) {
+    input.classList.add("error");
+    const errorSpan = input.nextElementSibling;
+    if (errorSpan) errorSpan.textContent = message;
+}
+
+// Helper: clear error
+function clearError(input) {
+    input.classList.remove("error");
+    const errorSpan = input.nextElementSibling;
+    if (errorSpan) errorSpan.textContent = "";
+}
+
 const registerSubmit = document.getElementById('registerSubmit');
 registerSubmit.addEventListener('click', async (e) => {
     e.preventDefault();
 
-    const fullname = document.querySelector('.register-model input[placeholder="Full Name"]').value;
-    const email = document.querySelector('.register-model input[placeholder="Email Address"]').value;
-    const password = document.querySelector('.register-model input[placeholder="Password"]').value;
-    const confirmPassword = document.querySelector('.register-model input[placeholder="Confirm Password"]').value;
+    const fullname = document.getElementById("regName");
+    const email = document.getElementById("regEmail");
+    const password = document.getElementById("regPassword");
+    const confirmPassword = document.getElementById("regConfirm");
 
-    if (password !== confirmPassword) {
-        alert("Passwords do not match!");
+    // Clear previous errors
+    [fullname, email, password, confirmPassword].forEach(clearError);
+
+    if (password.value !== confirmPassword.value) {
+        showError(confirmPassword, "Passwords do not match!");
         return;
     }
 
@@ -84,7 +101,7 @@ registerSubmit.addEventListener('click', async (e) => {
         const response = await fetch("http://localhost:5000/register", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ fullname, email, password }),
+            body: JSON.stringify({ fullname: fullname.value, email: email.value, password: password.value }),
         });
 
         const data = await response.json();
@@ -94,7 +111,13 @@ registerSubmit.addEventListener('click', async (e) => {
             registerModel.style.display = 'none';
             document.querySelector('.login-model').style.display = 'block';
         } else {
-            alert(data.message || "Registration failed.");
+            if (data.field === "email") {
+                showError(email, "This email has been used, please use another.");
+            } else if (data.field === "password") {
+                showError(password, "Password is too weak.");
+            } else {
+                alert(data.message || "Registration failed.");
+            }
         }
     } catch (error) {
         console.error(error);
@@ -106,32 +129,35 @@ const loginSubmit = document.getElementById('loginSubmit');
 loginSubmit.addEventListener('click', async (e) => {
     e.preventDefault();
 
-    if (loginForms.classList.contains('teacher-active')) {
-        const email = document.querySelector('#teacherOverlay input[placeholder="Email Address"]').value;
-        const password = document.querySelector('#teacherOverlay input[placeholder="Password"]').value;
+    const email = document.getElementById("loginEmail");
+    const password = document.getElementById("loginPassword");
 
-        try {
-            const response = await fetch("http://localhost:5000/login", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ email, password }),
-            });
+    // Clear errors
+    [email, password].forEach(clearError);
 
-            const data = await response.json();
+    try {
+        const response = await fetch("http://localhost:5000/login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email: email.value, password: password.value }),
+        });
 
-            if (data.success) {
-                alert("Login successful ✅");
-                window.location.href = "../../Front-end/html/teacher-front.html";
+        const data = await response.json();
+
+        if (data.success) {
+            window.location.href = "../../Front-end/html/teacher-front.html";
+        } else {
+            if (data.field === "email") {
+                showError(email, "Email not found.");
+            } else if (data.field === "password") {
+                showError(password, "Incorrect password.");
             } else {
-                alert(data.message || "Invalid email or password.");
+                alert(data.message || "Invalid credentials.");
             }
-        } catch (error) {
-            console.error(error);
-            alert("Error connecting to server.");
         }
-    } 
-    else if (loginForms.classList.contains('student-active')) {
-        window.location.href = "../../Front-end/html/student-front.html";
+    } catch (error) {
+        console.error(error);
+        alert("Error connecting to server.");
     }
 });
 
