@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     const fileInput = document.getElementById('file');
     const overlay = document.querySelector('.overlay-color');
     const overlapModal = document.querySelector('.overlap');
@@ -44,8 +44,6 @@ document.addEventListener('DOMContentLoaded', () => {
             return `https://source.unsplash.com/512x512/?${encodeURIComponent(keyword)}`;
         }
     }
-
-
 
     fileInput.addEventListener('change', async (e) => {
         const file = e.target.files[0];
@@ -244,4 +242,92 @@ document.addEventListener('DOMContentLoaded', () => {
             alert("Failed to create class. Please try again.");
         }
     });
+
+    
+    // Function to load teacher’s classes
+    async function loadTeacherClasses() {
+        const teacher = JSON.parse(localStorage.getItem("teacher"));
+        if (!teacher || !teacher.id) {
+            console.error("No teacher found in localStorage");
+            return;
+        }
+
+        try {
+            const res = await fetch(`http://localhost:5000/get-classes/${teacher.id}`);
+            const data = await res.json();
+
+            console.log("API response:", data);
+
+            const classes = Array.isArray(data) ? data : data.classes || [];
+
+            // ✅ fix here: use class-list-ul
+            const container = document.getElementById("class-list-ul");
+            container.innerHTML = "";
+
+            classes.forEach(cls => {
+                const li = document.createElement("li");
+                li.classList.add("class-card");
+                li.innerHTML = `
+                    <h3>${cls.name}</h3>
+                    <p>
+                        Class Code: 
+                        <span class="class-code" data-code="${cls.code}">****</span>
+                        <button class="toggle-code" aria-label="Toggle Code Visibility">
+                            <i class="fa fa-eye"></i>
+                        </button>
+                    </p>
+                    <p>Students: <span class="student-count">${cls.no_students}</span></p>
+                `;
+                container.appendChild(li);
+
+                // toggle show/hide class code
+                const toggleBtn = li.querySelector(".toggle-code");
+                const codeSpan = li.querySelector(".class-code");
+                let isHidden = true;
+
+                toggleBtn.addEventListener("click", () => {
+                    if (isHidden) {
+                        codeSpan.textContent = codeSpan.dataset.code;
+                        toggleBtn.innerHTML = `<i class="fa fa-eye-slash"></i>`;
+                    } else {
+                        codeSpan.textContent = "****";
+                        toggleBtn.innerHTML = `<i class="fa fa-eye"></i>`;
+                    }
+                    isHidden = !isHidden;
+                });
+            });
+        } catch (err) {
+            console.error("Error loading classes:", err);
+        }
+    }
+
+
+
+    // Load teacher classes on page load
+    window.addEventListener("DOMContentLoaded", async () => {
+        const teacher = JSON.parse(localStorage.getItem("teacher"));
+        if (teacher) {
+            await loadTeacherClasses(teacher.id);  // pass teacher id
+        } else {
+            console.log("No teacher found in localStorage.");
+        }
+    });
+
+    const socket = io("http://localhost:5000");
+
+    socket.on("student-joined", (data) => {
+        console.log("Student joined class:", data.code);
+        const teacher = JSON.parse(localStorage.getItem("teacher"));
+        if (teacher) {
+            loadTeacherClasses(teacher.id); // ✅ pass teacherId
+        }
+    });
+
+
+    document.getElementById("logout-btn").addEventListener("click", () => {
+        localStorage.removeItem("teacher");
+        window.location.reload();
+        window.location.href = "../../Front-end/html/home-page.html"; // Clear UI
+    });
+
 });

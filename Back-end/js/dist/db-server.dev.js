@@ -12,7 +12,19 @@ var _require = require("pg"),
     Pool = _require.Pool;
 
 var app = express();
-var PORT = 5000; // PostgreSQL connection
+var PORT = 5000;
+
+var http = require("http");
+
+var _require2 = require("socket.io"),
+    Server = _require2.Server;
+
+var server = http.createServer(app);
+var io = new Server(server, {
+  cors: {
+    origin: "*"
+  }
+}); // PostgreSQL connection
 
 var pool = new Pool({
   user: "postgres",
@@ -258,7 +270,7 @@ app.post("/student-login", function _callee4(req, res) {
           student = _context4.sent;
 
           if (!(student.rows.length === 0)) {
-            _context4.next = 16;
+            _context4.next = 17;
             break;
           }
 
@@ -271,15 +283,20 @@ app.post("/student-login", function _callee4(req, res) {
           return regeneratorRuntime.awrap(pool.query("UPDATE class SET no_students = no_students + 1 WHERE code = $1", [code]));
 
         case 16:
+          io.emit("student-joined", {
+            code: code
+          });
+
+        case 17:
           res.json({
             success: true,
             student: student.rows[0]
           });
-          _context4.next = 23;
+          _context4.next = 24;
           break;
 
-        case 19:
-          _context4.prev = 19;
+        case 20:
+          _context4.prev = 20;
           _context4.t0 = _context4["catch"](0);
           console.error("❌ Student login error:", _context4.t0.message);
           res.status(500).json({
@@ -287,13 +304,53 @@ app.post("/student-login", function _callee4(req, res) {
             message: "Student login failed"
           });
 
-        case 23:
+        case 24:
         case "end":
           return _context4.stop();
       }
     }
-  }, null, null, [[0, 19]]);
+  }, null, null, [[0, 20]]);
 });
-app.listen(PORT, function () {
+/**
+ * Get all classes for a teacher
+ */
+
+app.get("/get-classes/:teacher_id", function _callee5(req, res) {
+  var teacher_id, classes;
+  return regeneratorRuntime.async(function _callee5$(_context5) {
+    while (1) {
+      switch (_context5.prev = _context5.next) {
+        case 0:
+          _context5.prev = 0;
+          teacher_id = req.params.teacher_id;
+          _context5.next = 4;
+          return regeneratorRuntime.awrap(pool.query("SELECT * FROM class WHERE teacher_id = $1 ORDER BY code DESC", [teacher_id]));
+
+        case 4:
+          classes = _context5.sent;
+          res.json({
+            success: true,
+            classes: classes.rows
+          });
+          _context5.next = 12;
+          break;
+
+        case 8:
+          _context5.prev = 8;
+          _context5.t0 = _context5["catch"](0);
+          console.error("❌ Error fetching classes:", _context5.t0.message);
+          res.status(500).json({
+            success: false,
+            message: "Failed to fetch classes"
+          });
+
+        case 12:
+        case "end":
+          return _context5.stop();
+      }
+    }
+  }, null, null, [[0, 8]]);
+});
+server.listen(PORT, function () {
   console.log("Server running on http://localhost:".concat(PORT));
 }); //RUN THE SERVER WITH: node Back-end/js/db-server.js

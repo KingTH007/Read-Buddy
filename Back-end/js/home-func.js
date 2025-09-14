@@ -200,6 +200,31 @@ loginSubmit.addEventListener('click', async (e) => {
     }
 });
 
+async function loginTeacher(email, password) {
+    try {
+        const response = await fetch("http://localhost:5000/login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email, password }),
+        });
+
+        const data = await response.json();
+        
+        if (data.success) {
+            // ✅ Save teacher info to localStorage
+            localStorage.setItem("teacher", JSON.stringify(data.teacher));
+
+            // Reload the page or call class loading
+            window.location.reload();
+        } else {
+            alert(data.message);
+        }
+    } catch (err) {
+        console.error("Login error:", err);
+        alert("Login failed. Try again.");
+    }
+}
+
 // SCROLL REVEAL
 const sections = document.querySelectorAll('.second-section');
 const observer = new IntersectionObserver((entries) => {

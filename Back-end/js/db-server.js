@@ -7,6 +7,14 @@ const { Pool } = require("pg");
 const app = express();
 const PORT = 5000;
 
+const http = require("http");
+const { Server } = require("socket.io");
+
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: { origin: "*" }
+});
+
 // PostgreSQL connection
 const pool = new Pool({
   user: "postgres",
@@ -138,6 +146,8 @@ app.post("/student-login", async (req, res) => {
 
       // Update class student count
       await pool.query("UPDATE class SET no_students = no_students + 1 WHERE code = $1", [code]);
+
+      io.emit("student-joined", { code });
     }
 
     res.json({ success: true, student: student.rows[0] });
@@ -148,7 +158,26 @@ app.post("/student-login", async (req, res) => {
   }
 });
 
-app.listen(PORT, () => {
+/**
+ * Get all classes for a teacher
+ */
+app.get("/get-classes/:teacher_id", async (req, res) => {
+  try {
+    const { teacher_id } = req.params;
+    const classes = await pool.query(
+      "SELECT * FROM class WHERE teacher_id = $1 ORDER BY code DESC",
+      [teacher_id]
+    );
+
+    res.json({ success: true, classes: classes.rows });
+  } catch (err) {
+    console.error("❌ Error fetching classes:", err.message);
+    res.status(500).json({ success: false, message: "Failed to fetch classes" });
+  }
+});
+
+
+server.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });
 

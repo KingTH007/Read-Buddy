@@ -284,7 +284,61 @@ loginSubmit.addEventListener('click', function _callee2(e) {
       }
     }
   }, null, null, [[5, 15], [28, 38]]);
-}); // SCROLL REVEAL
+});
+
+function loginTeacher(email, password) {
+  var response, data;
+  return regeneratorRuntime.async(function loginTeacher$(_context3) {
+    while (1) {
+      switch (_context3.prev = _context3.next) {
+        case 0:
+          _context3.prev = 0;
+          _context3.next = 3;
+          return regeneratorRuntime.awrap(fetch("http://localhost:5000/login", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+              email: email,
+              password: password
+            })
+          }));
+
+        case 3:
+          response = _context3.sent;
+          _context3.next = 6;
+          return regeneratorRuntime.awrap(response.json());
+
+        case 6:
+          data = _context3.sent;
+
+          if (data.success) {
+            // ✅ Save teacher info to localStorage
+            localStorage.setItem("teacher", JSON.stringify(data.teacher)); // Reload the page or call class loading
+
+            window.location.reload();
+          } else {
+            alert(data.message);
+          }
+
+          _context3.next = 14;
+          break;
+
+        case 10:
+          _context3.prev = 10;
+          _context3.t0 = _context3["catch"](0);
+          console.error("Login error:", _context3.t0);
+          alert("Login failed. Try again.");
+
+        case 14:
+        case "end":
+          return _context3.stop();
+      }
+    }
+  }, null, null, [[0, 10]]);
+} // SCROLL REVEAL
+
 
 var sections = document.querySelectorAll('.second-section');
 var observer = new IntersectionObserver(function (entries) {
