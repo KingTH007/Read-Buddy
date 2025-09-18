@@ -29,13 +29,14 @@ const io = new Server(server, {
 // 🔹 DATABASE SECTION (PostgreSQL)
 // ===================================================
 const pool = new Pool({
-  user: "postgres",
-  host: "localhost",
-  database: "readbuddyDB",
-  password: "errorsyntax0!",
-  port: 5432,
+  connectionString: process.env.DATABASE_URL,
+  ssl: { rejectUnauthorized: false },
 });
 
+pool.connect()
+  .then(() => console.log("✅ Connected to Supabase Database"))
+  .catch(err => console.error("❌ Database connection error:", err));
+  
 /**
  * Teacher Registration
  */
