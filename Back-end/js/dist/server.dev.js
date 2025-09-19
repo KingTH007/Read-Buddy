@@ -40,11 +40,15 @@ var io = new Server(server, {
 // ===================================================
 
 var pool = new Pool({
-  user: "postgres",
-  host: "localhost",
-  database: "readbuddyDB",
-  password: "errorsyntax0!",
-  port: 5432
+  connectionString: process.env.DATABASE_URL,
+  ssl: {
+    rejectUnauthorized: false
+  }
+});
+pool.connect().then(function () {
+  return console.log("✅ Connected to Supabase Database");
+})["catch"](function (err) {
+  return console.error("❌ Database connection error:", err);
 });
 /**
  * Teacher Registration
