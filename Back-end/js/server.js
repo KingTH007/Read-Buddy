@@ -266,3 +266,5 @@ app.post("/api/generate-questions", async (req, res) => {
 server.listen(PORT, () => {
   console.log(`✅ Server running at http://localhost:${PORT}`);
 });
+
+//  node Back-end/js/server.js

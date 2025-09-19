@@ -323,7 +323,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-
     document.getElementById("logout-btn").addEventListener("click", () => {
         localStorage.removeItem("teacher");
         window.location.reload();
