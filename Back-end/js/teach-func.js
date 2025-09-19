@@ -171,7 +171,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             return;
         }
 
-        // Get teacher ID (assuming you saved it in localStorage after login)
         const teacherData = JSON.parse(localStorage.getItem("teacher"));
         if (!teacherData) {
             alert("Please log in again. Teacher not found.");
@@ -195,7 +194,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (data.success) {
                 alert("Class Created ✅ with Code: " + data.class.code);
 
-                // Create list item
                 const li = document.createElement("li");
                 li.classList.add("class-card");
                 li.innerHTML = `
@@ -210,25 +208,22 @@ document.addEventListener('DOMContentLoaded', async () => {
                     <p>Students: <span class="student-count">${data.class.no_students}</span></p>
                 `;
 
-                // Append to class list
                 classListUl.appendChild(li);
-
-                // Reset form & close modal
                 classNameInput.value = "";
                 classOverlay.style.display = "none";
                 classOverlap.style.display = "none";
 
-                // Add toggle functionality for code
                 const toggleBtn = li.querySelector(".toggle-code");
                 const codeSpan = li.querySelector(".class-code");
                 let isHidden = true;
 
-                toggleBtn.addEventListener("click", () => {
+                toggleBtn.addEventListener("click", (e) => {
+                    e.stopPropagation(); // ✅ prevent triggering openClassView
                     if (isHidden) {
-                        codeSpan.textContent = codeSpan.dataset.code; // show real code
+                        codeSpan.textContent = codeSpan.dataset.code;
                         toggleBtn.innerHTML = `<i class="fa fa-eye-slash"></i>`;
                     } else {
-                        codeSpan.textContent = "****"; // hide as asterisks
+                        codeSpan.textContent = "****";
                         toggleBtn.innerHTML = `<i class="fa fa-eye"></i>`;
                     }
                     isHidden = !isHidden;
@@ -242,7 +237,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             alert("Failed to create class. Please try again.");
         }
     });
-
     
     // Function to load teacher’s classes
     async function loadTeacherClasses() {
@@ -267,6 +261,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             classes.forEach(cls => {
                 const li = document.createElement("li");
                 li.classList.add("class-card");
+
+                // ✅ store classCode and className in dataset
+                li.dataset.classCode = cls.code;
+                li.dataset.className = cls.name;
+
                 li.innerHTML = `
                     <h3>${cls.name}</h3>
                     <p>
@@ -285,7 +284,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const codeSpan = li.querySelector(".class-code");
                 let isHidden = true;
 
-                toggleBtn.addEventListener("click", () => {
+                toggleBtn.addEventListener("click", (e) => {
+                    e.stopPropagation(); // ✅ prevent triggering class view when clicking eye button
                     if (isHidden) {
                         codeSpan.textContent = codeSpan.dataset.code;
                         toggleBtn.innerHTML = `<i class="fa fa-eye-slash"></i>`;
@@ -294,6 +294,16 @@ document.addEventListener('DOMContentLoaded', async () => {
                         toggleBtn.innerHTML = `<i class="fa fa-eye"></i>`;
                     }
                     isHidden = !isHidden;
+                });
+
+                // ✅ add click event for opening class view
+                li.addEventListener("click", () => {
+                    const classCode = parseInt(li.dataset.classCode, 10);
+                    if (!classCode) {
+                        console.error("Class code missing!", li.dataset);
+                        return;
+                    }
+                    openClassView(classCode, li.dataset.className);
                 });
             });
         } catch (err) {
@@ -327,6 +337,93 @@ document.addEventListener('DOMContentLoaded', async () => {
         localStorage.removeItem("teacher");
         window.location.reload();
         window.location.href = "../../Front-end/html/home-page.html"; // Clear UI
+    });
+
+    // Class View Overlay Elements
+    const classViewOverlay = document.querySelector(".class-view-overlay");
+    const classViewModal = document.querySelector(".class-view-modal");
+    const studentList = document.getElementById("student-list");
+    const closeClassViewBtn = document.getElementById("close-class-view");
+    const deleteClassBtn = document.getElementById("delete-class-btn");
+    const classViewTitle = document.getElementById("class-view-title");
+
+    let currentClassCode = null;
+
+    // Function to open class view
+    async function openClassView(classCode, className) {
+        if (!classCode) {
+            console.error("openClassView called without classCode!");
+            return;
+        }
+        currentClassCode = classCode;
+        classViewTitle.textContent = className;
+        studentList.innerHTML = "";
+
+        try {
+            const res = await fetch(`http://localhost:5000/get-students/${classCode}`);
+            const data = await res.json();
+
+            if (!data.students) {
+                console.warn("No students found for class", classCode, data);
+                return;
+            }
+
+            data.students.forEach((student, index) => {
+                const tr = document.createElement("tr");
+                tr.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td>${student.fullname}</td>
+                    <td>
+                        <div class="progress-bar">
+                            <div class="progress-bar-inner" style="width: ${student.progress || 0}%;"></div>
+                        </div>
+                        ${student.progress || 0}%
+                    </td>
+                    <td>
+                        <button class="delete-student" data-id="${student.id}">🗑</button>
+                    </td>
+                `;
+                studentList.appendChild(tr);
+            });
+
+            // Open modal
+            classViewOverlay.style.display = "block";
+            classViewModal.style.display = "block";
+
+            // Attach delete student handlers
+            document.querySelectorAll(".delete-student").forEach(btn => {
+                btn.addEventListener("click", async (e) => {
+                    const studentId = e.target.dataset.id;
+                    if (confirm("Delete this student?")) {
+                        await fetch(`http://localhost:5000/delete-student/${studentId}`, {
+                            method: "DELETE"
+                        });
+                        openClassView(currentClassCode, className); // reload list
+                    }
+                });
+            });
+
+        } catch (err) {
+            console.error("Error fetching students:", err);
+        }
+    }
+
+    // Close modal
+    closeClassViewBtn.addEventListener("click", () => {
+        classViewOverlay.style.display = "none";
+        classViewModal.style.display = "none";
+    });
+
+    // Delete class
+    deleteClassBtn.addEventListener("click", async () => {
+        if (confirm("Are you sure you want to delete this class?")) {
+            await fetch(`http://localhost:5000/delete-class/${currentClassCode}`, {
+                method: "DELETE"
+            });
+            classViewOverlay.style.display = "none";
+            classViewModal.style.display = "none";
+            loadTeacherClasses(); // reload classes
+        }
     });
 
 });

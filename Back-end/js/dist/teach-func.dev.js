@@ -1,11 +1,105 @@
 "use strict";
 
-document.addEventListener('DOMContentLoaded', function _callee5() {
-  var fileInput, overlay, overlapModal, cancelBtn, uploadBtn, imageUrl, generateQuestionsFromContext, generateImageFromKeyword, createClassBtn, classOverlay, classOverlap, cancelBtn1, codeInput, createBtn, classListUl, classNameInput, generateClassCode, loadTeacherClasses, socket;
-  return regeneratorRuntime.async(function _callee5$(_context8) {
+document.addEventListener('DOMContentLoaded', function _callee7() {
+  var fileInput, overlay, overlapModal, cancelBtn, uploadBtn, imageUrl, generateQuestionsFromContext, generateImageFromKeyword, createClassBtn, classOverlay, classOverlap, cancelBtn1, codeInput, createBtn, classListUl, classNameInput, generateClassCode, loadTeacherClasses, socket, classViewOverlay, classViewModal, studentList, closeClassViewBtn, deleteClassBtn, classViewTitle, currentClassCode, openClassView;
+  return regeneratorRuntime.async(function _callee7$(_context11) {
     while (1) {
-      switch (_context8.prev = _context8.next) {
+      switch (_context11.prev = _context11.next) {
         case 0:
+          openClassView = function _ref5(classCode, className) {
+            var res, data;
+            return regeneratorRuntime.async(function openClassView$(_context9) {
+              while (1) {
+                switch (_context9.prev = _context9.next) {
+                  case 0:
+                    if (classCode) {
+                      _context9.next = 3;
+                      break;
+                    }
+
+                    console.error("openClassView called without classCode!");
+                    return _context9.abrupt("return");
+
+                  case 3:
+                    currentClassCode = classCode;
+                    classViewTitle.textContent = className;
+                    studentList.innerHTML = "";
+                    _context9.prev = 6;
+                    _context9.next = 9;
+                    return regeneratorRuntime.awrap(fetch("http://localhost:5000/get-students/".concat(classCode)));
+
+                  case 9:
+                    res = _context9.sent;
+                    _context9.next = 12;
+                    return regeneratorRuntime.awrap(res.json());
+
+                  case 12:
+                    data = _context9.sent;
+
+                    if (data.students) {
+                      _context9.next = 16;
+                      break;
+                    }
+
+                    console.warn("No students found for class", classCode, data);
+                    return _context9.abrupt("return");
+
+                  case 16:
+                    data.students.forEach(function (student, index) {
+                      var tr = document.createElement("tr");
+                      tr.innerHTML = "\n                    <td>".concat(index + 1, "</td>\n                    <td>").concat(student.fullname, "</td>\n                    <td>\n                        <div class=\"progress-bar\">\n                            <div class=\"progress-bar-inner\" style=\"width: ").concat(student.progress || 0, "%;\"></div>\n                        </div>\n                        ").concat(student.progress || 0, "%\n                    </td>\n                    <td>\n                        <button class=\"delete-student\" data-id=\"").concat(student.id, "\">\uD83D\uDDD1</button>\n                    </td>\n                ");
+                      studentList.appendChild(tr);
+                    }); // Open modal
+
+                    classViewOverlay.style.display = "block";
+                    classViewModal.style.display = "block"; // Attach delete student handlers
+
+                    document.querySelectorAll(".delete-student").forEach(function (btn) {
+                      btn.addEventListener("click", function _callee5(e) {
+                        var studentId;
+                        return regeneratorRuntime.async(function _callee5$(_context8) {
+                          while (1) {
+                            switch (_context8.prev = _context8.next) {
+                              case 0:
+                                studentId = e.target.dataset.id;
+
+                                if (!confirm("Delete this student?")) {
+                                  _context8.next = 5;
+                                  break;
+                                }
+
+                                _context8.next = 4;
+                                return regeneratorRuntime.awrap(fetch("http://localhost:5000/delete-student/".concat(studentId), {
+                                  method: "DELETE"
+                                }));
+
+                              case 4:
+                                openClassView(currentClassCode, className); // reload list
+
+                              case 5:
+                              case "end":
+                                return _context8.stop();
+                            }
+                          }
+                        });
+                      });
+                    });
+                    _context9.next = 25;
+                    break;
+
+                  case 22:
+                    _context9.prev = 22;
+                    _context9.t0 = _context9["catch"](6);
+                    console.error("Error fetching students:", _context9.t0);
+
+                  case 25:
+                  case "end":
+                    return _context9.stop();
+                }
+              }
+            }, null, null, [[6, 22]]);
+          };
+
           loadTeacherClasses = function _ref4() {
             var teacher, res, data, classes, container;
             return regeneratorRuntime.async(function loadTeacherClasses$(_context6) {
@@ -41,14 +135,19 @@ document.addEventListener('DOMContentLoaded', function _callee5() {
                     container.innerHTML = "";
                     classes.forEach(function (cls) {
                       var li = document.createElement("li");
-                      li.classList.add("class-card");
+                      li.classList.add("class-card"); // ✅ store classCode and className in dataset
+
+                      li.dataset.classCode = cls.code;
+                      li.dataset.className = cls.name;
                       li.innerHTML = "\n                    <h3>".concat(cls.name, "</h3>\n                    <p>\n                        Class Code: \n                        <span class=\"class-code\" data-code=\"").concat(cls.code, "\">****</span>\n                        <button class=\"toggle-code\" aria-label=\"Toggle Code Visibility\">\n                            <i class=\"fa fa-eye\"></i>\n                        </button>\n                    </p>\n                    <p>Students: <span class=\"student-count\">").concat(cls.no_students, "</span></p>\n                ");
                       container.appendChild(li); // toggle show/hide class code
 
                       var toggleBtn = li.querySelector(".toggle-code");
                       var codeSpan = li.querySelector(".class-code");
                       var isHidden = true;
-                      toggleBtn.addEventListener("click", function () {
+                      toggleBtn.addEventListener("click", function (e) {
+                        e.stopPropagation(); // ✅ prevent triggering class view when clicking eye button
+
                         if (isHidden) {
                           codeSpan.textContent = codeSpan.dataset.code;
                           toggleBtn.innerHTML = "<i class=\"fa fa-eye-slash\"></i>";
@@ -58,6 +157,17 @@ document.addEventListener('DOMContentLoaded', function _callee5() {
                         }
 
                         isHidden = !isHidden;
+                      }); // ✅ add click event for opening class view
+
+                      li.addEventListener("click", function () {
+                        var classCode = parseInt(li.dataset.classCode, 10);
+
+                        if (!classCode) {
+                          console.error("Class code missing!", li.dataset);
+                          return;
+                        }
+
+                        openClassView(classCode, li.dataset.className);
                       });
                     });
                     _context6.next = 21;
@@ -340,7 +450,6 @@ document.addEventListener('DOMContentLoaded', function _callee5() {
                     return _context5.abrupt("return");
 
                   case 5:
-                    // Get teacher ID (assuming you saved it in localStorage after login)
                     teacherData = JSON.parse(localStorage.getItem("teacher"));
 
                     if (teacherData) {
@@ -376,29 +485,25 @@ document.addEventListener('DOMContentLoaded', function _callee5() {
                     data = _context5.sent;
 
                     if (data.success) {
-                      alert("Class Created ✅ with Code: " + data["class"].code); // Create list item
-
+                      alert("Class Created ✅ with Code: " + data["class"].code);
                       li = document.createElement("li");
                       li.classList.add("class-card");
-                      li.innerHTML = "\n                    <h3>".concat(data["class"].name, "</h3>\n                    <p>\n                        Class Code: \n                        <span class=\"class-code\" data-code=\"").concat(data["class"].code, "\">****</span>\n                        <button class=\"toggle-code\" aria-label=\"Toggle Code Visibility\">\n                            <i class=\"fa fa-eye\"></i>\n                        </button>\n                    </p>\n                    <p>Students: <span class=\"student-count\">").concat(data["class"].no_students, "</span></p>\n                "); // Append to class list
-
-                      classListUl.appendChild(li); // Reset form & close modal
-
+                      li.innerHTML = "\n                    <h3>".concat(data["class"].name, "</h3>\n                    <p>\n                        Class Code: \n                        <span class=\"class-code\" data-code=\"").concat(data["class"].code, "\">****</span>\n                        <button class=\"toggle-code\" aria-label=\"Toggle Code Visibility\">\n                            <i class=\"fa fa-eye\"></i>\n                        </button>\n                    </p>\n                    <p>Students: <span class=\"student-count\">").concat(data["class"].no_students, "</span></p>\n                ");
+                      classListUl.appendChild(li);
                       classNameInput.value = "";
                       classOverlay.style.display = "none";
-                      classOverlap.style.display = "none"; // Add toggle functionality for code
-
+                      classOverlap.style.display = "none";
                       toggleBtn = li.querySelector(".toggle-code");
                       codeSpan = li.querySelector(".class-code");
                       isHidden = true;
-                      toggleBtn.addEventListener("click", function () {
-                        if (isHidden) {
-                          codeSpan.textContent = codeSpan.dataset.code; // show real code
+                      toggleBtn.addEventListener("click", function (e) {
+                        e.stopPropagation(); // ✅ prevent triggering openClassView
 
+                        if (isHidden) {
+                          codeSpan.textContent = codeSpan.dataset.code;
                           toggleBtn.innerHTML = "<i class=\"fa fa-eye-slash\"></i>";
                         } else {
-                          codeSpan.textContent = "****"; // hide as asterisks
-
+                          codeSpan.textContent = "****";
                           toggleBtn.innerHTML = "<i class=\"fa fa-eye\"></i>";
                         }
 
@@ -469,11 +574,53 @@ document.addEventListener('DOMContentLoaded', function _callee5() {
             localStorage.removeItem("teacher");
             window.location.reload();
             window.location.href = "../../Front-end/html/home-page.html"; // Clear UI
+          }); // Class View Overlay Elements
+
+          classViewOverlay = document.querySelector(".class-view-overlay");
+          classViewModal = document.querySelector(".class-view-modal");
+          studentList = document.getElementById("student-list");
+          closeClassViewBtn = document.getElementById("close-class-view");
+          deleteClassBtn = document.getElementById("delete-class-btn");
+          classViewTitle = document.getElementById("class-view-title");
+          currentClassCode = null; // Function to open class view
+
+          // Close modal
+          closeClassViewBtn.addEventListener("click", function () {
+            classViewOverlay.style.display = "none";
+            classViewModal.style.display = "none";
+          }); // Delete class
+
+          deleteClassBtn.addEventListener("click", function _callee6() {
+            return regeneratorRuntime.async(function _callee6$(_context10) {
+              while (1) {
+                switch (_context10.prev = _context10.next) {
+                  case 0:
+                    if (!confirm("Are you sure you want to delete this class?")) {
+                      _context10.next = 6;
+                      break;
+                    }
+
+                    _context10.next = 3;
+                    return regeneratorRuntime.awrap(fetch("http://localhost:5000/delete-class/".concat(currentClassCode), {
+                      method: "DELETE"
+                    }));
+
+                  case 3:
+                    classViewOverlay.style.display = "none";
+                    classViewModal.style.display = "none";
+                    loadTeacherClasses(); // reload classes
+
+                  case 6:
+                  case "end":
+                    return _context10.stop();
+                }
+              }
+            });
           });
 
-        case 29:
+        case 39:
         case "end":
-          return _context8.stop();
+          return _context11.stop();
       }
     }
   });

@@ -122,9 +122,30 @@
                     <button class="class-overlap-button" id="class-overlap-create">CREATE</button>
                 </div>
             </div>
+        </div>
 
-            <div class="class-view">
+        <!-- Class View Overlay -->
+        <div class="class-view-overlay"></div>
+
+        <div class="class-view-modal">
+            <div class="class-view-border">
+                <h2 id="class-view-title">CLASS NAME</h2>
+                <button id="delete-class-btn" class="delete-class">🗑 Delete Class</button>
                 
+                <table class="student-table">
+                    <thead>
+                        <tr>
+                            <th>No#</th>
+                            <th>Student Name</th>
+                            <th>Progress</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="student-list">
+                        <!-- Students will be dynamically inserted here -->
+                    </tbody>
+                </table>
+                <button id="close-class-view">Close</button>
             </div>
         </div>
 

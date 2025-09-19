@@ -172,6 +172,65 @@ app.get("/get-classes/:teacher_id", async (req, res) => {
   }
 });
 
+/**
+ * Get students in a class (by class code)
+ */
+app.get("/get-students/:code", async (req, res) => {
+  try {
+    const { code } = req.params;
+
+    const students = await pool.query(
+      "SELECT * FROM students WHERE code = $1 ORDER BY id DESC",
+      [code]
+    );
+
+    res.json({ success: true, students: students.rows });
+  } catch (err) {
+    console.error("❌ Fetch Students Error:", err.message);
+    res.status(500).json({ success: false, message: "Failed to fetch students" });
+  }
+});
+
+/**
+ * Delete a class (by code)
+ */
+app.delete("/delete-class/:code", async (req, res) => {
+  try {
+    const { code } = req.params;
+
+    const deleted = await pool.query("DELETE FROM class WHERE code = $1 RETURNING *", [code]);
+
+    if (deleted.rows.length === 0) {
+      return res.status(404).json({ success: false, message: "Class not found" });
+    }
+
+    res.json({ success: true, class: deleted.rows[0] });
+  } catch (err) {
+    console.error("❌ Delete Class Error:", err.message);
+    res.status(500).json({ success: false, message: "Failed to delete class" });
+  }
+});
+
+/**
+ * Delete a student (by ID)
+ */
+app.delete("/delete-student/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const deleted = await pool.query("DELETE FROM students WHERE id = $1 RETURNING *", [id]);
+
+    if (deleted.rows.length === 0) {
+      return res.status(404).json({ success: false, message: "Student not found" });
+    }
+
+    res.json({ success: true, student: deleted.rows[0] });
+  } catch (err) {
+    console.error("❌ Delete Student Error:", err.message);
+    res.status(500).json({ success: false, message: "Failed to delete student" });
+  }
+});
+
 // ===================================================
 // 🔹 AI SECTION (RapidAPI GPT + Ghibli Image)
 // ===================================================

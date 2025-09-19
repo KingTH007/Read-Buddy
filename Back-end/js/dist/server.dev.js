@@ -362,6 +362,150 @@ app.get("/get-classes/:teacher_id", function _callee5(req, res) {
       }
     }
   }, null, null, [[0, 8]]);
+});
+/**
+ * Get students in a class (by class code)
+ */
+
+app.get("/get-students/:code", function _callee6(req, res) {
+  var code, students;
+  return regeneratorRuntime.async(function _callee6$(_context6) {
+    while (1) {
+      switch (_context6.prev = _context6.next) {
+        case 0:
+          _context6.prev = 0;
+          code = req.params.code;
+          _context6.next = 4;
+          return regeneratorRuntime.awrap(pool.query("SELECT * FROM students WHERE code = $1 ORDER BY id DESC", [code]));
+
+        case 4:
+          students = _context6.sent;
+          res.json({
+            success: true,
+            students: students.rows
+          });
+          _context6.next = 12;
+          break;
+
+        case 8:
+          _context6.prev = 8;
+          _context6.t0 = _context6["catch"](0);
+          console.error("❌ Fetch Students Error:", _context6.t0.message);
+          res.status(500).json({
+            success: false,
+            message: "Failed to fetch students"
+          });
+
+        case 12:
+        case "end":
+          return _context6.stop();
+      }
+    }
+  }, null, null, [[0, 8]]);
+});
+/**
+ * Delete a class (by code)
+ */
+
+app["delete"]("/delete-class/:code", function _callee7(req, res) {
+  var code, deleted;
+  return regeneratorRuntime.async(function _callee7$(_context7) {
+    while (1) {
+      switch (_context7.prev = _context7.next) {
+        case 0:
+          _context7.prev = 0;
+          code = req.params.code;
+          _context7.next = 4;
+          return regeneratorRuntime.awrap(pool.query("DELETE FROM class WHERE code = $1 RETURNING *", [code]));
+
+        case 4:
+          deleted = _context7.sent;
+
+          if (!(deleted.rows.length === 0)) {
+            _context7.next = 7;
+            break;
+          }
+
+          return _context7.abrupt("return", res.status(404).json({
+            success: false,
+            message: "Class not found"
+          }));
+
+        case 7:
+          res.json({
+            success: true,
+            "class": deleted.rows[0]
+          });
+          _context7.next = 14;
+          break;
+
+        case 10:
+          _context7.prev = 10;
+          _context7.t0 = _context7["catch"](0);
+          console.error("❌ Delete Class Error:", _context7.t0.message);
+          res.status(500).json({
+            success: false,
+            message: "Failed to delete class"
+          });
+
+        case 14:
+        case "end":
+          return _context7.stop();
+      }
+    }
+  }, null, null, [[0, 10]]);
+});
+/**
+ * Delete a student (by ID)
+ */
+
+app["delete"]("/delete-student/:id", function _callee8(req, res) {
+  var id, deleted;
+  return regeneratorRuntime.async(function _callee8$(_context8) {
+    while (1) {
+      switch (_context8.prev = _context8.next) {
+        case 0:
+          _context8.prev = 0;
+          id = req.params.id;
+          _context8.next = 4;
+          return regeneratorRuntime.awrap(pool.query("DELETE FROM students WHERE id = $1 RETURNING *", [id]));
+
+        case 4:
+          deleted = _context8.sent;
+
+          if (!(deleted.rows.length === 0)) {
+            _context8.next = 7;
+            break;
+          }
+
+          return _context8.abrupt("return", res.status(404).json({
+            success: false,
+            message: "Student not found"
+          }));
+
+        case 7:
+          res.json({
+            success: true,
+            student: deleted.rows[0]
+          });
+          _context8.next = 14;
+          break;
+
+        case 10:
+          _context8.prev = 10;
+          _context8.t0 = _context8["catch"](0);
+          console.error("❌ Delete Student Error:", _context8.t0.message);
+          res.status(500).json({
+            success: false,
+            message: "Failed to delete student"
+          });
+
+        case 14:
+        case "end":
+          return _context8.stop();
+      }
+    }
+  }, null, null, [[0, 10]]);
 }); // ===================================================
 // 🔹 AI SECTION (RapidAPI GPT + Ghibli Image)
 // ===================================================
@@ -370,25 +514,25 @@ app.get("/get-classes/:teacher_id", function _callee5(req, res) {
  * Generate AI Questions
  */
 
-app.post("/api/generate-questions", function _callee6(req, res) {
+app.post("/api/generate-questions", function _callee9(req, res) {
   var context, url, options, response, data;
-  return regeneratorRuntime.async(function _callee6$(_context6) {
+  return regeneratorRuntime.async(function _callee9$(_context9) {
     while (1) {
-      switch (_context6.prev = _context6.next) {
+      switch (_context9.prev = _context9.next) {
         case 0:
           context = req.body.context;
 
           if (context) {
-            _context6.next = 3;
+            _context9.next = 3;
             break;
           }
 
-          return _context6.abrupt("return", res.status(400).json({
+          return _context9.abrupt("return", res.status(400).json({
             error: "No context provided"
           }));
 
         case 3:
-          _context6.prev = 3;
+          _context9.prev = 3;
           url = "https://chatgpt-42.p.rapidapi.com/gpt4o";
           options = {
             method: "POST",
@@ -405,33 +549,33 @@ app.post("/api/generate-questions", function _callee6(req, res) {
               web_access: false
             })
           };
-          _context6.next = 8;
+          _context9.next = 8;
           return regeneratorRuntime.awrap(fetch(url, options));
 
         case 8:
-          response = _context6.sent;
-          _context6.next = 11;
+          response = _context9.sent;
+          _context9.next = 11;
           return regeneratorRuntime.awrap(response.json());
 
         case 11:
-          data = _context6.sent;
+          data = _context9.sent;
           res.json({
             questions: data.result || ["No questions generated"]
           });
-          _context6.next = 19;
+          _context9.next = 19;
           break;
 
         case 15:
-          _context6.prev = 15;
-          _context6.t0 = _context6["catch"](3);
-          console.error("❌ AI Question Error:", _context6.t0);
+          _context9.prev = 15;
+          _context9.t0 = _context9["catch"](3);
+          console.error("❌ AI Question Error:", _context9.t0);
           res.status(500).json({
             error: "Failed to generate questions"
           });
 
         case 19:
         case "end":
-          return _context6.stop();
+          return _context9.stop();
       }
     }
   }, null, null, [[3, 15]]);
@@ -479,4 +623,4 @@ app.post("/api/generate-questions", function _callee6(req, res) {
 
 server.listen(PORT, function () {
   console.log("\u2705 Server running at http://localhost:".concat(PORT));
-});
+}); //  node Back-end/js/server.js
