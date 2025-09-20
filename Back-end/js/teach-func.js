@@ -33,12 +33,23 @@ document.addEventListener('DOMContentLoaded', async () => {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    image_url: "https://source.unsplash.com/512x512/?cat" // example
+                    prompt: `illustrate a image about ${keyword}`,
+                    size: "1-1",
+                    refImage: "https://pub-static.aiease.ai/ai-storage/2025/09/02/dd9808737f694e25bb3f380508ad262f.jpeg"
                 }),
             });
 
             const data = await response.json();
-            console.log("AI Image Generated:", data.generatedImage);
+            console.log("AI Image Generated:", data);
+
+            // ✅ extract the actual image URL
+            if (data.generatedImage) {
+                const parsed = JSON.parse(data.generatedImage);
+                const url = parsed?.result?.data?.results?.[0]?.origin;
+                return url || `https://source.unsplash.com/512x512/?${encodeURIComponent(keyword)}`;
+            }
+
+            return `https://source.unsplash.com/512x512/?${encodeURIComponent(keyword)}`;
         } catch (error) {
             console.error("Error generating image:", error);
             return `https://source.unsplash.com/512x512/?${encodeURIComponent(keyword)}`;
@@ -73,7 +84,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 titleGuess = titleGuess.split(" ").slice(0, 8).join(" ");
 
                 // Generate placeholder image based on first keyword
-                const keyword = titleGuess.split(" ")[0] || "story";
+                const keyword = fullText.split(" ")[0] || "story";
                 imageUrl = await generateImageFromKeyword(keyword);
 
                 // Fill the modal with defaults
@@ -82,7 +93,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 document.querySelector(".over-img img").src = imageUrl;
 
                 const questions = await generateQuestionsFromContext(fullText.trim());
-                document.getElementById("questions").value = questions;
+                document.getElementById("questions").value = Array.isArray(questions) ? questions.join("\n\n") : questions;
+
             };
 
             fileReader.readAsArrayBuffer(file);
@@ -333,11 +345,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-    document.getElementById("logout-btn").addEventListener("click", () => {
-        localStorage.removeItem("teacher");
-        window.location.reload();
-        window.location.href = "../../Front-end/html/home-page.html"; // Clear UI
-    });
+    const logoutBtn = document.getElementById("logout-btn");
+    if (logoutBtn) {
+        logoutBtn.addEventListener("click", () => {
+            localStorage.removeItem("teacher");
+            window.location.href = "../../Front-end/html/home-page.html";
+        });
+    }
+
 
     // Class View Overlay Elements
     const classViewOverlay = document.querySelector(".class-view-overlay");
@@ -375,9 +390,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                     <td>${student.fullname}</td>
                     <td>
                         <div class="progress-bar">
-                            <div class="progress-bar-inner" style="width: ${student.progress || 0}%;"></div>
+                            <div class="progress-bar-inner" style="width: ${student.progress || 0}%;">
+                                <span class="progress-text">${student.progress || 0}%</span>
+                            </div>
                         </div>
-                        ${student.progress || 0}%
                     </td>
                     <td>
                         <button class="delete-student" data-id="${student.id}">🗑</button>

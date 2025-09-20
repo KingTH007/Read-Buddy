@@ -286,39 +286,45 @@ app.post("/api/generate-questions", async (req, res) => {
 /**
  * Generate AI Image
  */
-/*app.post("/api/generate-image", async (req, res) => {
-  const { image_url } = req.body;
-  if (!image_url) return res.status(400).json({ error: "No image_url provided" });
+app.post("/api/generate-image", async (req, res) => {
+    const { prompt, size = "1-1", refImage = "" } = req.body;
 
-  try {
-    const url = "https://ghibli-studio-ai.p.rapidapi.com/bot.php";
-    const options = {
-      method: "POST",
-      headers: {
-        "x-rapidapi-key": process.env.RAPIDAPI_KEY,
-        "x-rapidapi-host": "ghibli-studio-ai.p.rapidapi.com",
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ image_url }),
-    };
+    if (!prompt) return res.status(400).json({ error: "No prompt provided" });
 
-    const response = await fetch(url, options);
+    try {
+        const url = 'https://ghibli-image-generator-api-open-ai-4o-image-generation-free.p.rapidapi.com/generateghibliimage.php';
+        const options = {
+            method: 'POST',
+            headers: {
+                'x-rapidapi-key': process.env.RAPIDAPI_KEY || '1098f4e1fbmsha80729b29b72a9ep12b064jsn104e5f142388',
+                'x-rapidapi-host': 'ghibli-image-generator-api-open-ai-4o-image-generation-free.p.rapidapi.com',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                prompt,
+                size,
+                refImage,
+                refWeight: 1
+            })
+        };
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error("❌ Ghibli API Response Error:", errorText);
-      return res.status(500).json({ error: "Failed to generate image", details: errorText });
+        const response = await fetch(url, options);
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error("❌ Image API Response Error:", errorText);
+            return res.status(500).json({ error: "Failed to generate image", details: errorText });
+        }
+
+        const result = await response.text(); // API returns text
+        console.log("✅ AI Image Response:", result);
+
+        res.json({ generatedImage: result });
+    } catch (error) {
+        console.error("❌ AI Image Error:", error);
+        res.status(500).json({ error: "Failed to generate image", details: error.message });
     }
-
-    const result = await response.text(); // API returns text, not JSON
-    console.log("✅ AI Image Response:", result);
-
-    res.json({ generatedImage: result });
-  } catch (error) {
-    console.error("❌ AI Image Error:", error);
-    res.status(500).json({ error: "Failed to generate image", details: error.message });
-  }
-});*/
+});
 
 // ===================================================
 // START SERVER

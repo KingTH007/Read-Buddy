@@ -128,26 +128,29 @@
         <div class="class-view-overlay"></div>
 
         <div class="class-view-modal">
-            <div class="class-view-border">
+            <button id="close-class-view" class="close-btn">✖</button> 
+            <div class="class-view-header">
                 <h2 id="class-view-title">CLASS NAME</h2>
-                <button id="delete-class-btn" class="delete-class">🗑 Delete Class</button>
-                
-                <table class="student-table">
-                    <thead>
-                        <tr>
-                            <th>No#</th>
-                            <th>Student Name</th>
-                            <th>Progress</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody id="student-list">
-                        <!-- Students will be dynamically inserted here -->
-                    </tbody>
-                </table>
-                <button id="close-class-view">Close</button>
+                <div class="class-view-controls">
+                    <input type="text" id="student-search" placeholder="🔍 Search student..." />
+                </div>
             </div>
+
+            <table class="student-table">
+                <thead>
+                    <tr>
+                        <th>No#</th>
+                        <th>Student Name</th>
+                        <th>Progress</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody id="student-list">
+                    <!-- Students will be dynamically inserted here -->
+                </tbody>
+            </table>
         </div>
+
 
 
     </main>

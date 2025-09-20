@@ -428,7 +428,7 @@ main {
   background: #d8431c;
 }
 
-/* Class View Section */
+/* Overlay */
 .class-view-overlay {
     display: none;
     position: fixed;
@@ -438,44 +438,154 @@ main {
     z-index: 900;
 }
 
+/* Modal */
 .class-view-modal {
     display: none;
     position: fixed;
     top: 50%; left: 50%;
     transform: translate(-50%, -50%);
-    background: white;
-    padding: 20px;
-    border-radius: 12px;
-    width: 70%;
+    background: #fff;
+    border-radius: 16px;
+    width: 80%;
+    height: 80%;
+    padding: 25px;
     z-index: 1000;
-    max-height: 80%;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.2);
     overflow-y: auto;
 }
 
+/* Close button (absolute top-right) */
+.close-btn {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: transparent;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #444;
+    transition: 0.2s;
+}
+
+.close-btn:hover {
+    color: red;
+}
+
+/* Header */
+.class-view-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 40px;
+    margin-bottom: 15px;
+    border-bottom: 2px solid #eee;
+    padding-bottom: 10px;
+}
+
+.class-view-header h2 {
+    font-size: 28px;
+    font-weight: bold;
+    color: #00bfff;
+    text-transform: uppercase;
+    margin: 0;
+}
+
+/* Controls (Search + Close) */
+.class-view-controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+#student-search {
+    padding: 8px 15px;
+    border-radius: 20px;
+    border: 1px solid #ddd;
+    outline: none;
+    font-size: 14px;
+}
+
+#student-search:focus {
+    border-color: #00bfff;
+}
+
+/* Table */
 .student-table {
     width: 100%;
-    border-collapse: collapse;
-    margin-top: 15px;
+    border-collapse: separate;
+    border-spacing: 0 12px; /* spacing between rows */
+    margin-top: 10px;
 }
 
-.student-table th, .student-table td {
-    padding: 10px;
+.student-table thead th {
     text-align: left;
-    border-bottom: 1px solid #ddd;
+    padding: 10px;
+    font-weight: bold;
+    border-bottom: 2px solid #ddd;
 }
 
+.student-table tbody tr {
+    background: #f9fbff;
+    border-radius: 12px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    transition: transform 0.2s;
+}
+
+.student-table tbody tr:hover {
+    transform: translateY(-3px);
+}
+
+.student-table td {
+    padding: 12px 15px;
+    vertical-align: middle;
+}
+
+/* Progress Bar */
 .progress-bar {
-    width: 100px;
-    height: 10px;
+    width: 250px;
+    height: 20px;
     background: #eee;
-    border-radius: 8px;
+    border-radius: 10px;
     overflow: hidden;
+    position: relative;
 }
 
 .progress-bar-inner {
     height: 100%;
-    background: #00bfff;
-    width: 0;
+    background: linear-gradient(90deg, #00bfff, #87ceeb);
+    border-radius: 10px;
+    display: flex;
+    justify-content: flex-end;  /* push text to right */
+    align-items: center;
+    padding-right: 5px;         /* spacing from edge */
+    color: #fff;
+    font-size: 12px;
+    font-weight: bold;
+    white-space: nowrap;
+    transition: width 0.4s ease;
+}
+
+.progress-text {
+    position: relative;
+    z-index: 1; /* stays visible on top */
+}
+
+.student-table td:last-child {
+    text-align: center;
+}
+
+/* Delete Button */
+.delete-student {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 18px;
+    color: red;
+    transition: 0.2s;
+}
+
+.delete-student:hover {
+    transform: scale(1.2);
 }
 
 
