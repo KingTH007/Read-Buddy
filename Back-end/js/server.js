@@ -231,6 +231,42 @@ app.delete("/delete-student/:id", async (req, res) => {
   }
 });
 
+// Save uploaded story (keep or replace your existing)
+app.post("/save-story", async (req, res) => {
+  try {
+      const { teach_id, storyname, storycontent, storyquest, storyimage } = req.body;
+
+    const result = await pool.query(
+      `INSERT INTO teach_story (teach_id, storyname, storycontent, storyquest, storyimage) 
+       VALUES ($1, $2, $3, $4, $5) RETURNING *`,
+      [teach_id, storyname, storycontent, storyquest, storyimage]
+    );
+
+    res.json({ success: true, story: result.rows[0] });
+  } catch (err) {
+    console.error("❌ Error saving story:", err);
+    res.status(500).json({ success: false, message: err.message || "Failed to save story" });
+  }
+});
+
+// Get all stories for a specific teacher
+app.get("/get-stories/:teacherId", async (req, res) => {
+  const { teacherId } = req.params;
+
+  try {
+    const result = await pool.query(
+      "SELECT * FROM teach_story WHERE teach_id = $1 ORDER BY story_id DESC",
+      [teacherId]
+    );
+
+    res.json({ success: true, stories: result.rows });
+  } catch (err) {
+    console.error("❌ Error fetching stories:", err);
+    res.status(500).json({ success: false, message: "Failed to fetch stories" });
+  }
+});
+
+
 // ===================================================
 // 🔹 AI SECTION (RapidAPI GPT + Ghibli Image)
 // ===================================================

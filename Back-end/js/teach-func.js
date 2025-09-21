@@ -105,33 +105,98 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     // Upload button handler (reads updated values)
-    uploadBtn.addEventListener('click', () => {
+    uploadBtn.addEventListener('click', async () => {
         const editedTitle = document.getElementById("title").value;
         const editedContext = document.getElementById("context").value;
+        const editedQuestions = document.getElementById("questions").value;
 
-        // Create new story card
-        const newStory = document.createElement("div");
-        newStory.classList.add("story", "show");
+        const teacher = JSON.parse(localStorage.getItem("teacher"));
+        if (!teacher || !teacher.id) {
+            alert("Please log in again. Teacher not found.");
+            return;
+        }
 
-        newStory.innerHTML = `
-            <div class="story-image">
-                <img src="${imageUrl}" alt="Story Image" />
-            </div>
-            <p>${editedTitle}</p>
-            <button class="button">Read Now</button>
-        `;
+        try {
+            const response = await fetch("http://localhost:5000/save-story", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    teach_id: teacher.id,
+                    storyname: editedTitle,
+                    storycontent: editedContext,
+                    storyquest: editedQuestions,
+                    storyimage: imageUrl
+                }),
+            });
 
-        // Append to the activity card container
-        document.querySelector(".act-card").appendChild(newStory);
+            const data = await response.json();
+            if (data.success) {
+                console.log("✅ Story saved to DB:", data.story);
 
-        // Optionally log the full context in console
-        console.log("Uploaded Story:", { title: editedTitle, context: editedContext });
+                // Create new story card
+                const newStory = document.createElement("div");
+                newStory.classList.add("story", "show");
+                newStory.innerHTML = `
+                    <div class="story-image">
+                        <img src="${imageUrl}" alt="Story Image" />
+                    </div>
+                    <p>${editedTitle}</p>
+                    <button class="button">Read Now</button>
+                `;
+                document.querySelector(".act-card").appendChild(newStory);
 
-        // Hide modal
-        overlay.style.display = "none";
-        overlapModal.style.display = "none";
+                await loadStories();
+
+                // Hide modal
+                overlay.style.display = "none";
+                overlapModal.style.display = "none";
+            } else {
+                alert("Error: " + data.message);
+            }
+        } catch (err) {
+            console.error("❌ Error uploading story:", err);
+            alert("Failed to save story.");
+        }
     });
 
+    // Load all stories for logged-in teacher on page load
+    async function loadStories() {
+        const teacher = JSON.parse(localStorage.getItem("teacher"));
+        if (!teacher || !teacher.id) {
+            console.warn("No teacher found in localStorage");
+            return;
+        }
+
+        try {
+            const response = await fetch(`http://localhost:5000/get-stories/${teacher.id}`);
+            const data = await response.json();
+
+            if (data.success) {
+                const container = document.querySelector(".act-card");
+
+                // ✅ Remove only old story elements, NOT the upload div
+                container.querySelectorAll(".story").forEach(storyEl => storyEl.remove());
+
+                // ✅ Append the stories
+                data.stories.forEach(story => {
+                    const storyDiv = document.createElement("div");
+                    storyDiv.classList.add("story", "show");
+                    storyDiv.innerHTML = `
+                        <div class="story-image">
+                            <img src="${story.storyimage}" alt="Story Image" />
+                        </div>
+                        <p>${story.storyname}</p>
+                        <button class="button">Read Now</button>
+                    `;
+                    container.appendChild(storyDiv);
+                });
+            } else {
+                console.error("Failed to fetch stories:", data.message);
+            }
+        } catch (err) {
+            console.error("❌ Error loading stories:", err);
+        }
+    }
 
     cancelBtn.addEventListener('click', () => {
         overlay.style.display = "none";
@@ -325,11 +390,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 
 
-    // Load teacher classes on page load
+    // 🔹 Auto-load stories after login/reload
     window.addEventListener("DOMContentLoaded", async () => {
         const teacher = JSON.parse(localStorage.getItem("teacher"));
         if (teacher) {
-            await loadTeacherClasses(teacher.id);  // pass teacher id
+            await loadStories(); // autoload stories
+            await loadTeacherClasses(teacher.id); // also autoload classes
         } else {
             console.log("No teacher found in localStorage.");
         }
