@@ -506,6 +506,118 @@ app["delete"]("/delete-student/:id", function _callee8(req, res) {
       }
     }
   }, null, null, [[0, 10]]);
+}); // Save uploaded story (keep or replace your existing)
+
+app.post("/save-story", function _callee9(req, res) {
+  var _req$body5, teach_id, storyname, storycontent, storyquest, storyimage, result;
+
+  return regeneratorRuntime.async(function _callee9$(_context9) {
+    while (1) {
+      switch (_context9.prev = _context9.next) {
+        case 0:
+          _context9.prev = 0;
+          _req$body5 = req.body, teach_id = _req$body5.teach_id, storyname = _req$body5.storyname, storycontent = _req$body5.storycontent, storyquest = _req$body5.storyquest, storyimage = _req$body5.storyimage;
+          _context9.next = 4;
+          return regeneratorRuntime.awrap(pool.query("INSERT INTO teach_story (teach_id, storyname, storycontent, storyquest, storyimage) \n       VALUES ($1, $2, $3, $4, $5) RETURNING *", [teach_id, storyname, storycontent, storyquest, storyimage]));
+
+        case 4:
+          result = _context9.sent;
+          res.json({
+            success: true,
+            story: result.rows[0]
+          });
+          _context9.next = 12;
+          break;
+
+        case 8:
+          _context9.prev = 8;
+          _context9.t0 = _context9["catch"](0);
+          console.error("❌ Error saving story:", _context9.t0);
+          res.status(500).json({
+            success: false,
+            message: _context9.t0.message || "Failed to save story"
+          });
+
+        case 12:
+        case "end":
+          return _context9.stop();
+      }
+    }
+  }, null, null, [[0, 8]]);
+}); // Get all stories for a specific teacher
+
+app.get("/get-stories/:teacherId", function _callee10(req, res) {
+  var teacherId, result;
+  return regeneratorRuntime.async(function _callee10$(_context10) {
+    while (1) {
+      switch (_context10.prev = _context10.next) {
+        case 0:
+          teacherId = req.params.teacherId;
+          _context10.prev = 1;
+          _context10.next = 4;
+          return regeneratorRuntime.awrap(pool.query("SELECT * FROM teach_story WHERE teach_id = $1 ORDER BY story_id DESC", [teacherId]));
+
+        case 4:
+          result = _context10.sent;
+          res.json({
+            success: true,
+            stories: result.rows
+          });
+          _context10.next = 12;
+          break;
+
+        case 8:
+          _context10.prev = 8;
+          _context10.t0 = _context10["catch"](1);
+          console.error("❌ Error fetching stories:", _context10.t0);
+          res.status(500).json({
+            success: false,
+            message: "Failed to fetch stories"
+          });
+
+        case 12:
+        case "end":
+          return _context10.stop();
+      }
+    }
+  }, null, null, [[1, 8]]);
+}); // Get stories for a student
+
+app.get("/get-student-stories/:studentId", function _callee11(req, res) {
+  var studentId, result;
+  return regeneratorRuntime.async(function _callee11$(_context11) {
+    while (1) {
+      switch (_context11.prev = _context11.next) {
+        case 0:
+          studentId = req.params.studentId;
+          _context11.prev = 1;
+          _context11.next = 4;
+          return regeneratorRuntime.awrap(pool.query("SELECT ts.story_id, ts.storyname, ts.storycontent, ts.storyquest, ts.storyimage\n             FROM students s\n             JOIN class c ON s.code = c.code\n             JOIN teachers t ON c.teacher_id = t.id\n             JOIN teach_story ts ON ts.teach_id = t.id\n             WHERE s.id = $1", [studentId]));
+
+        case 4:
+          result = _context11.sent;
+          res.json({
+            success: true,
+            stories: result.rows
+          });
+          _context11.next = 12;
+          break;
+
+        case 8:
+          _context11.prev = 8;
+          _context11.t0 = _context11["catch"](1);
+          console.error("❌ Error fetching student stories:", _context11.t0);
+          res.json({
+            success: false,
+            message: "Database error"
+          });
+
+        case 12:
+        case "end":
+          return _context11.stop();
+      }
+    }
+  }, null, null, [[1, 8]]);
 }); // ===================================================
 // 🔹 AI SECTION (RapidAPI GPT + Ghibli Image)
 // ===================================================
@@ -514,25 +626,25 @@ app["delete"]("/delete-student/:id", function _callee8(req, res) {
  * Generate AI Questions
  */
 
-app.post("/api/generate-questions", function _callee9(req, res) {
+app.post("/api/generate-questions", function _callee12(req, res) {
   var context, url, options, response, data;
-  return regeneratorRuntime.async(function _callee9$(_context9) {
+  return regeneratorRuntime.async(function _callee12$(_context12) {
     while (1) {
-      switch (_context9.prev = _context9.next) {
+      switch (_context12.prev = _context12.next) {
         case 0:
           context = req.body.context;
 
           if (context) {
-            _context9.next = 3;
+            _context12.next = 3;
             break;
           }
 
-          return _context9.abrupt("return", res.status(400).json({
+          return _context12.abrupt("return", res.status(400).json({
             error: "No context provided"
           }));
 
         case 3:
-          _context9.prev = 3;
+          _context12.prev = 3;
           url = "https://chatgpt-42.p.rapidapi.com/gpt4o";
           options = {
             method: "POST",
@@ -549,33 +661,33 @@ app.post("/api/generate-questions", function _callee9(req, res) {
               web_access: false
             })
           };
-          _context9.next = 8;
+          _context12.next = 8;
           return regeneratorRuntime.awrap(fetch(url, options));
 
         case 8:
-          response = _context9.sent;
-          _context9.next = 11;
+          response = _context12.sent;
+          _context12.next = 11;
           return regeneratorRuntime.awrap(response.json());
 
         case 11:
-          data = _context9.sent;
+          data = _context12.sent;
           res.json({
             questions: data.result || ["No questions generated"]
           });
-          _context9.next = 19;
+          _context12.next = 19;
           break;
 
         case 15:
-          _context9.prev = 15;
-          _context9.t0 = _context9["catch"](3);
-          console.error("❌ AI Question Error:", _context9.t0);
+          _context12.prev = 15;
+          _context12.t0 = _context12["catch"](3);
+          console.error("❌ AI Question Error:", _context12.t0);
           res.status(500).json({
             error: "Failed to generate questions"
           });
 
         case 19:
         case "end":
-          return _context9.stop();
+          return _context12.stop();
       }
     }
   }, null, null, [[3, 15]]);
@@ -584,40 +696,93 @@ app.post("/api/generate-questions", function _callee9(req, res) {
  * Generate AI Image
  */
 
-/*app.post("/api/generate-image", async (req, res) => {
-  const { image_url } = req.body;
-  if (!image_url) return res.status(400).json({ error: "No image_url provided" });
+app.post("/api/generate-image", function _callee13(req, res) {
+  var _req$body6, prompt, _req$body6$size, size, _req$body6$refImage, refImage, url, options, response, errorText, result;
 
-  try {
-    const url = "https://ghibli-studio-ai.p.rapidapi.com/bot.php";
-    const options = {
-      method: "POST",
-      headers: {
-        "x-rapidapi-key": process.env.RAPIDAPI_KEY,
-        "x-rapidapi-host": "ghibli-studio-ai.p.rapidapi.com",
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ image_url }),
-    };
+  return regeneratorRuntime.async(function _callee13$(_context13) {
+    while (1) {
+      switch (_context13.prev = _context13.next) {
+        case 0:
+          _req$body6 = req.body, prompt = _req$body6.prompt, _req$body6$size = _req$body6.size, size = _req$body6$size === void 0 ? "1-1" : _req$body6$size, _req$body6$refImage = _req$body6.refImage, refImage = _req$body6$refImage === void 0 ? "" : _req$body6$refImage;
 
-    const response = await fetch(url, options);
+          if (prompt) {
+            _context13.next = 3;
+            break;
+          }
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error("❌ Ghibli API Response Error:", errorText);
-      return res.status(500).json({ error: "Failed to generate image", details: errorText });
+          return _context13.abrupt("return", res.status(400).json({
+            error: "No prompt provided"
+          }));
+
+        case 3:
+          _context13.prev = 3;
+          url = 'https://ghibli-image-generator-api-open-ai-4o-image-generation-free.p.rapidapi.com/generateghibliimage.php';
+          options = {
+            method: 'POST',
+            headers: {
+              'x-rapidapi-key': process.env.RAPIDAPI_KEY || '1098f4e1fbmsha80729b29b72a9ep12b064jsn104e5f142388',
+              'x-rapidapi-host': 'ghibli-image-generator-api-open-ai-4o-image-generation-free.p.rapidapi.com',
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              prompt: prompt,
+              size: size,
+              refImage: refImage,
+              refWeight: 1
+            })
+          };
+          _context13.next = 8;
+          return regeneratorRuntime.awrap(fetch(url, options));
+
+        case 8:
+          response = _context13.sent;
+
+          if (response.ok) {
+            _context13.next = 15;
+            break;
+          }
+
+          _context13.next = 12;
+          return regeneratorRuntime.awrap(response.text());
+
+        case 12:
+          errorText = _context13.sent;
+          console.error("❌ Image API Response Error:", errorText);
+          return _context13.abrupt("return", res.status(500).json({
+            error: "Failed to generate image",
+            details: errorText
+          }));
+
+        case 15:
+          _context13.next = 17;
+          return regeneratorRuntime.awrap(response.text());
+
+        case 17:
+          result = _context13.sent;
+          // API returns text
+          console.log("✅ AI Image Response:", result);
+          res.json({
+            generatedImage: result
+          });
+          _context13.next = 26;
+          break;
+
+        case 22:
+          _context13.prev = 22;
+          _context13.t0 = _context13["catch"](3);
+          console.error("❌ AI Image Error:", _context13.t0);
+          res.status(500).json({
+            error: "Failed to generate image",
+            details: _context13.t0.message
+          });
+
+        case 26:
+        case "end":
+          return _context13.stop();
+      }
     }
-
-    const result = await response.text(); // API returns text, not JSON
-    console.log("✅ AI Image Response:", result);
-
-    res.json({ generatedImage: result });
-  } catch (error) {
-    console.error("❌ AI Image Error:", error);
-    res.status(500).json({ error: "Failed to generate image", details: error.message });
-  }
-});*/
-// ===================================================
+  }, null, null, [[3, 22]]);
+}); // ===================================================
 // START SERVER
 // ===================================================
 

@@ -266,6 +266,26 @@ app.get("/get-stories/:teacherId", async (req, res) => {
   }
 });
 
+// Get stories for a student
+app.get("/get-student-stories/:studentId", async (req, res) => {
+    const { studentId } = req.params;
+    try {
+        const result = await pool.query(
+            `SELECT ts.story_id, ts.storyname, ts.storycontent, ts.storyquest, ts.storyimage
+             FROM students s
+             JOIN class c ON s.code = c.code
+             JOIN teachers t ON c.teacher_id = t.id
+             JOIN teach_story ts ON ts.teach_id = t.id
+             WHERE s.id = $1`,
+            [studentId]
+        );
+
+        res.json({ success: true, stories: result.rows });
+    } catch (err) {
+        console.error("❌ Error fetching student stories:", err);
+        res.json({ success: false, message: "Database error" });
+    }
+});
 
 // ===================================================
 // 🔹 AI SECTION (RapidAPI GPT + Ghibli Image)
