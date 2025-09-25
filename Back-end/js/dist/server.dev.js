@@ -618,6 +618,91 @@ app.get("/get-student-stories/:studentId", function _callee11(req, res) {
       }
     }
   }, null, null, [[1, 8]]);
+}); // Get single story by ID
+
+app.get("/get-story/:id", function _callee12(req, res) {
+  var id, result;
+  return regeneratorRuntime.async(function _callee12$(_context12) {
+    while (1) {
+      switch (_context12.prev = _context12.next) {
+        case 0:
+          id = req.params.id;
+          _context12.prev = 1;
+          _context12.next = 4;
+          return regeneratorRuntime.awrap(pool.query("SELECT * FROM teach_story WHERE story_id = $1", [id]));
+
+        case 4:
+          result = _context12.sent;
+
+          if (!(result.rows.length === 0)) {
+            _context12.next = 7;
+            break;
+          }
+
+          return _context12.abrupt("return", res.status(404).json({
+            success: false,
+            message: "Story not found"
+          }));
+
+        case 7:
+          res.json({
+            success: true,
+            story: result.rows[0]
+          });
+          _context12.next = 14;
+          break;
+
+        case 10:
+          _context12.prev = 10;
+          _context12.t0 = _context12["catch"](1);
+          console.error("❌ Error fetching story:", _context12.t0);
+          res.status(500).json({
+            success: false,
+            message: "Database error"
+          });
+
+        case 14:
+        case "end":
+          return _context12.stop();
+      }
+    }
+  }, null, null, [[1, 10]]);
+}); // Get all story titles only
+
+app.get("/get-stories", function _callee13(req, res) {
+  var result;
+  return regeneratorRuntime.async(function _callee13$(_context13) {
+    while (1) {
+      switch (_context13.prev = _context13.next) {
+        case 0:
+          _context13.prev = 0;
+          _context13.next = 3;
+          return regeneratorRuntime.awrap(pool.query("SELECT story_id AS id, storyname FROM teach_story ORDER BY story_id DESC"));
+
+        case 3:
+          result = _context13.sent;
+          res.json({
+            success: true,
+            stories: result.rows
+          });
+          _context13.next = 11;
+          break;
+
+        case 7:
+          _context13.prev = 7;
+          _context13.t0 = _context13["catch"](0);
+          console.error("❌ Error fetching stories:", _context13.t0.message);
+          res.status(500).json({
+            success: false,
+            message: "Failed to fetch stories"
+          });
+
+        case 11:
+        case "end":
+          return _context13.stop();
+      }
+    }
+  }, null, null, [[0, 7]]);
 }); // ===================================================
 // 🔹 AI SECTION (RapidAPI GPT + Ghibli Image)
 // ===================================================
@@ -626,25 +711,25 @@ app.get("/get-student-stories/:studentId", function _callee11(req, res) {
  * Generate AI Questions
  */
 
-app.post("/api/generate-questions", function _callee12(req, res) {
+app.post("/api/generate-questions", function _callee14(req, res) {
   var context, url, options, response, data;
-  return regeneratorRuntime.async(function _callee12$(_context12) {
+  return regeneratorRuntime.async(function _callee14$(_context14) {
     while (1) {
-      switch (_context12.prev = _context12.next) {
+      switch (_context14.prev = _context14.next) {
         case 0:
           context = req.body.context;
 
           if (context) {
-            _context12.next = 3;
+            _context14.next = 3;
             break;
           }
 
-          return _context12.abrupt("return", res.status(400).json({
+          return _context14.abrupt("return", res.status(400).json({
             error: "No context provided"
           }));
 
         case 3:
-          _context12.prev = 3;
+          _context14.prev = 3;
           url = "https://chatgpt-42.p.rapidapi.com/gpt4o";
           options = {
             method: "POST",
@@ -661,61 +746,98 @@ app.post("/api/generate-questions", function _callee12(req, res) {
               web_access: false
             })
           };
-          _context12.next = 8;
+          _context14.next = 8;
           return regeneratorRuntime.awrap(fetch(url, options));
 
         case 8:
-          response = _context12.sent;
-          _context12.next = 11;
+          response = _context14.sent;
+          _context14.next = 11;
           return regeneratorRuntime.awrap(response.json());
 
         case 11:
-          data = _context12.sent;
+          data = _context14.sent;
           res.json({
             questions: data.result || ["No questions generated"]
           });
-          _context12.next = 19;
+          _context14.next = 19;
           break;
 
         case 15:
-          _context12.prev = 15;
-          _context12.t0 = _context12["catch"](3);
-          console.error("❌ AI Question Error:", _context12.t0);
+          _context14.prev = 15;
+          _context14.t0 = _context14["catch"](3);
+          console.error("❌ AI Question Error:", _context14.t0);
           res.status(500).json({
             error: "Failed to generate questions"
           });
 
         case 19:
         case "end":
-          return _context12.stop();
+          return _context14.stop();
       }
     }
   }, null, null, [[3, 15]]);
 });
+/*
+// AI endpoint to format story text
+app.post("/api/format-story", async (req, res) => {
+  const { content } = req.body;
+  if (!content) return res.status(400).json({ success: false, message: "No content provided" });
+
+  try {
+    const url = "https://chatgpt-42.p.rapidapi.com/gpt4o";
+    const options = {
+      method: "POST",
+      headers: {
+        "x-rapidapi-key": process.env.RAPIDAPI_KEY,
+        "x-rapidapi-host": "chatgpt-42.p.rapidapi.com",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        messages: [
+          {
+            role: "user",
+            content: `Format the following story text with proper paragraph breaks, spacing, and readability. 
+                      Keep it simple, do not rewrite or summarize, only reformat:\n\n${context}`
+          },
+        ],
+        web_access: false,
+      }),
+    };
+
+    const response = await fetch(url, options);
+    const data = await response.json();
+
+    res.json({ success: true, formatted: data.result });
+  } catch (err) {
+    console.error("❌ AI Format Story Error:", err);
+    res.status(500).json({ success: false, message: "Failed to format story" });
+  }
+}); */
+
 /**
  * Generate AI Image
  */
 
-app.post("/api/generate-image", function _callee13(req, res) {
+app.post("/api/generate-image", function _callee15(req, res) {
   var _req$body6, prompt, _req$body6$size, size, _req$body6$refImage, refImage, url, options, response, errorText, result;
 
-  return regeneratorRuntime.async(function _callee13$(_context13) {
+  return regeneratorRuntime.async(function _callee15$(_context15) {
     while (1) {
-      switch (_context13.prev = _context13.next) {
+      switch (_context15.prev = _context15.next) {
         case 0:
           _req$body6 = req.body, prompt = _req$body6.prompt, _req$body6$size = _req$body6.size, size = _req$body6$size === void 0 ? "1-1" : _req$body6$size, _req$body6$refImage = _req$body6.refImage, refImage = _req$body6$refImage === void 0 ? "" : _req$body6$refImage;
 
           if (prompt) {
-            _context13.next = 3;
+            _context15.next = 3;
             break;
           }
 
-          return _context13.abrupt("return", res.status(400).json({
+          return _context15.abrupt("return", res.status(400).json({
             error: "No prompt provided"
           }));
 
         case 3:
-          _context13.prev = 3;
+          _context15.prev = 3;
           url = 'https://ghibli-image-generator-api-open-ai-4o-image-generation-free.p.rapidapi.com/generateghibliimage.php';
           options = {
             method: 'POST',
@@ -731,54 +853,54 @@ app.post("/api/generate-image", function _callee13(req, res) {
               refWeight: 1
             })
           };
-          _context13.next = 8;
+          _context15.next = 8;
           return regeneratorRuntime.awrap(fetch(url, options));
 
         case 8:
-          response = _context13.sent;
+          response = _context15.sent;
 
           if (response.ok) {
-            _context13.next = 15;
+            _context15.next = 15;
             break;
           }
 
-          _context13.next = 12;
+          _context15.next = 12;
           return regeneratorRuntime.awrap(response.text());
 
         case 12:
-          errorText = _context13.sent;
+          errorText = _context15.sent;
           console.error("❌ Image API Response Error:", errorText);
-          return _context13.abrupt("return", res.status(500).json({
+          return _context15.abrupt("return", res.status(500).json({
             error: "Failed to generate image",
             details: errorText
           }));
 
         case 15:
-          _context13.next = 17;
+          _context15.next = 17;
           return regeneratorRuntime.awrap(response.text());
 
         case 17:
-          result = _context13.sent;
+          result = _context15.sent;
           // API returns text
           console.log("✅ AI Image Response:", result);
           res.json({
             generatedImage: result
           });
-          _context13.next = 26;
+          _context15.next = 26;
           break;
 
         case 22:
-          _context13.prev = 22;
-          _context13.t0 = _context13["catch"](3);
-          console.error("❌ AI Image Error:", _context13.t0);
+          _context15.prev = 22;
+          _context15.t0 = _context15["catch"](3);
+          console.error("❌ AI Image Error:", _context15.t0);
           res.status(500).json({
             error: "Failed to generate image",
-            details: _context13.t0.message
+            details: _context15.t0.message
           });
 
         case 26:
         case "end":
-          return _context13.stop();
+          return _context15.stop();
       }
     }
   }, null, null, [[3, 22]]);

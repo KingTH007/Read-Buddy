@@ -40,6 +40,14 @@ async function loadStudentStories() {
                 `;
                 container.appendChild(storyDiv);
             });
+
+            // ✅ Redirect on button click
+            container.addEventListener("click", (e) => {
+                if (e.target.tagName === "BUTTON" && e.target.dataset.id) {
+                    const storyId = e.target.dataset.id;
+                    window.location.href = `../../Front-end/html/story-comp.html?story_id=${storyId}`;
+                }
+            });
         } else {
             console.error("❌ Failed to fetch student stories:", data.message);
         }

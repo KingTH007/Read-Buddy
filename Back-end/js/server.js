@@ -287,6 +287,34 @@ app.get("/get-student-stories/:studentId", async (req, res) => {
     }
 });
 
+// Get single story by ID
+app.get("/get-story/:id", async (req, res) => {
+  const { id } = req.params;
+  try {
+    const result = await pool.query("SELECT * FROM teach_story WHERE story_id = $1", [id]);
+    if (result.rows.length === 0) {
+      return res.status(404).json({ success: false, message: "Story not found" });
+    }
+    res.json({ success: true, story: result.rows[0] });
+  } catch (err) {
+    console.error("❌ Error fetching story:", err);
+    res.status(500).json({ success: false, message: "Database error" });
+  }
+});
+
+// Get all story titles only
+app.get("/get-stories", async (req, res) => {
+  try {
+    const result = await pool.query(
+      "SELECT story_id AS id, storyname FROM teach_story ORDER BY story_id DESC"
+    );
+    res.json({ success: true, stories: result.rows });
+  } catch (err) {
+    console.error("❌ Error fetching stories:", err.message);
+    res.status(500).json({ success: false, message: "Failed to fetch stories" });
+  }
+});
+
 // ===================================================
 // 🔹 AI SECTION (RapidAPI GPT + Ghibli Image)
 // ===================================================
@@ -338,6 +366,42 @@ app.post("/api/generate-questions", async (req, res) => {
     res.status(500).json({ error: "Failed to generate questions" });
   }
 });
+/*
+// AI endpoint to format story text
+app.post("/api/format-story", async (req, res) => {
+  const { content } = req.body;
+  if (!content) return res.status(400).json({ success: false, message: "No content provided" });
+
+  try {
+    const url = "https://chatgpt-42.p.rapidapi.com/gpt4o";
+    const options = {
+      method: "POST",
+      headers: {
+        "x-rapidapi-key": process.env.RAPIDAPI_KEY,
+        "x-rapidapi-host": "chatgpt-42.p.rapidapi.com",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        messages: [
+          {
+            role: "user",
+            content: `Format the following story text with proper paragraph breaks, spacing, and readability. 
+                      Keep it simple, do not rewrite or summarize, only reformat:\n\n${context}`
+          },
+        ],
+        web_access: false,
+      }),
+    };
+
+    const response = await fetch(url, options);
+    const data = await response.json();
+
+    res.json({ success: true, formatted: data.result });
+  } catch (err) {
+    console.error("❌ AI Format Story Error:", err);
+    res.status(500).json({ success: false, message: "Failed to format story" });
+  }
+}); */
 
 /**
  * Generate AI Image

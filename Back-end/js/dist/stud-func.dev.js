@@ -51,6 +51,13 @@ function loadStudentStories() {
               storyDiv.classList.add("story", "show");
               storyDiv.innerHTML = "\n                    <div class=\"story-image\">\n                        <img src=\"".concat(story.storyimage || "https://placehold.co/600x400", "\" alt=\"Story Image\" />\n                    </div>\n                    <p>").concat(story.storyname, "</p>\n                    <button class=\"button\" data-id=\"").concat(story.story_id, "\">Read Now</button>\n                ");
               container.appendChild(storyDiv);
+            }); // ✅ Redirect on button click
+
+            container.addEventListener("click", function (e) {
+              if (e.target.tagName === "BUTTON" && e.target.dataset.id) {
+                var storyId = e.target.dataset.id;
+                window.location.href = "../../Front-end/html/story-comp.html?story_id=".concat(storyId);
+              }
             });
           } else {
             console.error("❌ Failed to fetch student stories:", data.message);
