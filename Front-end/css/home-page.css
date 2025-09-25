@@ -68,6 +68,7 @@ body {
     align-items: center;
     object-fit: cover;
     border-radius: 12px;
+    
 }
 
 .main-image {
@@ -97,8 +98,8 @@ body {
 
 /* Image fixed effect */
 .second-section .second-image {
-    position: sticky;
-    top: 100px; /* stays fixed during scroll */
+  /*  position: sticky;
+    top: 100px;* /* stays fixed during scroll */
     flex: 1;
     height: 350px;
     border-radius: 12px;
