@@ -334,6 +334,32 @@ app.get("/get-story/:id", async (req, res) => {
   }
 });
 
+/**
+ * Save Student Result
+ */
+app.post("/save-result", (req, res) => {
+  const { student_id, story_id, read_speed, read_score, final_grade } = req.body;
+
+  if (!student_id || !story_id) {
+    return res.status(400).json({ success: false, message: "Missing data" });
+  }
+
+  const query = `
+    INSERT INTO s_storyresult (student_id, story_id, read_speed, read_score, final_grade)
+    VALUES ($1, $2, $3, $4, $5) RETURNING *;
+  `;
+  const values = [student_id, story_id, read_speed, read_score, final_grade];
+
+  pool.query(query, values)
+    .then(result => {
+      res.json({ success: true, result: result.rows[0] });
+    })
+    .catch(err => {
+      console.error("❌ DB Insert Error:", err);
+      res.status(500).json({ success: false, message: "Database error" });
+    });
+});
+
 // ===================================================
 // 🔹 AI SECTION (RapidAPI GPT + Ghibli Image)
 // ===================================================
@@ -385,11 +411,13 @@ app.post("/api/generate-questions", async (req, res) => {
     res.status(500).json({ error: "Failed to generate questions" });
   }
 });
-/*
+
 // AI endpoint to format story text
 app.post("/api/format-story", async (req, res) => {
   const { content } = req.body;
-  if (!content) return res.status(400).json({ success: false, message: "No content provided" });
+  if (!content) {
+    return res.status(400).json({ success: false, message: "No content provided" });
+  }
 
   try {
     const url = "https://chatgpt-42.p.rapidapi.com/gpt4o";
@@ -404,9 +432,10 @@ app.post("/api/format-story", async (req, res) => {
         messages: [
           {
             role: "user",
-            content: `Format the following story text with proper paragraph breaks, spacing, and readability. 
-                      Keep it simple, do not rewrite or summarize, only reformat:\n\n${context}`
-          },
+            content: `Reformat the following story for readability. 
+                      Keep words the same. Add proper line breaks and paragraph spacing.
+                      Do not summarize, do not rewrite — only fix layout.\n\n${content}`
+          }
         ],
         web_access: false,
       }),
@@ -415,12 +444,25 @@ app.post("/api/format-story", async (req, res) => {
     const response = await fetch(url, options);
     const data = await response.json();
 
-    res.json({ success: true, formatted: data.result });
+    // ✅ Handle both possible response formats
+    let formatted = null;
+    if (data.result) {
+      formatted = data.result;
+    } else if (data.choices && data.choices[0]?.message?.content) {
+      formatted = data.choices[0].message.content;
+    }
+
+    if (!formatted) {
+      console.error("⚠️ API response:", data);
+      return res.status(500).json({ success: false, message: "AI returned no formatted text" });
+    }
+
+    res.json({ success: true, formatted });
   } catch (err) {
     console.error("❌ AI Format Story Error:", err);
     res.status(500).json({ success: false, message: "Failed to format story" });
   }
-}); */
+});
 
 /**
  * Generate AI Image

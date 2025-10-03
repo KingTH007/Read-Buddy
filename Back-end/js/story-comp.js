@@ -9,7 +9,7 @@ let questions = [];           // parsed questions array from DB
 let currentQuestionIndex = 0; // which question is showing
 let correctCount = 0;
 let totalWords = 0;
-
+let answers = {};
 
 // Format timer as mm:ss
 function formatTime(sec) {
@@ -110,10 +110,16 @@ function showQuestion(index) {
   const storyContentEl = document.getElementById("story-content");
   if (!storyContentEl) return;
 
-  storyContentEl.innerHTML = ""; // clear for new question
+  storyContentEl.innerHTML = "";
 
+  // Update question progress
+  const timerEl = document.getElementById("timer");
+  if (timerEl && index < questions.length) {
+    timerEl.textContent = `${index + 1}/${questions.length}`;
+  }
+  // If index is past last question → show review page
   if (index >= questions.length) {
-    showResults();
+    showReview();
     return;
   }
 
@@ -121,53 +127,140 @@ function showQuestion(index) {
   const qWrapper = document.createElement("div");
   qWrapper.classList.add("question-wrapper");
 
+  // Question text
   const qText = document.createElement("p");
   qText.textContent = `Q${index + 1}: ${q.question ?? "Untitled question"}`;
   qWrapper.appendChild(qText);
 
+  // Choices container
   const optionsContainer = document.createElement("div");
   optionsContainer.classList.add("options");
 
   (q.choices || []).forEach((choiceText, i) => {
-    const btn = document.createElement("button");
-    btn.classList.add("answer-btn");
-    btn.textContent = choiceText;
+    const label = document.createElement("label");
+    label.classList.add("choice-label");
 
-    btn.addEventListener("click", () => {
-      if (i === q.answerIndex) {
-        correctCount++;
-      }
-      currentQuestionIndex++;
-      showQuestion(currentQuestionIndex);
+    const radio = document.createElement("input");
+    radio.type = "radio";
+    radio.name = `question-${index}`;
+    radio.value = i;
+
+    // restore previous selection
+    if (answers[index] === i) {
+      radio.checked = true;
+    }
+
+    radio.addEventListener("change", () => {
+      answers[index] = i; // save selected choice
     });
 
-    optionsContainer.appendChild(btn);
+    label.appendChild(radio);
+    label.appendChild(document.createTextNode(choiceText));
+    optionsContainer.appendChild(label);
+    optionsContainer.appendChild(document.createElement("br"));
   });
 
   qWrapper.appendChild(optionsContainer);
+
+  // Navigation buttons
+  const navDiv = document.createElement("div");
+  navDiv.classList.add("nav-btns");
+
+  const backBtn = document.createElement("button");
+  backBtn.textContent = "⬅ Back";
+  backBtn.disabled = index === 0;
+  backBtn.addEventListener("click", () => {
+    currentQuestionIndex--;
+    showQuestion(currentQuestionIndex);
+  });
+
+  const nextBtn = document.createElement("button");
+  if (index === questions.length - 1) {
+    nextBtn.textContent = "Proceed to Review ➡";
+  } else {
+    nextBtn.textContent = "Next ➡";
+  }
+
+  nextBtn.addEventListener("click", () => {
+  if (index === questions.length - 1) {
+    // last question → go to review
+    showReview();
+  } else {
+    currentQuestionIndex++;
+    showQuestion(currentQuestionIndex);
+  }
+});
+
+  navDiv.appendChild(backBtn);
+  navDiv.appendChild(nextBtn);
+
+  qWrapper.appendChild(navDiv);
   storyContentEl.appendChild(qWrapper);
+}
+
+// Review Page
+function showReview() {
+  const storyContentEl = document.getElementById("story-content");
+  storyContentEl.innerHTML = "<h3>📝 Review Your Answers</h3>";
+
+  questions.forEach((q, idx) => {
+    const block = document.createElement("div");
+    block.classList.add("review-block");
+
+    block.innerHTML = `<p><strong>Q${idx + 1}:</strong> ${q.question}</p>`;
+    
+    q.choices.forEach((c, i) => {
+      const mark = (answers[idx] === i) ? "✅" : "";
+      const p = document.createElement("p");
+      p.textContent = `${c} ${mark}`;
+      block.appendChild(p);
+    });
+
+    // Edit Button
+    const editBtn = document.createElement("button");
+    editBtn.textContent = "Edit Answer";
+    editBtn.addEventListener("click", () => {
+      currentQuestionIndex = idx;
+      showQuestion(idx);
+    });
+    block.appendChild(editBtn);
+
+    storyContentEl.appendChild(block);
+  });
+
+  // Submit Button
+  const submitBtn = document.createElement("button");
+  submitBtn.id = "submit-btn";              // unique ID
+  submitBtn.classList.add("submit");        // class for styling
+  submitBtn.textContent = "Submit All";
+  
+  submitBtn.addEventListener("click", () => {
+    console.log("✅ Submit button clicked");
+    showResults();
+  });
+
+  storyContentEl.appendChild(submitBtn);
 }
 
 function showResults() {
   const storyContentEl = document.getElementById("story-content");
   storyContentEl.innerHTML = "";
 
-  // Time in minutes
+  // compute scores
+  correctCount = 0;
+  questions.forEach((q, idx) => {
+    if (answers[idx] === q.answerIndex) correctCount++;
+  });
+
   const timeMinutes = seconds / 60;
-
-  // Reading Speed (WPM)
   const wpm = timeMinutes > 0 ? (totalWords / timeMinutes).toFixed(2) : totalWords;
-
-  // Comprehension %
   const comprehension = ((correctCount / questions.length) * 100).toFixed(2);
 
-  // Reading Efficiency Score (RES)
-  const res = timeMinutes > 0 ? (comprehension / timeMinutes).toFixed(2) : comprehension;
+  const wpmCap = 200; 
+  const wpmScore = Math.min((wpm / wpmCap) * 100, 100);
 
-  // Weighted Final Grade
-  const finalGrade = ((comprehension * 0.7) + (wpm * 0.3)).toFixed(2);
+  const finalGrade = Math.min(((comprehension * 0.7) + (wpmScore * 0.3)), 100).toFixed(2);
 
-  // Grading System
   let remark = "";
   if (finalGrade >= 90) remark = "Outstanding";
   else if (finalGrade >= 85) remark = "Very Satisfactory";
@@ -178,15 +271,56 @@ function showResults() {
   const failClass = finalGrade < 75 ? "fail" : "";
   storyContentEl.innerHTML = `
     <h3>📊 Results</h3>
-    <p><strong>Time:</strong> ${formatTime(seconds)} (${timeMinutes.toFixed(2)} min)</p>
-    <p><strong>Number of Words:</strong> ${totalWords}</p>
-    <p><strong>Correct Answers:</strong> ${correctCount} / ${questions.length}</p>
-    <hr>
-    <p><strong>Reading Speed (WPM):</strong> ${wpm}</p>
-    <p><strong>Reading Efficiency Score (RES):</strong> ${res}</p>
+    <p><strong>Time:</strong> ${formatTime(seconds)}</p>
+    <p><strong>Correct:</strong> ${correctCount} / ${questions.length}</p>
+    <p><strong>Comprehension:</strong> ${comprehension}%</p>
+    <p><strong>WPM:</strong> ${wpm}</p>
     <p><strong>Final Grade:</strong> ${finalGrade}%</p>
     <p class="${failClass}" id="result"><strong>Result:</strong> ${remark}</p>
   `;
+
+  // ✅ Save results to DB only now
+  const student = JSON.parse(localStorage.getItem("student"));
+  if (student && student.id && currentStoryId) {
+    saveResult(student.id, currentStoryId, wpm, correctCount, finalGrade);
+  } else {
+    console.error("❌ No student or story ID found in localStorage");
+    storyContentEl.insertAdjacentHTML("beforeend",
+      `<p style="color:red">❌ Unable to save: missing student or story ID</p>`);
+  }
+}
+
+async function saveResult(studentId, storyId, readSpeed, readScore, finalGrade) {
+  const storyContentEl = document.getElementById("story-content");
+
+  try {
+    const response = await fetch("http://localhost:5000/save-result", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        student_id: studentId,
+        story_id: storyId,
+        read_speed: readSpeed,
+        read_score: readScore,
+        final_grade: finalGrade
+      })
+    });
+
+    const data = await response.json();
+    if (!data.success) {
+      console.error("❌ Failed to save result:", data.message);
+      storyContentEl.insertAdjacentHTML("beforeend",
+        `<p style="color:red">❌ Failed to save result: ${data.message}</p>`);
+    } else {
+      console.log("✅ Result saved:", data.result);
+      storyContentEl.insertAdjacentHTML("beforeend",
+        `<p style="color:green">✅ Result saved successfully!</p>`);
+    }
+  } catch (err) {
+    console.error("❌ Error saving result:", err);
+    storyContentEl.insertAdjacentHTML("beforeend",
+      `<p style="color:red">❌ Error saving result. Check server logs.</p>`);
+  }
 }
 
 
@@ -221,6 +355,25 @@ async function fetchStory() {
       totalWords = currentStory.split(/\s+/).filter(Boolean).length;
 
       questions = parseQuestions(story.storyquest ?? story.storyquest_json ?? []);
+
+      // ✅ AI Format story
+      try {
+        const formatRes = await fetch("http://localhost:5000/api/format-story", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ content: currentStory })
+        });
+
+        const formatData = await formatRes.json();
+        if (formatData.success && formatData.formatted) {
+          console.log("✅ Story formatted by AI");
+          currentStory = formatData.formatted;
+        } else {
+          console.warn("⚠️ Using raw story content, AI format failed:", formatData.message);
+        }
+      } catch (err) {
+        console.error("❌ Error calling format API:", err);
+      }
 
       if (storyContentEl) storyContentEl.innerHTML = `<p>Click START to read "${story.storyname ?? 'this story'}".</p>`;
 
@@ -258,11 +411,17 @@ document.addEventListener("DOMContentLoaded", async () => {
       seconds = 0;
       startTimer();
     } else {
-      // STOP
+      // STOP → show questions
       stopTimer();
       startBtn.style.display = "none"; // hide button
       timerRunning = false;
       currentQuestionIndex = 0;
+
+      const timerEl = document.getElementById("timer");
+      if (timerEl) {
+        timerEl.textContent = `0/${questions.length}`;
+      }
+
       showQuestion(currentQuestionIndex);
     }
   });
