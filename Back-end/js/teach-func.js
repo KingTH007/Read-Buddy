@@ -411,15 +411,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-    const logoutBtn = document.getElementById("logout-btn");
-    if (logoutBtn) {
-        logoutBtn.addEventListener("click", () => {
-            localStorage.removeItem("teacher");
-            window.location.href = "../../Front-end/html/home-page.html";
-        });
-    }
-
-
     // Class View Overlay Elements
     const classViewOverlay = document.querySelector(".class-view-overlay");
     const classViewModal = document.querySelector(".class-view-modal");

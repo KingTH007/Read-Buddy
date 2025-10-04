@@ -73,13 +73,15 @@ app.post("/register", async (req, res) => {
 app.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
-    const teacher = await pool.query("SELECT * FROM teachers WHERE email = $1", [email]);
+    const teacherQuery = await pool.query("SELECT * FROM teachers WHERE email = $1", [email]);
 
-    if (teacher.rows.length === 0) {
+    if (teacherQuery.rows.length === 0) {
       return res.status(400).json({ success: false, field: "email", message: "Email not found" });
     }
 
-    const validPassword = await bcrypt.compare(password, teacher.rows[0].password);
+    const teacher = teacherQuery.rows[0];
+    const validPassword = await bcrypt.compare(password, teacher.password);
+
     if (!validPassword) {
       return res.status(400).json({
         success: false,
@@ -88,7 +90,15 @@ app.post("/login", async (req, res) => {
       });
     }
 
-    res.json({ success: true, teacher: teacher.rows[0] });
+    // ✅ Return only the needed fields cleanly
+    res.json({
+      success: true,
+      teacher: {
+        id: teacher.id,
+        fullname: teacher.fullname,
+        email: teacher.email
+      }
+    });
   } catch (err) {
     console.error("❌ Teacher Login Error:", err);
     res.status(500).json({ success: false, message: "Login failed" });
@@ -137,17 +147,27 @@ app.post("/student-login", async (req, res) => {
     );
 
     if (student.rows.length === 0) {
+      // Auto-register new student
       student = await pool.query(
         "INSERT INTO students (fullname, code) VALUES ($1, $2) RETURNING *",
         [fullname, code]
       );
 
       await pool.query("UPDATE class SET no_students = no_students + 1 WHERE code = $1", [code]);
-
       io.emit("student-joined", { code });
     }
 
-    res.json({ success: true, student: student.rows[0] });
+    const s = student.rows[0];
+
+    // ✅ Return cleaned-up data
+    res.json({
+      success: true,
+      student: {
+        id: s.id,
+        fullname: s.fullname,
+        code: s.code
+      }
+    });
   } catch (err) {
     console.error("❌ Student Login Error:", err.message);
     res.status(500).json({ success: false, message: "Student login failed" });
