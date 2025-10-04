@@ -98,7 +98,7 @@ registerSubmit.addEventListener('click', async (e) => {
     }
 
     try {
-        const response = await fetch("http://localhost:5000/register", {
+        const response = await fetch("https://fdgcfxghgiwalhcvoate.functions.supabase.co/register", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ fullname: fullname.value, email: email.value, password: password.value }),
@@ -138,7 +138,8 @@ loginSubmit.addEventListener('click', async (e) => {
         [email, password].forEach(clearError);
 
         try {
-            const response = await fetch("http://localhost:5000/login", {
+            const newLocal = "https://fdgcfxghgiwalhcvoate.functions.supabase.co/login";
+            const response = await fetch(newLocal, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ email: email.value, password: password.value }),
@@ -175,7 +176,7 @@ loginSubmit.addEventListener('click', async (e) => {
         }
 
         try {
-            const res = await fetch("http://localhost:5000/student-login", {
+            const res = await fetch("https://fdgcfxghgiwalhcvoate.functions.supabase.co/student-login", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ fullname: fullname.value.trim(), code: code.value.trim() }),
@@ -202,7 +203,7 @@ loginSubmit.addEventListener('click', async (e) => {
 
 async function loginTeacher(email, password) {
     try {
-        const response = await fetch("http://localhost:5000/login", {
+        const response = await fetch("https://fdgcfxghgiwalhcvoate.functions.supabase.co/login", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ email, password }),
