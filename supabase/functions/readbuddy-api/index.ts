@@ -2,10 +2,9 @@
 // https://deno.land/manual/getting_started/setup_your_environment
 // This enables autocomplete, go to definition, etc.
 
-// Setup type definitions for built-in Supabase Runtime APIs
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { compare } from "https://deno.land/x/bcrypt@v0.4.1/mod.ts"; // ✅ moved here
+import { compare } from "https://deno.land/x/bcrypt@v0.4.1/mod.ts";
 
 // Initialize Supabase client
 const supabase = createClient(
@@ -13,13 +12,26 @@ const supabase = createClient(
   Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
 );
 
+// ✅ CORS headers
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Methods": "POST, GET, OPTIONS",
+};
+
 serve(async (req) => {
   try {
     const url = new URL(req.url);
     const path = url.pathname;
     const method = req.method;
 
-    // Example route
+    // ✅ Handle CORS preflight
+    if (method === "OPTIONS") {
+      return new Response("ok", { headers: corsHeaders });
+    }
+
+    // ✅ Teacher login route
     if (path.endsWith("/login") && method === "POST") {
       const { email, password } = await req.json();
 
@@ -32,7 +44,7 @@ serve(async (req) => {
       if (error || !teacher) {
         return new Response(
           JSON.stringify({ success: false, message: "Email not found" }),
-          { status: 400 }
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
 
@@ -40,7 +52,7 @@ serve(async (req) => {
       if (!valid) {
         return new Response(
           JSON.stringify({ success: false, message: "Incorrect password" }),
-          { status: 400 }
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
 
@@ -53,20 +65,57 @@ serve(async (req) => {
             email: teacher.email,
           },
         }),
-        { headers: { "Content-Type": "application/json" } }
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    return new Response("ReadBuddy API running 🧠", { status: 200 });
+    // ✅ Optional: student login route
+    if (path.endsWith("/student-login") && method === "POST") {
+      const { fullname, code } = await req.json();
+
+      const { data: student, error } = await supabase
+        .from("students")
+        .select("*")
+        .eq("fullname", fullname)
+        .eq("code", code)
+        .single();
+
+      if (error || !student) {
+        return new Response(
+          JSON.stringify({ success: false, message: "Invalid student credentials" }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      return new Response(
+        JSON.stringify({
+          success: true,
+          student: {
+            id: student.id,
+            fullname: student.fullname,
+            code: student.code,
+          },
+        }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // ✅ Default response
+    return new Response("ReadBuddy API running 🧠", {
+      status: 200,
+      headers: corsHeaders,
+    });
   } catch (err) {
     console.error("Error:", err);
-    return new Response(JSON.stringify({ success: false, message: err.message }), {
-      status: 500,
-      headers: { "Content-Type": "application/json" },
-    });
+    return new Response(
+      JSON.stringify({ success: false, message: err.message }),
+      {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      }
+    );
   }
 });
-
 
 /* To invoke locally:
 
