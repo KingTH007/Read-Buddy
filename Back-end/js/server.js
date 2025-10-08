@@ -380,6 +380,47 @@ app.post("/save-result", (req, res) => {
     });
 });
 
+/**
+ * Update existing story
+ */
+app.put("/update-story/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    // Ensure body exists
+    if (!req.body || Object.keys(req.body).length === 0) {
+      return res.status(400).json({ success: false, message: "No fields provided to update" });
+    }
+
+    // Check story exists
+    const current = await pool.query("SELECT * FROM teach_story WHERE story_id = $1", [id]);
+    if (current.rows.length === 0) {
+      return res.status(404).json({ success: false, message: "Story not found" });
+    }
+
+    const story = current.rows[0];
+
+    // Only override fields that are provided; keep existing otherwise
+    const storyname = req.body.storyname ?? story.storyname;
+    const storycontent = req.body.storycontent ?? story.storycontent;
+    const storyquest = req.body.storyquest ?? story.storyquest;
+    const storyimage = req.body.storyimage ?? story.storyimage;
+
+    const result = await pool.query(
+      `UPDATE teach_story
+       SET storyname = $1, storycontent = $2, storyquest = $3, storyimage = $4
+       WHERE story_id = $5
+       RETURNING *`,
+      [storyname, storycontent, storyquest, storyimage, id]
+    );
+
+    res.json({ success: true, story: result.rows[0] });
+  } catch (err) {
+    console.error("❌ Error updating story:", err);
+    res.status(500).json({ success: false, message: "Failed to update story", error: err.message });
+  }
+});
+
 // ===================================================
 // 🔹 AI SECTION (RapidAPI GPT + Ghibli Image)
 // ===================================================

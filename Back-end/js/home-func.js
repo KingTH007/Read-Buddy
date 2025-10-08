@@ -25,7 +25,11 @@ backToLogin.addEventListener('click', () => {
 });
 
 studentLogin.addEventListener('click', () => {
-    loginOverlay.style.display = 'flex';         // show overlay
+    loginOverlay.style.display = 'flex';        
+    
+    loginModel.style.display = 'block';
+    registerModel.style.display = 'none';
+
     loginForms.classList.remove('teacher-active');
     loginForms.classList.add('student-active');  // switch to student login
     teacherBtn.classList.remove('active');
@@ -36,6 +40,10 @@ studentLogin.addEventListener('click', () => {
 // Show overlay with Teacher first
 loginBtn.addEventListener('click', () => {
     loginOverlay.style.display = 'flex';
+
+    loginModel.style.display = 'block';
+    registerModel.style.display = 'none';
+
     loginForms.classList.add('teacher-active');
     loginForms.classList.remove('student-active');
     teacherBtn.classList.add('active');
@@ -48,6 +56,9 @@ teacherBtn.addEventListener('click', () => {
     loginForms.classList.remove('student-active');
     teacherBtn.classList.add('active');
     studentBtn.classList.remove('active');
+
+    loginModel.style.display = 'block';
+    registerModel.style.display = 'none';
 });
 
 // Toggle to Student
@@ -56,6 +67,9 @@ studentBtn.addEventListener('click', () => {
     loginForms.classList.remove('teacher-active');
     studentBtn.classList.add('active');
     teacherBtn.classList.remove('active');
+
+    loginModel.style.display = 'block';
+    registerModel.style.display = 'none';
 });
 
 // Close overlay
@@ -64,6 +78,7 @@ closeLogin.addEventListener('click', () => {
 });
 closeRegister.addEventListener('click', () => {
     loginOverlay.style.display = 'none';
+    loginModel.style.display = 'block';
 });
 
 // Helper: show error message beside input
@@ -98,7 +113,7 @@ registerSubmit.addEventListener('click', async (e) => {
     }
 
     try {
-        const response = await fetch("https://fdgcfxghgiwalhcvoate.functions.supabase.co/register", {
+        const response = await fetch("http://localhost:5000/register", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ fullname: fullname.value, email: email.value, password: password.value }),
@@ -138,7 +153,7 @@ loginSubmit.addEventListener('click', async (e) => {
         [email, password].forEach(clearError);
 
         try {
-            const newLocal = "https://fdgcfxghgiwalhcvoate.functions.supabase.co/login";
+            const newLocal = "http://localhost:5000/login";
             const response = await fetch(newLocal, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -176,7 +191,7 @@ loginSubmit.addEventListener('click', async (e) => {
         }
 
         try {
-            const res = await fetch("https://fdgcfxghgiwalhcvoate.functions.supabase.co/student-login", {
+            const res = await fetch("http://localhost:5000/student-login", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ fullname: fullname.value.trim(), code: code.value.trim() }),
@@ -203,7 +218,7 @@ loginSubmit.addEventListener('click', async (e) => {
 
 async function loginTeacher(email, password) {
     try {
-        const response = await fetch("https://fdgcfxghgiwalhcvoate.functions.supabase.co/login", {
+        const response = await fetch("http://localhost:5000/login", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ email, password }),

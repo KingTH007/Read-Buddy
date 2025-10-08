@@ -123,7 +123,7 @@ main {
     font-size: 0.95rem;
 }
 
-.button {
+.modify {
     background-color: var(--primary);
     color: #FDFBEE;
     border: none;
@@ -136,7 +136,7 @@ main {
     box-shadow: 0 4px 8px rgba(255,107,107,0.3);
 }
 
-.button:hover {
+.modify:hover {
     transform: translateY(-2px);
     box-shadow: 0 6px 12px rgba(255,107,107,0.4);
 }

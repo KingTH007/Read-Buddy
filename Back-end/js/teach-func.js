@@ -141,7 +141,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         <img src="${imageUrl}" alt="Story Image" />
                     </div>
                     <p>${editedTitle}</p>
-                    <button class="button">Read Now</button>
+                    <button class="modify">Modify Now</button>
                 `;
                 document.querySelector(".act-card").appendChild(newStory);
 
@@ -181,12 +181,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                 data.stories.forEach(story => {
                     const storyDiv = document.createElement("div");
                     storyDiv.classList.add("story", "show");
+                    storyDiv.dataset.storyId = story.story_id;
                     storyDiv.innerHTML = `
                         <div class="story-image">
                             <img src="${story.storyimage}" alt="Story Image" />
                         </div>
                         <p>${story.storyname}</p>
-                        <button class="button">Read Now</button>
+                        <button class="modify">Modify Now</button>
                     `;
                     container.appendChild(storyDiv);
                 });
@@ -203,6 +204,151 @@ document.addEventListener('DOMContentLoaded', async () => {
         overlapModal.style.display = "none";
         fileInput.value = ''; // reset file input
     });
+
+    // ==============================
+    // 🔹 Handle Modify Story Button
+    // ==============================
+    async function openModifyStory(storyId) {
+        const modifyOverlay = document.getElementById("modify-overlap");
+        const overlay = document.querySelector(".overlay-color");
+
+        try {
+            const response = await fetch(`http://localhost:5000/get-story/${storyId}`);
+            if (!response.ok) {
+            const text = await response.text();
+            console.error("get-story failed:", response.status, text);
+            alert("Failed to load story details (see console).");
+            return;
+            }
+
+            const data = await response.json();
+            if (!data.success) {
+            alert("Failed to load story details: " + (data.message || "Unknown"));
+            return;
+            }
+
+            const story = data.story || {};
+
+            // fill fields
+            document.getElementById("modify-title").value = story.storyname || "";
+            document.getElementById("modify-context").value = story.storycontent || "";
+            document.getElementById("modify-questions").value = story.storyquest || "";
+            document.getElementById("modify-img").src = story.storyimage || "https://placehold.co/250x180";
+
+            // show overlay
+            overlay.style.display = "block";
+            modifyOverlay.style.display = "block";
+
+            // store editing id and original snapshot for diffing later
+            modifyOverlay.dataset.editingStoryId = story.story_id;
+            modifyOverlay.dataset.originalStory = JSON.stringify({
+            storyname: story.storyname || "",
+            storycontent: story.storycontent || "",
+            storyquest: story.storyquest || "",
+            storyimage: story.storyimage || ""
+            });
+            console.log("openModifyStory: loaded story", story.story_id);
+        } catch (err) {
+            console.error("❌ Error fetching story details:", err);
+            alert("Error loading story details. Check console.");
+        }
+    }
+
+    // ==============================
+    // 🔹 Listen for Modify Button Clicks
+    // ==============================
+    document.addEventListener("click", (e) => {
+        if (e.target && e.target.classList.contains("modify")) {
+            const storyCard = e.target.closest(".story");
+            if (!storyCard) return;
+
+            const storyId = storyCard.dataset.storyId;
+            if (storyId) openModifyStory(storyId);
+        }
+    });
+
+    // 🔹 Close Modify Overlay
+    document.getElementById("modify-cancel").addEventListener("click", () => {
+        document.getElementById("modify-overlap").style.display = "none";
+        document.querySelector(".overlay-color").style.display = "none";
+    });
+
+    // 🔹 Save Modified Story
+    document.getElementById("modify-save").addEventListener("click", async () => {
+        const modifyOverlay = document.getElementById("modify-overlap");
+        const storyId = modifyOverlay?.dataset?.editingStoryId;
+
+        if (!storyId) {
+            alert("No story selected to modify.");
+            return;
+        }
+
+        // current values
+        const currentTitle = document.getElementById("modify-title").value.trim();
+        const currentContext = document.getElementById("modify-context").value.trim();
+        const currentQuestions = document.getElementById("modify-questions").value.trim();
+        const currentImage = document.getElementById("modify-img").src || "";
+
+        // original snapshot
+        const original = modifyOverlay.dataset.originalStory ? JSON.parse(modifyOverlay.dataset.originalStory) : {};
+
+        // build diff object: only include keys that actually changed
+        const updatedStory = {};
+        if (currentTitle !== (original.storyname || "")) updatedStory.storyname = currentTitle;
+        if (currentContext !== (original.storycontent || "")) updatedStory.storycontent = currentContext;
+        if (currentQuestions !== (original.storyquest || "")) updatedStory.storyquest = currentQuestions;
+        if (currentImage !== (original.storyimage || "")) updatedStory.storyimage = currentImage;
+
+        if (Object.keys(updatedStory).length === 0) {
+            alert("No changes detected.");
+            return;
+        }
+
+        try {
+            console.log("PUT /update-story/" + storyId, updatedStory);
+
+            const response = await fetch(`http://localhost:5000/update-story/${storyId}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(updatedStory)
+            });
+
+            // if response is not ok try to read text (avoid .json() on HTML)
+            if (!response.ok) {
+            const errText = await response.text();
+            console.error("Server returned non-OK:", response.status, errText);
+            alert("Failed to update story. Server responded: " + response.status);
+            return;
+            }
+
+            // parse JSON safely
+            const dataText = await response.text();
+            let data;
+            try {
+            data = JSON.parse(dataText);
+            } catch (parseErr) {
+            console.error("Failed parsing response JSON:", parseErr, "raw:", dataText);
+            alert("Server returned unexpected response. Check server console.");
+            return;
+            }
+
+            if (data.success) {
+            console.log("Story updated:", data.story);
+            alert("Story updated successfully!");
+            modifyOverlay.style.display = "none";
+            document.querySelector(".overlay-color").style.display = "none";
+            // optionally refresh the list
+            await loadStories();
+            } else {
+            console.error("Update failed:", data);
+            alert("Update failed: " + (data.message || "unknown"));
+            }
+        } catch (err) {
+            console.error("❌ Error updating story:", err);
+            alert("Error saving changes. See console for details.");
+        }
+    });
+
     
     // Create Class Section
     const createClassBtn = document.getElementById("create-class-btn");
