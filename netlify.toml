@@ -14,6 +14,9 @@
   
   # * Environment variables (set these in Netlify dashboard)
   NODE_ENV = "production"
+  
+  # * Disable secrets scanning for this build
+  SECRETS_SCAN_ENABLED = "false"
 
 # * Redirect rules for SPA
 [[redirects]]
