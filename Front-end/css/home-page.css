@@ -98,10 +98,10 @@ body {
 
 /* Image fixed effect */
 .second-section .second-image {
-  /*  position: sticky;
-    top: 100px;* /* stays fixed during scroll */
+    position: sticky;
+    top: 100px; /* stays fixed during scroll */
     flex: 1;
-    height: 350px;
+    height: 500px;
     border-radius: 12px;
     background: #d3d3d3;
 }
@@ -168,7 +168,7 @@ body {
     padding: 2rem;
     border-radius: 16px;
     width: 380px;
-    height: 450px;
+    height: 550px;
     max-width: 90%;
     text-align: center;
     box-shadow: 0px 10px 25px rgba(0,0,0,0.2);
@@ -180,8 +180,24 @@ body {
 .login-forms {
     display: flex;
     width: 200%; /* 👈 both forms side by side */
-    height: 250px;
+    height: auto;
     transition: transform 0.4s ease;
+}
+
+.login {
+    width: 50%;
+    flex-shrink: 0;
+    padding: 1.5rem 2rem;
+    box-sizing: border-box;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* centers the form vertically */
+    align-items: center;
+}
+
+.login form {
+    width: 100%;
 }
 
 /* Each form */
@@ -423,5 +439,161 @@ footer {
     100% {
         opacity: 1;
         transform: translateY(0);
+    }
+}
+
+/* =======================
+   📱 Responsive Design
+   ======================= */
+
+/* For tablets (≤ 768px) */
+@media (max-width: 768px) {
+    /* MAIN SECTION */
+    .main-section {
+        flex-direction: column-reverse;
+        align-items: center;
+        text-align: center;
+        padding: 4rem 5%;
+        height: auto;
+    }
+
+    .main-text h2 {
+        font-size: 1.9rem;
+    }
+
+    .main-text p {
+        font-size: 1.1rem;
+        max-width: 100%;
+    }
+
+    .main-image {
+        width: 90%;
+        height: auto;
+        margin-top: 1.5rem;
+    }
+
+    /* SECOND SECTION */
+    .second-section {
+        flex-direction: column;
+        gap: 2rem;
+        padding: 4rem 5%;
+        text-align: center;
+    }
+
+    .second-image {
+        position: relative;
+        top: 0;
+        height: 400px;
+        width: 100%;
+    }
+
+    .second-text h2 {
+        font-size: 2rem;
+    }
+
+    .second-text p {
+        font-size: 1.2rem;
+        max-width: 100%;
+    }
+
+    /* Remove unwanted image scrolls */
+    .main-image, .second-image {
+        overflow: hidden;
+        object-fit: cover;
+        max-width: 100%;
+    }
+
+    /* Make sure the modal fits smaller screens */
+    .login-overlay {
+        overflow: hidden;
+    }
+}
+
+/* For mobile phones (≤ 480px) */
+@media (max-width: 480px) {
+    /* MAIN SECTION */
+    .main-section {
+        padding: 3rem 1.5rem;
+    }
+
+    .main-image {
+        display: none; /* 🚫 Hide main image */
+        overflow: hidden;
+    }
+
+    .main-text h2 {
+        font-size: 1.7rem;
+    }
+
+    .main-text p {
+        font-size: 1rem;
+    }
+
+    .student-btn {
+        width: 80%;
+        font-size: 0.95rem;
+        padding: 0.9rem;
+    }
+
+    /* SECOND SECTION */
+    .second-section {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        padding: 3rem 1.5rem;
+    }
+
+    .second-image {
+        width: 100%;
+        height: auto;
+        margin-bottom: 1rem;
+        order: -1; /* 🆙 Image goes above description */
+        position: relative;
+    }
+
+    .second-text h2 {
+        font-size: 1.6rem;
+    }
+
+    .second-text p {
+        font-size: 1rem;
+    }
+
+    /* THIRD SECTION */
+    .third-section {
+        padding: 6rem 1.5rem;
+    }
+
+    .third-section h2 {
+        font-size: 1.5rem;
+    }
+
+    .third-section p {
+        font-size: 1rem;
+    }
+
+    /* Ensure second-section images are static and not scrollable */
+    .second-image img {
+        width: 100%;
+        height: auto;
+        object-fit: contain;
+        overflow: hidden;
+        display: block;
+    }
+
+    /* Center and make sure there's no horizontal scroll */
+    body, html {
+        overflow-x: hidden;
+    }
+
+    /* Make modal buttons fit smaller viewports */
+    .login-form button {
+        font-size: 0.9rem;
+        padding: 0.7rem 1rem;
+    }
+
+    .login-form input {
+        font-size: 0.9rem;
+        padding: 0.6rem 0.9rem;
     }
 }

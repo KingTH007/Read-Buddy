@@ -180,21 +180,31 @@ loginSubmit.addEventListener('click', async (e) => {
         }
     } else if (loginForms.classList.contains("student-active")) {
         // Student login
-        const fullname = document.getElementById("studentName");
+        const surnameInput = document.getElementById("studentSurname");
+        const firstnameInput = document.getElementById("studentFirstname");
         const code = document.getElementById("classCode");
 
-        [fullname, code].forEach(clearError);
+        [surnameInput, firstnameInput, code].forEach(clearError);
 
-        if (!fullname.value.trim() || !code.value.trim()) {
-            alert("Please enter your name and class code.");
+        const surname = surnameInput.value.trim();
+        const firstname = firstnameInput.value.trim();
+
+        if (!surname || !firstname || !code.value.trim()) {
+            alert("Please enter your surname, first name, and class code.");
             return;
         }
+
+        // 🔠 Capitalize first letters (for display)
+        const formattedFullName = `${capitalize(surname)}, ${capitalize(firstname)}`;
 
         try {
             const res = await fetch("http://localhost:5000/student-login", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ fullname: fullname.value.trim(), code: code.value.trim() }),
+                body: JSON.stringify({
+                    fullname: formattedFullName,
+                    code: code.value.trim(),
+                }),
             });
 
             const data = await res.json();
@@ -213,6 +223,15 @@ loginSubmit.addEventListener('click', async (e) => {
             console.error(err);
             alert("Error connecting to server.");
         }
+    }
+
+    // Helper function to capitalize first letter
+    function capitalize(str) {
+        return str
+            .toLowerCase()
+            .split(" ")
+            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(" ");
     }
 });
 

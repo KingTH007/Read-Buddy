@@ -108,30 +108,6 @@ app.post("/login", async (req, res) => {
 /**
  * Create a Class
  */
-app.post("/create-class", async (req, res) => {
-  try {
-    const { name, code, teacher_id } = req.body;
-
-    const existing = await pool.query("SELECT * FROM class WHERE code = $1", [code]);
-    if (existing.rows.length > 0) {
-      return res.status(400).json({ success: false, message: "Class code already exists." });
-    }
-
-    const newClass = await pool.query(
-      "INSERT INTO class (code, name, teacher_id) VALUES ($1, $2, $3) RETURNING *",
-      [code, name, teacher_id]
-    );
-
-    res.json({ success: true, class: newClass.rows[0] });
-  } catch (err) {
-    console.error("❌ Create Class Error:", err);
-    res.status(500).json({ success: false, message: "Failed to create class" });
-  }
-});
-
-/**
- * Student Login (auto-register if new)
- */
 app.post("/student-login", async (req, res) => {
   try {
     const { fullname, code } = req.body;
@@ -141,16 +117,37 @@ app.post("/student-login", async (req, res) => {
       return res.status(400).json({ success: false, field: "code", message: "Invalid class code" });
     }
 
+    // Normalize input
+    const [surname, firstname] = fullname
+      .replace(/\s+/g, " ")
+      .trim()
+      .replace(/(^\w|\s\w)/g, m => m.toUpperCase())
+      .split(/,|\s/)
+      .map(n => n.trim())
+      .filter(Boolean);
+
+    const normalizedFullName = `${surname}, ${firstname}`;
+
+    // 🔍 Find student (case-insensitive)
     let student = await pool.query(
-      "SELECT * FROM students WHERE fullname = $1 AND code = $2",
-      [fullname, code]
+      `SELECT * FROM students WHERE LOWER(fullname) = LOWER($1) AND code = $2`,
+      [normalizedFullName, code]
     );
 
+    // If not found, check reversed order
     if (student.rows.length === 0) {
-      // Auto-register new student
+      const reversedName = `${firstname}, ${surname}`;
+      student = await pool.query(
+        `SELECT * FROM students WHERE LOWER(fullname) = LOWER($1) AND code = $2`,
+        [reversedName, code]
+      );
+    }
+
+    // Auto-register if not found
+    if (student.rows.length === 0) {
       student = await pool.query(
         "INSERT INTO students (fullname, code) VALUES ($1, $2) RETURNING *",
-        [fullname, code]
+        [normalizedFullName, code]
       );
 
       await pool.query("UPDATE class SET no_students = no_students + 1 WHERE code = $1", [code]);
@@ -159,7 +156,6 @@ app.post("/student-login", async (req, res) => {
 
     const s = student.rows[0];
 
-    // ✅ Return cleaned-up data
     res.json({
       success: true,
       student: {
@@ -173,6 +169,7 @@ app.post("/student-login", async (req, res) => {
     res.status(500).json({ success: false, message: "Student login failed" });
   }
 });
+
 
 /**
  * Get all classes for a teacher
