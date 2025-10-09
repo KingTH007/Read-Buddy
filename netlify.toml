@@ -1,6 +1,6 @@
 [build]
   # * Build command for Netlify Functions
-  command = "npm run build"
+  command = "echo 'Build completed - serving static files'"
   
   # * Directory to publish (Netlify will serve the frontend from here)
   publish = "Front-end"
