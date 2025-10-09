@@ -18,13 +18,13 @@
   # * Disable secrets scanning for this build
   SECRETS_SCAN_ENABLED = "false"
 
-# * Redirect rules for SPA
+# * Redirect rules for API
 [[redirects]]
   from = "/api/*"
   to = "/.netlify/functions/server/:splat"
   status = 200
 
-# * Catch-all for frontend routing
+# * Catch-all for frontend routing (must be last)
 [[redirects]]
   from = "/*"
   to = "/index.html"
