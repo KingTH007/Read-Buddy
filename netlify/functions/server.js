@@ -44,9 +44,13 @@ exports.handler = async (event, context) => {
 
   try {
     const { httpMethod, path, body, queryStringParameters } = event;
+    console.log("Netlify Function called:", { httpMethod, path, body });
+    
     const pathSegments = path.replace("/api/", "").split("/");
     const endpoint = pathSegments[0];
     const id = pathSegments[1];
+    
+    console.log("Parsed path segments:", { endpoint, id, pathSegments });
 
     // * Parse request body
     let requestBody = {};

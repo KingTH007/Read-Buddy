@@ -12,6 +12,57 @@ const backToLogin = document.getElementById('backToLogin');
 const closeRegister = document.getElementById('closeRegister');
 const studentLogin = document.querySelector('.student-btn');
 
+// Add Enter key support for forms
+document.addEventListener('DOMContentLoaded', () => {
+    // Teacher login form Enter key support
+    const loginEmail = document.getElementById('loginEmail');
+    const loginPassword = document.getElementById('loginPassword');
+    
+    if (loginEmail && loginPassword) {
+        [loginEmail, loginPassword].forEach(input => {
+            input.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    document.querySelector('.login-btn').click();
+                }
+            });
+        });
+    }
+
+    // Student login form Enter key support
+    const classCode = document.getElementById('classCode');
+    const studentSurname = document.getElementById('studentSurname');
+    const studentFirstname = document.getElementById('studentFirstname');
+    
+    if (classCode && studentSurname && studentFirstname) {
+        [classCode, studentSurname, studentFirstname].forEach(input => {
+            input.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    document.querySelector('.student-btn').click();
+                }
+            });
+        });
+    }
+
+    // Registration form Enter key support
+    const regName = document.getElementById('regName');
+    const regEmail = document.getElementById('regEmail');
+    const regPassword = document.getElementById('regPassword');
+    const regConfirm = document.getElementById('regConfirm');
+    
+    if (regName && regEmail && regPassword && regConfirm) {
+        [regName, regEmail, regPassword, regConfirm].forEach(input => {
+            input.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    document.getElementById('registerSubmit').click();
+                }
+            });
+        });
+    }
+});
+
 // Show Register when clicking "Sign up here!"
 signupLink.addEventListener('click', () => {
     loginModel.style.display = 'none';
@@ -154,13 +205,20 @@ loginSubmit.addEventListener('click', async (e) => {
 
         try {
             const newLocal = "/api/login";
+            console.log("Attempting login to:", newLocal);
+            console.log("Login data:", { email: email.value, password: "***" });
+            
             const response = await fetch(newLocal, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ email: email.value, password: password.value }),
             });
 
+            console.log("Response status:", response.status);
+            console.log("Response headers:", response.headers);
+            
             const data = await response.json();
+            console.log("Response data:", data);
 
             if (data.success) {
                 localStorage.setItem("teacher", JSON.stringify(data.teacher));
@@ -198,6 +256,9 @@ loginSubmit.addEventListener('click', async (e) => {
         const formattedFullName = `${capitalize(surname)}, ${capitalize(firstname)}`;
 
         try {
+            console.log("Attempting student login to: /api/student-login");
+            console.log("Student login data:", { fullname: formattedFullName, code: code.value.trim() });
+            
             const res = await fetch("/api/student-login", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -207,7 +268,9 @@ loginSubmit.addEventListener('click', async (e) => {
                 }),
             });
 
+            console.log("Student login response status:", res.status);
             const data = await res.json();
+            console.log("Student login response data:", data);
 
             if (data.success) {
                 localStorage.setItem("student", JSON.stringify(data.student));
