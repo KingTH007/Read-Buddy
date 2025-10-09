@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Baloo+2:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="../css/teacher-style.css">
     <link rel="stylesheet" href="../css/header.css">
@@ -123,9 +124,9 @@
                     Class Management
                 </div>
                 <div class="create-class">
-                <button class="create-btn" id="create-class-btn">
-                    <span>Create a New Class +</span>
-                </button>
+                    <button class="create-btn" id="create-class-btn">
+                        <span>Create a New Class +</span>
+                    </button>
                 </div>
             </div>
 
@@ -164,7 +165,11 @@
         <div class="class-view-modal">
             <button id="close-class-view" class="close-btn">✖</button> 
             <div class="class-view-header">
-                <h2 id="class-view-title">CLASS NAME</h2>
+                <div class="class-title-container">
+                    <h2 id="class-view-title">CLASS NAME</h2>
+                    <i class="bi bi-trash delete-class-icon" id="delete-class-btn"></i>
+                </div>
+
                 <div class="class-view-controls">
                     <input type="text" id="student-search" placeholder="🔍 Search student..." />
                 </div>
@@ -185,7 +190,57 @@
             </table>
         </div>
 
+        <!--Overlay Notification-->
+        <div class="notification-overlay">
+            <!-- Modify -->
+            <div class="notification" id="modify-notification">
+                <div class="notification-content">
+                    <p class="notification-message">Update <span class="story-title"></span>?</p>
+                    <div class="notification-buttons">
+                        <button id="yes-modify" class="notification-btn">Yes</button>
+                        <button id="no-modify" class="notification-btn">No</button>
+                    </div>
+                </div>
+            </div>
 
+            <!-- Create -->
+            <div class="notification" id="create-notification">
+                <div class="notification-content">
+                    <p class="notification-message">Created <span class="class-title"></span> successfully!</p>
+                    <button id="no-create" class="notification-btn">OK</button>
+                </div>
+            </div>
+
+            <!-- Delete Class -->
+            <div class="notification" id="delete-class-notification">
+                <div class="notification-content">
+                    <p class="notification-message">Delete class <span class="class-title"></span>?</p>
+                    <div class="notification-buttons">
+                        <button id="yes-delete-class" class="notification-btn">Yes</button>
+                        <button id="no-delete-class" class="notification-btn">No</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Delete Student -->
+            <div class="notification" id="delete-student-notification">
+                <div class="notification-content">
+                    <p class="notification-message">Remove student <span class="student-name"></span>?</p>
+                    <div class="notification-buttons">
+                        <button id="yes-delete-student" class="notification-btn">Yes</button>
+                        <button id="no-delete-student" class="notification-btn">No</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Error -->
+            <div class="notification" id="error-notification">
+                <div class="notification-content">
+                    <p class="notification-message">⚠️ <span class="error-message">An error occurred.</span></p>
+                    <button id="no-error" class="notification-btn">OK</button>
+                </div>
+            </div>
+        </div>
 
     </main>
     <script src="../../Back-end/js/teach-func.js"></script>

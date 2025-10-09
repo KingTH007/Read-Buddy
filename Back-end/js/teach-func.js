@@ -112,7 +112,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const teacher = JSON.parse(localStorage.getItem("teacher"));
         if (!teacher || !teacher.id) {
-            alert("Please log in again. Teacher not found.");
+            showNotification('login', 'Please log in again.', null);
             return;
         }
 
@@ -151,11 +151,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                 overlay.style.display = "none";
                 overlapModal.style.display = "none";
             } else {
-                alert("Error: " + data.message);
+                showNotification('error', data.message);
             }
         } catch (err) {
             console.error("❌ Error uploading story:", err);
-            alert("Failed to save story.");
+            showNotification('error', "Failed to save story.");
         }
     });
 
@@ -300,7 +300,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (currentImage !== (original.storyimage || "")) updatedStory.storyimage = currentImage;
 
         if (Object.keys(updatedStory).length === 0) {
-            alert("No changes detected.");
+            showNotification('info', 'No changes detected.');
             return;
         }
 
@@ -325,27 +325,27 @@ document.addEventListener('DOMContentLoaded', async () => {
             const dataText = await response.text();
             let data;
             try {
-            data = JSON.parse(dataText);
+                data = JSON.parse(dataText);
             } catch (parseErr) {
-            console.error("Failed parsing response JSON:", parseErr, "raw:", dataText);
-            alert("Server returned unexpected response. Check server console.");
-            return;
+                console.error("Failed parsing response JSON:", parseErr, "raw:", dataText);
+                alert("Server returned unexpected response. Check server console.");
+                return;
             }
 
             if (data.success) {
-            console.log("Story updated:", data.story);
-            alert("Story updated successfully!");
-            modifyOverlay.style.display = "none";
-            document.querySelector(".overlay-color").style.display = "none";
-            // optionally refresh the list
-            await loadStories();
+                console.log("Story updated:", data.story);
+                showNotification('modify', currentTitle, async () => {
+                    modifyOverlay.style.display = "none";
+                    document.querySelector(".overlay-color").style.display = "none";
+                    await loadStories();
+                });
             } else {
-            console.error("Update failed:", data);
-            alert("Update failed: " + (data.message || "unknown"));
+                console.error("Update failed:", data);
+                showNotification('error', "Update failed: " + (data.message || "unknown"));
             }
         } catch (err) {
             console.error("❌ Error updating story:", err);
-            alert("Error saving changes. See console for details.");
+            showNotification('error', "Error saving changes. See console for details.");
         }
     });
 
@@ -390,7 +390,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const classCode = codeInput.value;
 
         if (className === "") {
-            alert("Please enter a class name!");
+            showNotification('info', 'Please enter a class name!');
             return;
         }
 
@@ -415,7 +415,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             const data = await response.json();
 
             if (data.success) {
-                alert("Class Created ✅ with Code: " + data.class.code);
+                showNotification('create', data.class.name, () => {
+                    console.log('Class created successfully.');
+                });
 
                 const li = document.createElement("li");
                 li.classList.add("class-card");
@@ -453,11 +455,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                 });
 
             } else {
-                alert("Error: " + data.message);
+                showNotification('error', "Error: " + data.message);
             }
         } catch (err) {
             console.error("Error creating class:", err);
-            alert("Failed to create class. Please try again.");
+            showNotification('error', "Failed to create class. Please try again.");
         }
     });
     
@@ -613,12 +615,33 @@ document.addEventListener('DOMContentLoaded', async () => {
             document.querySelectorAll(".delete-student").forEach(btn => {
                 btn.addEventListener("click", async (e) => {
                     const studentId = e.target.dataset.id;
-                    if (confirm("Delete this student?")) {
-                        await fetch(`http://localhost:5000/delete-student/${studentId}`, {
-                            method: "DELETE"
-                        });
-                        openClassView(currentClassCode, className); // reload list
-                    }
+                    showNotification('delete-student', e.target.closest('tr').querySelector('td:nth-child(2)').textContent, async () => {
+                        try {
+                            const response = await fetch(`http://localhost:5000/delete-student/${studentId}`, {
+                                method: "DELETE"
+                            });
+
+                            if (response.ok) {
+                                // ✅ Remove the student row immediately
+                                e.target.closest("tr").remove();
+
+                                // ✅ Update the student count in the class list
+                                const classCard = document.querySelector(`.class-card[data-class-code='${currentClassCode}']`);
+                                if (classCard) {
+                                    const countEl = classCard.querySelector(".student-count");
+                                    const currentCount = parseInt(countEl.textContent, 10) || 0;
+                                    countEl.textContent = Math.max(0, currentCount - 1); // avoid negative
+                                }
+
+                                console.log(`Student ${studentId} deleted. Count updated.`);
+                            } else {
+                                showNotification('error', "Failed to delete student.");
+                            }
+                        } catch (err) {
+                            console.error("Error deleting student:", err);
+                            showNotification('error', "Error deleting student.");
+                        }
+                    });
                 });
             });
 
@@ -626,6 +649,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             console.error("Error fetching students:", err);
         }
     }
+
+    socket.on("student-removed", (data) => {
+        if (data.code === currentClassCode) {
+            openClassView(currentClassCode, classViewTitle.textContent); // reload modal
+            loadTeacherClasses(); // reload sidebar counts
+        }
+    });
 
     // Close modal
     closeClassViewBtn.addEventListener("click", () => {
@@ -635,14 +665,87 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Delete class
     deleteClassBtn.addEventListener("click", async () => {
-        if (confirm("Are you sure you want to delete this class?")) {
+        showNotification('delete-class', classViewTitle.textContent, async () => {
             await fetch(`http://localhost:5000/delete-class/${currentClassCode}`, {
                 method: "DELETE"
             });
             classViewOverlay.style.display = "none";
             classViewModal.style.display = "none";
-            loadTeacherClasses(); // reload classes
+            loadTeacherClasses();
+        });
+    });
+
+    const searchInput = document.getElementById("student-search");
+    if (searchInput) {
+    searchInput.addEventListener("click", () => {
+        if (window.innerWidth <= 768) {
+        searchInput.classList.toggle("expanded");
+        if (searchInput.classList.contains("expanded")) {
+            searchInput.focus();
+        } else {
+            searchInput.blur();
+        }
         }
     });
+    }
+
+    //Notification
+    // ✅ Notification system helper
+    function showNotification(type, titleText, onConfirm) {
+        // Hide any open notifications
+        document.querySelectorAll('.notification').forEach(n => (n.style.display = 'none'));
+        const overlay = document.querySelector('.notification-overlay');
+
+        if (!overlay) {
+            console.error('❌ Notification overlay not found in DOM.');
+            return;
+        }
+
+        const notification = document.getElementById(`${type}-notification`);
+
+        if (!notification) {
+            console.error(`❌ Notification element #${type}-notification missing.`);
+            overlay.style.display = 'none';
+            return;
+        }
+
+        overlay.style.display = 'flex';
+        notification.style.display = 'block';
+
+        // Update dynamic title text if exists
+        const titleSpan = notification.querySelector('.story-title, .class-title, .student-name');
+        if (titleSpan) titleSpan.textContent = titleText || '';
+
+        // Safely get buttons
+        const yesBtn = notification.querySelector('button[id^="yes"]');
+        const noBtn = notification.querySelector('button[id^="no"]');
+
+        // Reset click handlers (prevent stacking)
+        if (yesBtn) yesBtn.onclick = null;
+        if (noBtn) noBtn.onclick = null;
+
+        if (yesBtn) {
+            yesBtn.onclick = () => {
+            overlay.style.display = 'none';
+            notification.style.display = 'none';
+            if (onConfirm) onConfirm();
+            };
+        }
+
+        if (noBtn) {
+            noBtn.onclick = () => {
+            overlay.style.display = 'none';
+            notification.style.display = 'none';
+            };
+        }
+
+        // Auto-close info or error messages after 2s
+        if (!yesBtn && !onConfirm) {
+            setTimeout(() => {
+            overlay.style.display = 'none';
+            notification.style.display = 'none';
+            }, 2000);
+        }
+    }
 
 });

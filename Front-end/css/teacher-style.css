@@ -428,7 +428,7 @@ main {
   background: #d8431c;
 }
 
-/* Overlay */
+/* Class View Overlay */
 .class-view-overlay {
     display: none;
     position: fixed;
@@ -488,6 +488,25 @@ main {
     color: #00bfff;
     text-transform: uppercase;
     margin: 0;
+}
+
+.class-title-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Trash icon next to title */
+.delete-class-icon {
+    font-size: 22px;
+    color: var(--primary); /* Primary color */
+    cursor: pointer;
+    transition: color 0.2s, transform 0.2s;
+}
+
+.delete-class-icon:hover {
+    color: var(--primary-dark); /* Slightly darker shade on hover */
+    transform: scale(1.15);
 }
 
 /* Controls (Search + Close) */
@@ -588,6 +607,81 @@ main {
     transform: scale(1.2);
 }
 
+/* =============================
+   ✅ Notification System Design
+   ============================= */
+.notification-overlay {
+  display: none;
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(3px);
+  z-index: 2000;
+  justify-content: center;
+  align-items: center;
+}
+
+.notification {
+  background: #fff;
+  border-radius: 16px;
+  padding: 2rem 2.5rem;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+  max-width: 420px;
+  width: 90%;
+  text-align: center;
+  animation: slideIn 0.35s ease forwards;
+}
+
+@keyframes slideIn {
+  from { transform: translateY(-40px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.notification-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.notification-message {
+  font-size: 1.1rem;
+  color: var(--dark);
+  line-height: 1.4;
+}
+
+.notification-message .story-title,
+.notification-message .class-title,
+.notification-message .student-name {
+  font-weight: bold;
+  color: var(--primary);
+}
+
+.notification-btn {
+  background: var(--secondary);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 0.6rem 1.2rem;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  width: 80px;
+}
+
+.notification-btn:hover {
+  background: #06a0d6;
+}
+
+.notification-btn:nth-child(2) {
+  background: var(--primary);
+}
+
+.notification-btn:nth-child(2):hover {
+  background: #e94e4e;
+}
 
 /* End of Main Context*/
 
@@ -643,6 +737,56 @@ main {
         padding: 0.6rem 1.2rem;
         font-size: 0.9rem;
     }
+
+    /* Class List: 3 columns */
+    .class-list ul {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    /* Class View Modal smaller */
+    .class-view-modal {
+        width: 90%;
+        height: 85%;
+        padding: 15px;
+    }
+
+    .class-view-header h2 {
+        font-size: 20px;
+    }
+
+    .delete-class-icon {
+        font-size: 18px;
+    }
+
+    /* Search bar collapsible */
+    .class-view-controls {
+        position: relative;
+    }
+
+    #student-search {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        padding: 0;
+        text-indent: -9999px;
+        background: url('https://cdn-icons-png.flaticon.com/512/622/622669.png') no-repeat center;
+        background-size: 18px;
+        transition: all 0.3s ease;
+        border: 1px solid #ccc;
+    }
+
+    #student-search.expanded {
+        width: 160px;
+        text-indent: 0;
+        padding: 8px 15px 8px 35px;
+        border-radius: 20px;
+        background: #fff url('https://cdn-icons-png.flaticon.com/512/622/622669.png') no-repeat 10px center;
+        background-size: 16px;
+    }
+
+    #student-search:focus {
+        border-color: var(--secondary);
+    }
 }
 
 @media (max-width: 480px) {
@@ -682,5 +826,75 @@ main {
     .overlap-button {
         padding: 0.5rem 1rem;
         font-size: 0.85rem;
+    }
+
+    /* Class List: 2 columns */
+    .class-list ul {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    /* Create button → just a "+" */
+    .create-btn span {
+        display: none;
+    }
+    .create-btn::after {
+        content: "+";
+        font-size: 22px;
+        font-weight: bold;
+    }
+    .create-btn {
+        padding: 6px 10px;
+        border-radius: 50%;
+        width: 42px;
+        height: 42px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* Class View Modal adjustments */
+    .class-view-modal {
+        width: 95%;
+        height: 85%;
+        padding: 10px;
+    }
+
+    .class-view-header h2 {
+        font-size: 18px;
+    }
+
+    .delete-class-icon {
+        font-size: 16px;
+    }
+
+    .student-table td,
+    .student-table th {
+        font-size: 12px;
+        padding: 8px;
+    }
+
+    .progress-bar {
+        width: 180px;
+        height: 14px;
+    }
+
+    .progress-bar-inner {
+        font-size: 10px;
+        padding-right: 3px;
+    }
+
+    .notification {
+        width: 90%;
+        padding: 1.5rem;
+    }
+
+    .notification-message {
+        font-size: 0.95rem;
+    }
+
+    .notification-btn {
+        font-size: 0.85rem;
+        padding: 0.5rem 1rem;
+        width: 70px;
     }
 }
