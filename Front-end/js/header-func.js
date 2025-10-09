@@ -34,7 +34,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (confirm("Are you sure you want to logout?")) {
             localStorage.removeItem("teacher");
             localStorage.removeItem("student");
-            window.location.href = "../html/home-page.html";
+            window.location.href = "/html/home-page.html";
         }
     });
 });

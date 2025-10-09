@@ -208,6 +208,12 @@ loginSubmit.addEventListener('click', async (e) => {
             console.log("Attempting login to:", newLocal);
             console.log("Login data:", { email: email.value, password: "***" });
             
+            // Show loading state
+            const loginBtn = document.querySelector('.login-btn');
+            const originalText = loginBtn.textContent;
+            loginBtn.textContent = "Logging in...";
+            loginBtn.disabled = true;
+            
             const response = await fetch(newLocal, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -222,7 +228,7 @@ loginSubmit.addEventListener('click', async (e) => {
 
             if (data.success) {
                 localStorage.setItem("teacher", JSON.stringify(data.teacher));
-                window.location.href = "../../Front-end/html/teacher-front.html";
+                window.location.href = "/html/teacher-front.html";
             } else {
                 if (data.field === "email") {
                     showError(email, "Email not found.");
@@ -235,6 +241,13 @@ loginSubmit.addEventListener('click', async (e) => {
         } catch (error) {
             console.error(error);
             alert("Error connecting to server.");
+        } finally {
+            // Reset button state
+            const studentBtn = document.querySelector('.student-btn');
+            if (studentBtn) {
+                studentBtn.textContent = "Login";
+                studentBtn.disabled = false;
+            }
         }
     } else if (loginForms.classList.contains("student-active")) {
         // Student login
@@ -259,6 +272,12 @@ loginSubmit.addEventListener('click', async (e) => {
             console.log("Attempting student login to: /api/student-login");
             console.log("Student login data:", { fullname: formattedFullName, code: code.value.trim() });
             
+            // Show loading state
+            const studentBtn = document.querySelector('.student-btn');
+            const originalText = studentBtn.textContent;
+            studentBtn.textContent = "Logging in...";
+            studentBtn.disabled = true;
+            
             const res = await fetch("/api/student-login", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -274,7 +293,7 @@ loginSubmit.addEventListener('click', async (e) => {
 
             if (data.success) {
                 localStorage.setItem("student", JSON.stringify(data.student));
-                window.location.href = "../../Front-end/html/student-front.html";
+                window.location.href = "/html/student-front.html";
             } else {
                 if (data.field === "code") {
                     showError(code, "Invalid class code.");
