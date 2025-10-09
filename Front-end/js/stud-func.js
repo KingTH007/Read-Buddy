@@ -12,7 +12,7 @@ async function loadStudentStories() {
     }
 
     try {
-        const response = await fetch(`http://localhost:5000/get-student-stories/${student.id}`);
+        const response = await fetch(`/api/get-student-stories/${student.id}`);
         const data = await response.json();
 
         if (data.success) {

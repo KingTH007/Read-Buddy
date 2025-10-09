@@ -10,7 +10,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Function to generate questions using OpenAI
     async function generateQuestionsFromContext(context) {
         try {
-            const response = await fetch("http://localhost:5000/api/generate-questions", {
+            const response = await fetch("/api/api/generate-questions", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ context }),
@@ -29,7 +29,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Function to generate AI image using backend
     async function generateImageFromKeyword(keyword) {
         try {
-            const response = await fetch("http://localhost:5000/api/generate-image", {
+            const response = await fetch("/api/api/generate-image", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
@@ -117,7 +117,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         try {
-            const response = await fetch("http://localhost:5000/save-story", {
+            const response = await fetch("/api/save-story", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
@@ -168,7 +168,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         try {
-            const response = await fetch(`http://localhost:5000/get-stories/${teacher.id}`);
+            const response = await fetch(`/api/get-stories/${teacher.id}`);
             const data = await response.json();
 
             if (data.success) {
@@ -213,7 +213,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const overlay = document.querySelector(".overlay-color");
 
         try {
-            const response = await fetch(`http://localhost:5000/get-story/${storyId}`);
+            const response = await fetch(`/api/get-story/${storyId}`);
             if (!response.ok) {
             const text = await response.text();
             console.error("get-story failed:", response.status, text);
@@ -307,7 +307,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         try {
             console.log("PUT /update-story/" + storyId, updatedStory);
 
-            const response = await fetch(`http://localhost:5000/update-story/${storyId}`, {
+            const response = await fetch(`/api/update-story/${storyId}`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(updatedStory)
@@ -402,7 +402,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const teacherId = teacherData.id;
 
         try {
-            const response = await fetch("http://localhost:5000/create-class", {
+            const response = await fetch("/api/create-class", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
@@ -472,7 +472,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         try {
-            const res = await fetch(`http://localhost:5000/get-classes/${teacher.id}`);
+            const res = await fetch(`/api/get-classes/${teacher.id}`);
             const data = await res.json();
 
             console.log("API response:", data);
@@ -549,7 +549,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-    const socket = io("http://localhost:5000");
+    const socket = io(window.location.origin);
 
     socket.on("student-joined", (data) => {
         console.log("Student joined class:", data.code);
@@ -580,7 +580,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         studentList.innerHTML = "";
 
         try {
-            const res = await fetch(`http://localhost:5000/get-students/${classCode}`);
+            const res = await fetch(`/api/get-students/${classCode}`);
             const data = await res.json();
 
             if (!data.students) {
@@ -617,7 +617,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     const studentId = e.target.dataset.id;
                     showNotification('delete-student', e.target.closest('tr').querySelector('td:nth-child(2)').textContent, async () => {
                         try {
-                            const response = await fetch(`http://localhost:5000/delete-student/${studentId}`, {
+                            const response = await fetch(`/api/delete-student/${studentId}`, {
                                 method: "DELETE"
                             });
 
@@ -666,7 +666,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Delete class
     deleteClassBtn.addEventListener("click", async () => {
         showNotification('delete-class', classViewTitle.textContent, async () => {
-            await fetch(`http://localhost:5000/delete-class/${currentClassCode}`, {
+            await fetch(`/api/delete-class/${currentClassCode}`, {
                 method: "DELETE"
             });
             classViewOverlay.style.display = "none";

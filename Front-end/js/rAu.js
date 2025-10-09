@@ -65,7 +65,7 @@ function resetChoiceButtons() {
 }
 
 // Stories with correct answers
-fetch("../../Back-end/json/rau-stories.json")
+fetch("../json/rau-stories.json")
   .then(res => res.json())
   .then(data => {
     stories = data;

@@ -35,7 +35,7 @@ function stopTimer() {
 // Fetch ALL stories for sidebar
 async function fetchAllStories() {
   try {
-    const response = await fetch("http://localhost:5000/get-stories");
+    const response = await fetch("/api/get-stories");
     const data = await response.json();
 
     if (data.success && Array.isArray(data.stories)) {
@@ -294,7 +294,7 @@ async function saveResult(studentId, storyId, readSpeed, readScore, finalGrade) 
   const storyContentEl = document.getElementById("story-content");
 
   try {
-    const response = await fetch("http://localhost:5000/save-result", {
+    const response = await fetch("/api/save-result", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -340,7 +340,7 @@ async function fetchStory() {
   }
 
   try {
-    const response = await fetch(`http://localhost:5000/get-story/${storyId}`);
+    const response = await fetch(`/api/get-story/${storyId}`);
     const data = await response.json();
 
     if (data.success) {
@@ -358,7 +358,7 @@ async function fetchStory() {
 
       // ✅ AI Format story
       try {
-        const formatRes = await fetch("http://localhost:5000/api/format-story", {
+        const formatRes = await fetch("/api/api/format-story", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ content: currentStory })

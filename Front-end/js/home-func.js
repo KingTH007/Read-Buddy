@@ -113,7 +113,7 @@ registerSubmit.addEventListener('click', async (e) => {
     }
 
     try {
-        const response = await fetch("http://localhost:5000/register", {
+        const response = await fetch("/api/register", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ fullname: fullname.value, email: email.value, password: password.value }),
@@ -153,7 +153,7 @@ loginSubmit.addEventListener('click', async (e) => {
         [email, password].forEach(clearError);
 
         try {
-            const newLocal = "http://localhost:5000/login";
+            const newLocal = "/api/login";
             const response = await fetch(newLocal, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -198,7 +198,7 @@ loginSubmit.addEventListener('click', async (e) => {
         const formattedFullName = `${capitalize(surname)}, ${capitalize(firstname)}`;
 
         try {
-            const res = await fetch("http://localhost:5000/student-login", {
+            const res = await fetch("/api/student-login", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
@@ -237,7 +237,7 @@ loginSubmit.addEventListener('click', async (e) => {
 
 async function loginTeacher(email, password) {
     try {
-        const response = await fetch("http://localhost:5000/login", {
+        const response = await fetch("/api/login", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ email, password }),
