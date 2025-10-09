@@ -4,6 +4,10 @@
   "description": "Reading Comprehension for Elementary Students.",
   "main": "index.js",
   "scripts": {
+    "start": "node Back-end/js/server.js",
+    "build": "echo 'Build completed - Netlify will handle the deployment'",
+    "dev": "node Back-end/js/server.js",
+    "netlify:dev": "netlify dev",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {

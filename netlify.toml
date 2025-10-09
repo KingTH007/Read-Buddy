@@ -1,0 +1,45 @@
+[build]
+  # * Build command for Netlify Functions
+  command = "npm run build"
+  
+  # * Directory to publish (Netlify will serve the frontend from here)
+  publish = "Front-end"
+  
+  # * Functions directory for serverless functions
+  functions = "netlify/functions"
+
+[build.environment]
+  # * Node.js version
+  NODE_VERSION = "18"
+  
+  # * Environment variables (set these in Netlify dashboard)
+  NODE_ENV = "production"
+
+# * Redirect rules for SPA
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/server/:splat"
+  status = 200
+
+# * Catch-all for frontend routing
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# * Headers for security
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-XSS-Protection = "1; mode=block"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+
+# * CORS headers for API
+[[headers]]
+  for = "/api/*"
+  [headers.values]
+    Access-Control-Allow-Origin = "*"
+    Access-Control-Allow-Headers = "Content-Type, Authorization"
+    Access-Control-Allow-Methods = "GET, POST, PUT, DELETE, OPTIONS"
