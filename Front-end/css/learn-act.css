@@ -4,14 +4,14 @@
     --accent: #FFE66D;
     --light: #F7FFF7;
     --dark: #292F36;
-}   
+}
 
 * {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
 }
-        
+
 body {
     font-family: 'Poppins', sans-serif;
     background-color: #F0F8FF;
@@ -19,28 +19,63 @@ body {
     line-height: 1.6;
 }
 
-.content {
+/* --- MAIN LAYOUT --- */
+main {
     display: flex;
+    width: 100%;
+    min-height: 100vh;
 }
 
-/* Sidebar fixed under the header */
+/* --- SIDEBAR --- (Default: Desktop) */
 .sidebar {
-    display: fixed;
-    top: 60px; /* adjust to match your header height */
+    position: fixed;
+    top: 0;
     left: 0;
-    height: calc(100vh - 60px); /* full height minus header */
-    width: 220px;
-    background: #ff8080;
+    width: 240px;
+    height: 100vh;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
     color: white;
     padding: 20px;
-    box-shadow: 2px 0 6px rgba(0,0,0,0.1);
-    overflow-y: auto; /* scroll only inside sidebar if content overflows */
+    box-shadow: 2px 0 6px rgba(0, 0, 0, 0.15);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    overflow: hidden;
+    transition: all 0.3s ease-in-out;
+}
+
+/* Logo Container */
+.sidebar .logo-container {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-bottom: 2rem;
+}
+
+.sidebar .logo {
+    width: 55px;
+    height: 55px;
+    opacity: 0.95;
+}
+
+.sidebar .logo-text {
+    font-family: 'Baloo 2', cursive;
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: white;
 }
 
 .sidebar h2 {
-    font-size: 1.1rem;
-    margin-bottom: 20px;
+    font-size: 1.2rem;
+    margin: 1rem 0;
     font-weight: 700;
+}
+
+/* Scrollable List */
+.learn-list {
+    flex: 1;
+    overflow-y: auto;
+    margin-bottom: 1.5rem;
 }
 
 .side-btn {
@@ -54,9 +89,95 @@ body {
     color: #292f36;
     font-weight: 600;
     cursor: pointer;
+    transition: all 0.2s ease;
 }
 
-/* Container for all activity content */
+.side-btn:hover {
+    background: #b7e9f6;
+}
+
+.back-link {
+    display: block;
+    text-align: center;
+    background: rgba(255, 255, 255, 0.9);
+    color: var(--primary);
+    padding: 10px;
+    border-radius: 8px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.back-link:hover {
+    background: white;
+    color: var(--secondary);
+    transform: translateY(-2px);
+}
+
+.sidebar .login-btn {
+    background-color: var(--primary);
+    color: white;
+    font-weight: 700;
+    text-align: center;
+    padding: 12px 0;
+    border-radius: 30px;
+    text-decoration: none;
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+    transition: all 0.3s ease;
+}
+
+.sidebar .login-btn:hover {
+    background-color: #f74d2b;
+    color: var(--secondary);
+    transform: translateY(-3px);
+}
+
+/* --- HAMBURGER --- */
+.hamburger {
+    display: none;
+    font-size: 1.8rem;
+    background: var(--primary);
+    color: white;
+    padding: 8px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    position: fixed;
+    top: 15px;
+    left: 15px;
+    z-index: 1001;
+}
+
+.background {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 998;
+    transition: opacity 0.3s ease;
+}
+
+.background.show {
+    display: block;
+    opacity: 1;
+}
+
+/* --- MAIN CONTENT --- */
+.main-content {
+    margin-left: 240px;
+    flex: 1;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+}
+
 .content-container {
     width: 100%;
     max-width: 1000px;
@@ -65,28 +186,18 @@ body {
     box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     display: flex;
     flex-direction: column;
-
-    margin-left: 40px;
-    margin-top: 20px;
-    margin-bottom: 20px;
     padding: 20px;
-
-    max-height: calc(100vh - 120px);
+    max-height: calc(100vh - 40px);
     overflow-y: auto;
 }
 
-/* Header (title + buttons) */
 .content-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
 }
 
-.content-header h2 {
-    font-weight: 700;
-}
-
-/* Mode buttons */
+/* --- Mode Buttons --- */
 .mode-btns button {
     background: #08c2ff;
     border: none;
@@ -95,11 +206,11 @@ body {
     margin-left: 10px;
     border-radius: 20px;
     font-weight: 600;
-    font-size: 1.4rem;
+    font-size: 1rem;
     cursor: pointer;
 }
 
-/* Gray content box */
+/* --- CONTENT BOX --- */
 .content-box {
     background: #fdfdfd;
     flex: 1;
@@ -110,32 +221,14 @@ body {
     overflow-y: auto;
     box-shadow: inset 0 0 8px rgba(0,0,0,0.1);
     display: flex;
-    flex-direction: column; /* bubbles stack straight down */
+    flex-direction: column;
 }
 
-/* Bubble style messages */
+/* --- Bubble Messages --- */
 .bubble {
-    position: relative;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
     padding: 8px 12px;
     border-radius: 12px;
     margin: 6px 0;
-}
-
-.bubble .speak-btn {
-    background: none;
-    border: none;
-    cursor: pointer;
-    font-size: 18px;
-    margin-left: 10px;
-    color: #555;
-    transition: color 0.2s ease;
-}
-
-.bubble .speak-btn:hover {
-    color: #000;
 }
 
 .system {
@@ -150,12 +243,12 @@ body {
     align-self: flex-end;
 }
 
-/* User input styling */
+/* --- Answer Buttons --- */
 .answer-container {
     display: flex;
     justify-content: space-between;
-    margin-bottom: 15px;
     gap: 10px;
+    margin-bottom: 15px;
 }
 
 .answer-btn {
@@ -175,10 +268,11 @@ body {
     background: #007bbd;
 }
 
-/* Start button */
+/* --- Start / Restart Buttons --- */
 .start-btn-container {
     display: flex;
     justify-content: flex-end;
+    gap: 10px;
 }
 
 .start-btn, .restart-btn {
@@ -186,9 +280,90 @@ body {
     border: none;
     color: white;
     font-weight: bold;
-    font-size: 1.2rem;
+    font-size: 1.1rem;
     padding: 10px 25px;
     border-radius: 20px;
     cursor: pointer;
-    margin-left: 10px;
+}
+
+.start-btn:hover, .restart-btn:hover {
+    background: #f74d2b;
+}
+
+/* --- RESPONSIVE --- */
+@media (max-width: 768px) {
+    .hamburger {
+        display: block;
+    }
+
+    .sidebar {
+        position: fixed;
+        top: 0;
+        right: -240px;
+        left: auto;
+        width: 240px;
+        transition: right 0.3s ease-in-out;
+        border-radius: 12px 0 0 12px;
+    }
+
+    .sidebar.show {
+        right: 0;
+    }
+
+    .main-content {
+        margin-left: 0;
+        padding: 15px;
+    }
+
+    /* 🔹 Stack the title and mode buttons */
+    .content-header {
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 10px;
+    }
+
+    .content-header h2 {
+        font-size: 1.5rem;
+        text-align: right;
+    }
+
+    /* 🔹 Move mode buttons below and align them to the right */
+    .mode-btns {
+        align-self: flex-end;
+    }
+}
+
+@media (max-width: 480px) {
+    .sidebar {
+        width: 230px;
+        right: -230px;
+        left: auto;
+        padding: 15px;
+        border-radius: 12px 0 0 12px;
+        transition: right 0.3s ease-in-out;
+        z-index: 1001;
+    }
+
+    .sidebar.show {
+        right: 0;
+    }
+
+    .hamburger {
+        font-size: 1.6rem;
+        padding: 8px 12px;
+    }
+
+    .content-container {
+        padding: 10px;
+    }
+
+    .content-header h2 {
+        font-size: 1.2rem;
+        text-align: left;
+    }
+
+    .mode-btns button {
+        padding: 6px 10px;
+        font-size: 0.9rem;
+    }
 }
