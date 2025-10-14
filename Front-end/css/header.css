@@ -4,63 +4,56 @@
     --accent: #FFE66D;
     --light: #F7FFF7;
     --dark: #292F36;
-}   
+}
 
 /* Header */
 header {
     background: linear-gradient(135deg, var(--primary), var(--secondary));
     color: #FFF8E1;
-    padding: 0.3rem 2rem;
-    text-align: center;
+    padding: 0.7rem 2rem; /* Reduced padding for normal nav size */
     box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     position: relative;
     overflow: hidden;
 }
-        
+
 .header-content {
-    position: relative;
-    z-index: 2;
     display: flex;
     justify-content: space-between;
     align-items: center;
 }
-        
+
+/* Logo Section */
 .logo-container {
     display: flex;
-    justify-content: flex-start;
     align-items: center;
-    margin-bottom: 1rem;
-    gap: 1rem;
-}
-        
-.logo-text {
-    font-family: 'Baloo 2', cursive;
-    font-size: 2.5rem;
-    font-weight: 700;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
-    margin-left: 1rem;
-    margin-top: 0.3rem;
-}
-        
-.logo {
-    position: relative;
-    width: 80px;
-    height: 80px;
-    top: 10px;
-    left: 20px;
-    opacity: 0.8;
-    transform: rotate(-10deg);
+    gap: 0.6rem;
 }
 
+.logo {
+    width: 50px;
+    height: 50px;
+    opacity: 0.9;
+    transform: rotate(-8deg);
+}
+
+.logo-text {
+    font-family: 'Baloo 2', cursive;
+    font-size: 1.8rem;
+    font-weight: 700;
+    text-shadow: 1px 1px 3px rgba(0,0,0,0.2);
+    margin: 0;
+}
+
+/* Navigation Links */
 .link {
     display: flex;
     align-items: center;
-    gap: 2.4rem;
+    gap: 1.5rem;
 }
 
 .link a {
     font-family: 'Baloo 2', cursive;
-    font-size: 1.5rem;
+    font-size: 1.1rem;
     text-decoration: none;
     color: white;
     font-weight: 600;
@@ -85,46 +78,31 @@ header {
     background-color: #f74d2b;
 }
 
+/* Hamburger Menu (hidden by default) */
 .hamburger {
-    font-size: 2rem;
+    font-size: 1.8rem;
     cursor: pointer;
     color: white;
     display: none;
 }
 
-/* End of Header */
-
-/*Responsive Layout*/
+/* Responsive Layout */
 @media (max-width: 768px) {
     .logo {
-        width: 50px;
-        height: 50px;
-        top: 5px;
-        left: 10px;
-    }
-
-    .logo-text {
-        font-size: 1.8rem;
-    }
-
-    .logo-container {
-        gap: 0.5rem;
-        margin-bottom: 0.5rem;
-    }
-}
-
-@media (max-width: 480px) {
-    .logo {
-        width: 40px;
-        height: 40px;
-        top: 0;
-        left: 5px;
+        width: 45px;
+        height: 45px;
     }
 
     .logo-text {
         font-size: 1.5rem;
     }
 
+    .link a {
+        font-size: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
     .hamburger {
         display: block;
         z-index: 1001;
@@ -133,15 +111,15 @@ header {
     .link {
         position: fixed;
         top: 0;
-        right: -170px;
+        right: -180px;
         flex-direction: column;
         background: linear-gradient(135deg, var(--primary), var(--secondary));
         height: 100vh;
-        width: 170px;
-        padding: 4rem 0.5rem;
+        width: 180px;
+        padding: 5rem 1rem;
         gap: 1.5rem;
         transition: right 0.3s ease;
-        z-index: 1000s;
+        z-index: 1000;
     }
 
     .link.show {
