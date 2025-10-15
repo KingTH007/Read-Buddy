@@ -228,6 +228,112 @@ main {
     flex-direction: column;
 }
 
+.question-wrapper {
+  margin-bottom: 20px;
+}
+
+.question-wrapper p {
+  font-size: 1.2rem;
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+
+/* Radio button choices */
+.choice-label {
+  display: flex;
+  align-items: center;
+  font-size: 1.1rem;
+  background: #eaf6ff;
+  border: 2px solid #cce7ff;
+  padding: 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.choice-label:hover {
+  background: #d9efff;
+}
+
+.choice-label input[type="radio"] {
+  margin-right: 10px;
+  transform: scale(1.2);
+}
+
+/* Nav buttons */
+.nav-btns {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+}
+
+.nav-btns button {
+  background: var(--secondary);
+  border: none;
+  color: white;
+  font-weight: 600;
+  padding: 15px 30px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.3s;
+  font-size: large;
+}
+
+.nav-btns button:hover {
+  background: #06a1d5;
+}
+
+.nav-btns button:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+/* Review Page */
+.review-block {
+  background: #f7f9fc;
+  padding: 15px;
+  margin-bottom: 15px;
+  border-left: 4px solid var(--secondary);
+  border-radius: 8px;
+}
+
+.review-block p {
+  margin: 5px 0;
+}
+
+.review-block button {
+  margin-top: 10px;
+  background: var(--secondary);
+  color: white;
+  border: none;
+  padding: 6px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.review-block button:hover {
+  background: var(--secondary);
+}
+
+/* Submit button */
+#submit-btn {
+  display: block;
+  margin: 20px auto;
+  padding: 12px 30px;
+  font-size: 1.2rem;
+  font-weight: bold;
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 25px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+#submit-btn:hover {
+  background: #e85c5c;
+}
+
 /* --- BUTTONS --- */
 .start-btn-container {
     display: flex;
@@ -249,6 +355,48 @@ main {
 .start-btn:hover {
     background: #f74d2b;
     transform: translateY(-2px);
+}
+
+/* Results Container */
+#story-content h3 {
+  font-size: 1.8rem;
+  text-align: center;
+  margin-bottom: 1rem;
+  color: #333;
+}
+
+#story-content p {
+  font-size: 1.2rem;
+  margin: 0.4rem 0;
+  padding: 0.5rem;
+  border-radius: 6px;
+}
+
+#story-content p strong {
+  color: #0056b3;
+}
+
+#story-content hr {
+  margin: 1rem 0;
+  border: 0;
+  border-top: 2px dashed #ccc;
+}
+
+#story-content #result {
+  font-size: 1.2rem;
+  font-weight: bold;
+  text-align: center;
+  background: #eaf5ea;
+  border: 2px solid #4caf50;
+  color: #2e7d32;
+  padding: 10px;
+  border-radius: 10px;
+}
+
+#story-content #result.fail {
+  background: #fdeaea;
+  border: 2px solid #f44336;
+  color: #c62828;
 }
 
 /* --- RESPONSIVE --- */

@@ -17,7 +17,7 @@ const PORT = 5000;
 app.use(cors());
 app.use(express.json());
 app.use(bodyParser.json());
-app.use(express.static(path.join(__dirname, "../../Front-end")));
+app.use(express.static(path.join(__dirname, "../Front-end")));
 
 // HTTP + Socket server
 const server = http.createServer(app);
