@@ -529,14 +529,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                         return;
                     }
                     openClassView(classCode, li.dataset.className);
+                    openClass(classCode);
                 });
             });
         } catch (err) {
             console.error("Error loading classes:", err);
         }
     }
-
-
 
     // 🔹 Auto-load stories after login/reload
     window.addEventListener("DOMContentLoaded", async () => {
@@ -748,4 +747,82 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
+    // === ENROLL STUDENT OVERLAY ===
+    const enrollBtn = document.getElementById('enroll-student-btn');
+    const enrollOverlayColor = document.querySelector('.enroll-overlay-color');
+    const enrollOverlap = document.querySelector('.enroll-overlap');
+    const enrollCancel = document.getElementById('enroll-overlap-cancel');
+    const enrollForm = document.getElementById('enroll-form');
+    const enrollClassCode = document.getElementById('enroll-class-code');
+
+    // 🧩 Variable to store the selected class code (set dynamically when viewing a class)
+    let selectedClassCode = null;
+
+    // Example: when teacher opens a specific class
+    // Call this function after a class is selected from your class list
+    function openClass(code) {
+        selectedClassCode = code;
+        console.log("✅ Selected class code:", selectedClassCode);
+    }
+
+    // Open overlay when clicking "Enroll Student"
+    enrollBtn.addEventListener('click', () => {
+        if (!selectedClassCode) {
+            alert("Please select a class first before enrolling a student.");
+            return;
+        }
+
+        enrollClassCode.value = selectedClassCode;
+        enrollOverlayColor.style.display = 'block';
+        enrollOverlap.style.display = 'block';
+    });
+
+    // Close overlay
+    enrollCancel.addEventListener('click', () => {
+        enrollOverlayColor.style.display = 'none';
+        enrollOverlap.style.display = 'none';
+        enrollForm.reset();
+    });
+
+    // Form submission handler (connected to server)
+    enrollForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const firstName = document.getElementById('enroll-first-name').value.trim();
+        const lastName = document.getElementById('enroll-last-name').value.trim();
+        const classCode = enrollClassCode.value.trim();
+
+        if (!firstName || !lastName || !classCode) {
+            alert("Please fill out all required fields.");
+            return;
+        }
+
+        // Combine to match your server normalization ("Surname, Firstname")
+        const fullname = `${lastName}, ${firstName}`;
+
+        try {
+            const response = await fetch("http://localhost:5000/student-register", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ fullname, code: classCode })
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                alert(`✅ ${result.student.fullname} successfully enrolled in class ${result.student.code}!`);
+                enrollOverlayColor.style.display = 'none';
+                enrollOverlap.style.display = 'none';
+                enrollForm.reset();
+            } else {
+                alert(`⚠️ ${result.message || "Student enrollment failed."}`);
+            }
+
+        } catch (err) {
+            console.error("❌ Enrollment Error:", err);
+            alert("Error connecting to server. Please try again.");
+        }
+    });
 });

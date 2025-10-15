@@ -44,17 +44,47 @@ app.post("/register", async (req, res) => {
   try {
     const { fullname, email, password } = req.body;
 
+    // ✅ Validate Fullname (only letters and spaces)
+    const nameRegex = /^[A-Za-z\s]+$/;
+    if (!nameRegex.test(fullname)) {
+      return res.status(400).json({
+        success: false,
+        field: "fullname",
+        message: "Name should only contain letters.",
+      });
+    }
+
+    // ✅ Validate Email format (must end with @gmail.com)
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({
+        success: false,
+        field: "email",
+        message: "Please enter a valid Gmail address (e.g. example@gmail.com).",
+      });
+    }
+
+    // ✅ Validate Password strength
+    if (!password || password.length < 6) {
+      return res.status(400).json({
+        success: false,
+        field: "password",
+        message: "Password must be at least 6 characters long.",
+      });
+    }
+
+    // ✅ Check if email already exists
     const existing = await pool.query("SELECT * FROM teachers WHERE email = $1", [email]);
     if (existing.rows.length > 0) {
       return res.status(400).json({
         success: false,
         field: "email",
-        message: "This email has been used, please use another.",
+        message: "This email has already been used, please use another.",
       });
     }
 
+    // ✅ Hash password and insert into DB
     const hashedPassword = await bcrypt.hash(password, 10);
-
     const newTeacher = await pool.query(
       "INSERT INTO teachers (fullname, email, password) VALUES ($1, $2, $3) RETURNING *",
       [fullname, email, hashedPassword]
@@ -63,7 +93,7 @@ app.post("/register", async (req, res) => {
     res.json({ success: true, teacher: newTeacher.rows[0] });
   } catch (err) {
     console.error("❌ Teacher Registration Error:", err);
-    res.status(500).json({ success: false, message: "Registration failed" });
+    res.status(500).json({ success: false, message: "Registration failed." });
   }
 });
 
@@ -73,10 +103,16 @@ app.post("/register", async (req, res) => {
 app.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
-    const teacherQuery = await pool.query("SELECT * FROM teachers WHERE email = $1", [email]);
 
+    // ✅ Validate Email
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ success: false, field: "email", message: "Invalid email format." });
+    }
+
+    const teacherQuery = await pool.query("SELECT * FROM teachers WHERE email = $1", [email]);
     if (teacherQuery.rows.length === 0) {
-      return res.status(400).json({ success: false, field: "email", message: "Email not found" });
+      return res.status(400).json({ success: false, field: "email", message: "Email not found." });
     }
 
     const teacher = teacherQuery.rows[0];
@@ -86,32 +122,57 @@ app.post("/login", async (req, res) => {
       return res.status(400).json({
         success: false,
         field: "password",
-        message: "Incorrect password",
+        message: "Incorrect password.",
       });
     }
 
-    // ✅ Return only the needed fields cleanly
     res.json({
       success: true,
       teacher: {
         id: teacher.id,
         fullname: teacher.fullname,
-        email: teacher.email
-      }
+        email: teacher.email,
+      },
     });
   } catch (err) {
     console.error("❌ Teacher Login Error:", err);
-    res.status(500).json({ success: false, message: "Login failed" });
+    res.status(500).json({ success: false, message: "Login failed." });
   }
 });
 
 /**
- * Create a Class
+ * Create a Class (Teacher)
+ */
+app.post("/create-class", async (req, res) => {
+  try {
+    const { name, code, teacher_id } = req.body;
+
+    // Check if code already exists
+    const existing = await pool.query("SELECT * FROM class WHERE code = $1", [code]);
+    if (existing.rows.length > 0) {
+      return res.status(400).json({ success: false, message: "Class code already exists." });
+    }
+
+    const newClass = await pool.query(
+      "INSERT INTO class (code, name, teacher_id) VALUES ($1, $2, $3) RETURNING *",
+      [code, name, teacher_id]
+    );
+
+    res.json({ success: true, class: newClass.rows[0] });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: "Failed to create class" });
+  }
+});
+
+/**
+ * STUDENT LOGIN (Existing Students Only)
  */
 app.post("/student-login", async (req, res) => {
   try {
     const { fullname, code } = req.body;
 
+    // Check if class exists
     const classExists = await pool.query("SELECT * FROM class WHERE code = $1", [code]);
     if (classExists.rows.length === 0) {
       return res.status(400).json({ success: false, field: "code", message: "Invalid class code" });
@@ -128,13 +189,13 @@ app.post("/student-login", async (req, res) => {
 
     const normalizedFullName = `${surname}, ${firstname}`;
 
-    // 🔍 Find student (case-insensitive)
+    // 🔍 Try to find student
     let student = await pool.query(
       `SELECT * FROM students WHERE LOWER(fullname) = LOWER($1) AND code = $2`,
       [normalizedFullName, code]
     );
 
-    // If not found, check reversed order
+    // Also check reversed order
     if (student.rows.length === 0) {
       const reversedName = `${firstname}, ${surname}`;
       student = await pool.query(
@@ -143,19 +204,13 @@ app.post("/student-login", async (req, res) => {
       );
     }
 
-    // Auto-register if not found
+    // ❌ No student found
     if (student.rows.length === 0) {
-      student = await pool.query(
-        "INSERT INTO students (fullname, code) VALUES ($1, $2) RETURNING *",
-        [normalizedFullName, code]
-      );
-
-      await pool.query("UPDATE class SET no_students = no_students + 1 WHERE code = $1", [code]);
-      io.emit("student-joined", { code });
+      return res.status(400).json({ success: false, field: "fullname", message: "Student not found. Please register first." });
     }
 
+    // ✅ Login success
     const s = student.rows[0];
-
     res.json({
       success: true,
       student: {
@@ -170,6 +225,66 @@ app.post("/student-login", async (req, res) => {
   }
 });
 
+/**
+ * STUDENT REGISTER (New Students Only)
+ */
+app.post("/student-register", async (req, res) => {
+  try {
+    const { fullname, code } = req.body;
+
+    // Check if class exists
+    const classExists = await pool.query("SELECT * FROM class WHERE code = $1", [code]);
+    if (classExists.rows.length === 0) {
+      return res.status(400).json({ success: false, field: "code", message: "Invalid class code" });
+    }
+
+    // Normalize input
+    const [surname, firstname] = fullname
+      .replace(/\s+/g, " ")
+      .trim()
+      .replace(/(^\w|\s\w)/g, m => m.toUpperCase())
+      .split(/,|\s/)
+      .map(n => n.trim())
+      .filter(Boolean);
+
+    const normalizedFullName = `${surname}, ${firstname}`;
+
+    // 🔍 Check if already registered
+    const existingStudent = await pool.query(
+      `SELECT * FROM students WHERE LOWER(fullname) = LOWER($1) AND code = $2`,
+      [normalizedFullName, code]
+    );
+
+    if (existingStudent.rows.length > 0) {
+      return res.status(400).json({ success: false, field: "fullname", message: "Student already registered in this class" });
+    }
+
+    // ✅ Insert new student
+    const student = await pool.query(
+      "INSERT INTO students (fullname, code) VALUES ($1, $2) RETURNING *",
+      [normalizedFullName, code]
+    );
+
+    // Update student count
+    await pool.query("UPDATE class SET no_students = no_students + 1 WHERE code = $1", [code]);
+
+    // Notify via socket
+    io.emit("student-joined", { code });
+
+    const s = student.rows[0];
+    res.json({
+      success: true,
+      student: {
+        id: s.id,
+        fullname: s.fullname,
+        code: s.code
+      }
+    });
+  } catch (err) {
+    console.error("❌ Student Register Error:", err.message);
+    res.status(500).json({ success: false, message: "Student registration failed" });
+  }
+});
 
 /**
  * Get all classes for a teacher

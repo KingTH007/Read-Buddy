@@ -35,7 +35,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Fetch ALL stories for sidebar
   async function fetchAllStories() {
     try {
-      const response = await fetch("/api/get-stories");
+      const response = await fetch("http://localhost:5000/get-stories");
       const data = await response.json();
 
       if (data.success && Array.isArray(data.stories)) {
@@ -294,7 +294,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const storyContentEl = document.getElementById("story-content");
 
     try {
-      const response = await fetch("/api/save-result", {
+      const response = await fetch("http://localhost:5000/save-result", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -340,7 +340,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     try {
-      const response = await fetch(`/api/get-story/${storyId}`);
+      const response = await fetch(`http://localhost:5000/get-story/${storyId}`);
       const data = await response.json();
 
       if (data.success) {
@@ -358,7 +358,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         // ✅ AI Format story
         try {
-          const formatRes = await fetch("/api/api/format-story", {
+          const formatRes = await fetch("http://localhost:5000/format-story", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ content: currentStory })
@@ -454,4 +454,28 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
     });
   }
+
+  const logoutBtn = document.getElementById("logout-btn");
+  const userNameSpan = document.getElementById("user-name");
+
+    // Check localStorage for login info
+  const teacherData = JSON.parse(localStorage.getItem("teacher"));
+  const studentData = JSON.parse(localStorage.getItem("student"));
+
+    if (teacherData && teacherData.fullname) {
+        userNameSpan.textContent = teacherData.fullname;
+    } else if (studentData && studentData.fullname) {
+        userNameSpan.textContent = studentData.fullname;
+    } else {
+        userNameSpan.textContent = "User";
+    }
+
+    // ✅ Add logout functionality
+    logoutBtn.addEventListener("click", () => {
+        if (confirm("Are you sure you want to logout?")) {
+            localStorage.removeItem("teacher");
+            localStorage.removeItem("student");
+            window.location.href = "../../Front-end/html/home-page.html";
+        }
+    });
 });

@@ -81,18 +81,24 @@ closeRegister.addEventListener('click', () => {
     loginModel.style.display = 'block';
 });
 
-// Helper: show error message beside input
+// Helper functions
 function showError(input, message) {
     input.classList.add("error");
-    const errorSpan = input.nextElementSibling;
-    if (errorSpan) errorSpan.textContent = message;
+    let errorMsg = input.nextElementSibling;
+    if (!errorMsg || !errorMsg.classList.contains("error-message")) {
+        errorMsg = document.createElement("span");
+        errorMsg.classList.add("error-message");
+        input.insertAdjacentElement("afterend", errorMsg);
+    }
+    errorMsg.textContent = message;
 }
 
-// Helper: clear error
 function clearError(input) {
     input.classList.remove("error");
-    const errorSpan = input.nextElementSibling;
-    if (errorSpan) errorSpan.textContent = "";
+    const next = input.nextElementSibling;
+    if (next && next.classList.contains("error-message")) {
+        next.remove();
+    }
 }
 
 const registerSubmit = document.getElementById('registerSubmit');
@@ -104,9 +110,9 @@ registerSubmit.addEventListener('click', async (e) => {
     const password = document.getElementById("regPassword");
     const confirmPassword = document.getElementById("regConfirm");
 
-    // Clear previous errors
     [fullname, email, password, confirmPassword].forEach(clearError);
 
+    // ✅ Check matching passwords
     if (password.value !== confirmPassword.value) {
         showError(confirmPassword, "Passwords do not match!");
         return;
@@ -116,27 +122,29 @@ registerSubmit.addEventListener('click', async (e) => {
         const response = await fetch("http://localhost:5000/register", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ fullname: fullname.value, email: email.value, password: password.value }),
+            body: JSON.stringify({
+                fullname: fullname.value.trim(),
+                email: email.value.trim(),
+                password: password.value.trim(),
+            }),
         });
 
         const data = await response.json();
 
         if (data.success) {
-            alert("Registration successful ✅ Please log in.");
-            registerModel.style.display = 'none';
+            alert("✅ Registration successful! Please log in.");
+            document.querySelector('.register-model').style.display = 'none';
             document.querySelector('.login-model').style.display = 'block';
         } else {
-            if (data.field === "email") {
-                showError(email, "This email has been used, please use another.");
-            } else if (data.field === "password") {
-                showError(password, "Password is too weak.");
-            } else {
-                alert(data.message || "Registration failed.");
-            }
+            // ✅ Show specific error messages
+            if (data.field === "fullname") showError(fullname, data.message);
+            else if (data.field === "email") showError(email, data.message);
+            else if (data.field === "password") showError(password, data.message);
+            else alert(data.message || "Registration failed.");
         }
     } catch (error) {
         console.error(error);
-        alert("Error connecting to server.");
+        alert("Error connecting to the server.");
     }
 });
 
@@ -179,7 +187,7 @@ loginSubmit.addEventListener('click', async (e) => {
             alert("Error connecting to server.");
         }
     } else if (loginForms.classList.contains("student-active")) {
-        // Student login
+        // === Student login ===
         const surnameInput = document.getElementById("studentSurname");
         const firstnameInput = document.getElementById("studentFirstname");
         const code = document.getElementById("classCode");
@@ -188,13 +196,23 @@ loginSubmit.addEventListener('click', async (e) => {
 
         const surname = surnameInput.value.trim();
         const firstname = firstnameInput.value.trim();
+        const classCode = code.value.trim();
 
-        if (!surname || !firstname || !code.value.trim()) {
-            alert("Please enter your surname, first name, and class code.");
+        // 🔍 Validation
+        if (!surname) {
+            showError(surnameInput, "Please enter your surname.");
+            return;
+        }
+        if (!firstname) {
+            showError(firstnameInput, "Please enter your first name.");
+            return;
+        }
+        if (!classCode) {
+            showError(code, "Please enter your class code.");
             return;
         }
 
-        // 🔠 Capitalize first letters (for display)
+        // 🔠 Capitalize properly
         const formattedFullName = `${capitalize(surname)}, ${capitalize(firstname)}`;
 
         try {
@@ -203,25 +221,31 @@ loginSubmit.addEventListener('click', async (e) => {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     fullname: formattedFullName,
-                    code: code.value.trim(),
+                    code: classCode,
                 }),
             });
 
             const data = await res.json();
 
             if (data.success) {
+                // ✅ Save and redirect
                 localStorage.setItem("student", JSON.stringify(data.student));
                 window.location.href = "../../Front-end/html/student-front.html";
             } else {
+                // ❌ Show inline errors
                 if (data.field === "code") {
-                    showError(code, "Invalid class code.");
+                    showError(code, "Invalid class code. Please try again.");
+                } else if (data.field === "fullname") {
+                    showError(firstnameInput, "Name not recognized in this class.");
+                    showError(surnameInput, "Name not recognized in this class.");
                 } else {
-                    alert(data.message || "Login failed.");
+                    // Catch-all fallback
+                    showError(code, data.message || "Login failed. Please try again.");
                 }
             }
         } catch (err) {
-            console.error(err);
-            alert("Error connecting to server.");
+            console.error("❌ Connection error:", err);
+            showError(code, "Unable to connect to the server. Try again later.");
         }
     }
 

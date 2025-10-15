@@ -24,10 +24,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // ✅ Add logout functionality
     logoutBtn.addEventListener("click", () => {
-        if (confirm("Are you sure you want to logout?")) {
-            localStorage.removeItem("teacher");
-            localStorage.removeItem("student");
-            window.location.href = "../../Front-end/html/home-page.html";
-        }
+        localStorage.removeItem("teacher");
+        localStorage.removeItem("student");
+        window.location.href = "../../Front-end/html/home-page.html";
     });
 });

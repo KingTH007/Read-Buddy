@@ -290,6 +290,19 @@ main {
     background: #f74d2b;
 }
 
+.speak-btn {
+    border: none;
+    background: none;
+    color: var(--secondary);
+    cursor: pointer;
+    font-size: 1.2rem;
+    transition: color 0.2s ease;
+}   
+
+.speak-btn:hover {
+    color: #0056b3;
+}
+
 /* --- RESPONSIVE --- */
 @media (max-width: 768px) {
     .hamburger {

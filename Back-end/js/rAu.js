@@ -34,10 +34,10 @@ function addMessage(text, type = "system", isStoryOrQuestion = false) {
     messageText.textContent = text;
     bubble.appendChild(messageText);
 
-    // only add 🔊 for story or question bubbles
+    // only add Bootstrap icon for story or question bubbles
     if (type === "system" && isStoryOrQuestion) {
         const speakBtn = document.createElement("button");
-        speakBtn.innerHTML = "🔊"; // speaker icon
+        speakBtn.innerHTML = `<i class="bi bi-volume-up-fill"></i>`; // Bootstrap icon
         speakBtn.classList.add("speak-btn");
 
         speakBtn.addEventListener("click", () => {
