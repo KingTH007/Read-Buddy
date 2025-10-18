@@ -31,6 +31,41 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
+    // SIDEBAR TOGGLE FOR LEARN & PRACTICE
+    const readBtn = document.getElementById("rAu");
+    const speakBtn = document.getElementById("wPa");
+    const readSection = document.getElementById("readUnderstand");
+    const speakSection = document.getElementById("sayItRight");
+
+    readBtn.addEventListener("click", () => {
+        readSection.style.display = "flex";
+        speakSection.style.display = "none";
+    });
+
+    speakBtn.addEventListener("click", () => {
+        speakSection.style.display = "flex";
+        readSection.style.display = "none";
+    });
+
+    // --- Detect selected learning activity from URL ---
+    const params = new URLSearchParams(window.location.search);
+    const selectedActivity = params.get("activity");
+
+    // Hide both first
+    if (readSection) readSection.style.display = "none";
+    if (speakSection) speakSection.style.display = "none";
+
+    // Show selected activity
+    if (selectedActivity === "readUnderstand" && readSection) {
+        readSection.style.display = "flex";
+    } else if (selectedActivity === "sayItRight" && speakSection) {
+        speakSection.style.display = "flex";
+    } else {
+        // Default state (if no parameter found)
+        if (readSection) readSection.style.display = "flex";
+    }
+
+    // LOGOUT FUNCTIONALITY
     const logoutBtn = document.getElementById("logout-btn");
     const userNameSpan = document.getElementById("user-name");
 
@@ -48,10 +83,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // ✅ Add logout functionality
     logoutBtn.addEventListener("click", () => {
-        if (confirm("Are you sure you want to logout?")) {
-            localStorage.removeItem("teacher");
-            localStorage.removeItem("student");
-            window.location.href = "../../Front-end/html/home-page.html";
-        }
+        localStorage.removeItem("teacher");
+        localStorage.removeItem("student");
+        window.location.href = "../../Front-end/html/home-page.html";
     });
 });

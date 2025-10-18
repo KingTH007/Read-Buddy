@@ -26,8 +26,10 @@
                 <a href="../html/student-front.html" class="back-link">← Back to Home</a>
                 <h2>📘 Learning<br>Activities</h2>
                 <div class="learn-list">
-                    <button class="side-btn">Read and Understand</button>
+                    <button class="side-btn" id="rAu">Read and Understand</button>
+                    <button class="side-btn" id="wPa">Say It Right!</button>
                 </div>
+                
 
                 <a href="#" class="nav-btn login-btn" id="logout-btn">
                     <i class="fa fa-user"></i> 
@@ -37,10 +39,11 @@
         </div>
         <!-- Main Content -->
         <section class="main-content">
-            <div class="content-container">
+            <!-- Read and Understand -->
+            <div class="content-container" id="readUnderstand">
                 <div class="content-header">
                     <h2>Read and Understand</h2>
-                    <div class="mode-btns">
+                    <div class="mode-btns" id="readUnderstand-mode">
                         <button>Easy</button>
                         <button>Medium</button>
                         <button>Hard</button>
@@ -48,12 +51,12 @@
                 </div>
 
                 <!-- Chat-style content -->
-                <div class="content-box" id="contentBox">
+                <div class="content-box" id="rAuBox">
                     <div class="bubble system">Select a mode to see the instructions.</div>
                 </div>
 
                 <!-- Input for user -->
-                <div class="answer-container" id="answerContainer">
+                <div class="answer-container" id="rAuAnswers">
                     <button class="answer-btn" data-choice="A">A</button>
                     <button class="answer-btn" data-choice="B">B</button>
                     <button class="answer-btn" data-choice="C">C</button>
@@ -66,10 +69,92 @@
                     <button class="restart-btn">RESTART</button>
                 </div>
             </div>
+
+            <!-- Say It Right! -->
+            <div class="content-container" id="sayItRight">
+                <div class="content-header">
+                    <h2>Say It Right!</h2>
+                    <div class="mode-btns" id="sayItRight-mode">
+                        <button>Easy</button>
+                        <button>Medium</button>
+                        <button>Hard</button>
+                    </div>
+                </div>
+
+                <!-- Chat-style content -->
+                <div class="content-box" id="sirBox">
+                    <!-- put this inside .content-box (sirBox) where you want the character -->
+                <div class="book-ai">
+                    <!-- inline SVG so JS/CSS can control it easily -->
+                    <svg id="bookChar" viewBox="0 0 200 200" width="120" height="120" aria-label="Talking book character" role="img">
+                        <defs>
+                            <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
+                                <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000" flood-opacity="0.15"/>
+                            </filter>
+                        </defs>
+
+                        <!-- book body -->
+                        <g id="bookBody" transform="translate(20,18)">
+                            <rect x="0" y="20" width="160" height="110" rx="10" ry="10" fill="#fff6e6" stroke="#ffda9e" stroke-width="3" filter="url(#shadow)"/>
+                            <rect x="6" y="26" width="148" height="96" rx="6" ry="6" fill="#fff" />
+                            <!-- left page line -->
+                            <path d="M10 40 L70 40" stroke="#ffe8b5" stroke-width="2" stroke-linecap="round" />
+                            <path d="M10 58 L140 58" stroke="#ffe8b5" stroke-width="2" stroke-linecap="round" />
+                            <path d="M10 76 L120 76" stroke="#ffe8b5" stroke-width="2" stroke-linecap="round" />
+                        </g>
+
+                        <!-- eyes -->
+                        <g id="eyes" transform="translate(40,36)">
+                            <circle cx="30" cy="40" r="7" fill="#292F36"/>
+                            <circle cx="90" cy="40" r="7" fill="#292F36"/>
+                            <!-- small pupil shine -->
+                            <circle cx="28" cy="38" r="2" fill="#fff"/>
+                            <circle cx="88" cy="38" r="2" fill="#fff"/>
+                        </g>
+
+                        <!-- smiling mouth group: we animate scaleY for talking -->
+                        <g id="mouthGroup" transform="translate(40,68)">
+                            <!-- mouth background -->
+                            <ellipse id="mouthBg" cx="50" cy="20" rx="26" ry="12" fill="#fff" />
+                            <!-- mouth shape that will scale vertically when talking -->
+                            <g id="mouth" transform="translate(0,0)">
+                                <path id="mouthPath" d="M20 20 Q50 32 80 20 Q50 36 20 20 Z" fill="#ff6b6b" />
+                            </g>
+                        </g>
+
+                        <!-- small speech bubble anchor (not the text bubble itself) -->
+                        <g id="chatTail" transform="translate(120,8)">
+                            <path d="M0 0 L22 -12 L14 4 Z" fill="#fff6e6" stroke="#ffda9e" stroke-width="1" />
+                        </g>
+                    </svg>
+                    </div>
+
+                    <!-- AI bubble (single, updatable) -->
+                    <div class="ai-bubble">
+                        <div id="aiBubble" class="bubble system">Press Start to begin.</div>
+                    </div>
+
+                    <!-- User bubble (single, updatable) -->
+                    <div class="user-bubble">
+                        <div id="userBubble" class="bubble user" aria-live="polite"></div>
+                    </div>
+                </div>
+
+                <!-- Voice Input -->
+                <div class="start-btn-container">
+                    <button class="openVoice"><i class="fa fa-microphone"></i></button>
+                    <div class="start-restart-group">
+                        <button class="start-btn" id="startVoice">START</button>
+                        <button class="restart-btn" id="restartVoice">RESTART</button>
+                    </div>
+                </div>
+            </div>
         </section>
+
     </main>
     <script src="../../Back-end/js/learn-func.js"></script>
     <script src="../../Back-end/js/rAu.js"></script>
+    <script src="../../Back-end/js/sayItRight.js"></script>
 
 </body>
 </html>

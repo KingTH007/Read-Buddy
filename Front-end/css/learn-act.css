@@ -210,6 +210,12 @@ main {
     cursor: pointer;
 }
 
+/* Hide both content sections by default */
+#readUnderstand,
+#sayItRight {
+    display: none;
+}
+
 /* --- CONTENT BOX --- */
 .content-box {
     background: #fdfdfd;
@@ -226,9 +232,19 @@ main {
 
 /* --- Bubble Messages --- */
 .bubble {
+    display: flex;               /* Make text and button align side-by-side */
+    align-items: center;         /* Vertically align text and button */
+    justify-content: space-between; /* Push button to the right side */
+    gap: 0.75rem;                /* Add space between text and button */
     padding: 8px 12px;
     border-radius: 12px;
     margin: 6px 0;
+}
+
+/* Optional: make sure long text wraps properly */
+.bubble span {
+    flex: 1;
+    word-wrap: break-word;
 }
 
 .system {
@@ -242,6 +258,51 @@ main {
     color: white;
     align-self: flex-end;
 }
+
+/* container layout for the character */
+.book-ai { display:flex; align-items:flex-start; gap:14px; margin:8px 0 18px; }
+
+/* idle breathing (gentle up-down) */
+#bookChar { transform-origin: center; transition: transform 0.25s ease; }
+#bookChar.idle { animation: book-breathe 3.5s ease-in-out infinite; }
+@keyframes book-breathe {
+  0% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-3px) scale(1.005); }
+  100% { transform: translateY(0) scale(1); }
+}
+
+/* mouth default */
+#mouth { transform-origin: 50% 50%; transition: transform 0.08s linear; }
+
+/* when book is "talking", scale mouth in Y to simulate opening and closing.
+   We apply a repeating animation for a mouth "talk" effect. */
+#bookChar.talking #mouth {
+  animation: mouth-talk 220ms steps(2, end) infinite;
+}
+@keyframes mouth-talk {
+  0% { transform: scaleY(0.18) translateY(0); }
+  50% { transform: scaleY(1.05) translateY(2px); }
+  100% { transform: scaleY(0.18) translateY(0); }
+}
+
+/* slightly make mouth color pop while talking */
+#bookChar.talking #mouthPath { fill:#ff4b4b; }
+
+/* little glow/pop when AI updates bubble */
+.bubble.system.pop-in {
+  animation: popIn 0.28s ease;
+}
+@keyframes popIn {
+  0% { opacity:0.3; transform: scale(0.95); }
+  100% { opacity:1; transform: scale(1); }
+}
+
+/* user bubble similar */
+.bubble.user.pop-in { animation: popIn .28s ease; }
+
+/* small pointer for AI bubble and user bubble (adjust to match your bubble styles) */
+.ai-bubble .bubble::after { content:""; position:absolute; left:-8px; top:14px; width:0; height:0; border:6px solid transparent; border-right-color:#FF6B6B; }
+.user-bubble .bubble::after { content:""; position:absolute; right:-8px; top:14px; width:0; height:0; border:6px solid transparent; border-left-color:#08C2FF; }
 
 /* --- Answer Buttons --- */
 .answer-container {
@@ -268,14 +329,52 @@ main {
     background: #007bbd;
 }
 
-/* --- Start / Restart Buttons --- */
+/* --- Start / Restart Buttons + Mic Button --- */
 .start-btn-container {
     display: flex;
-    justify-content: flex-end;
-    gap: 10px;
+    justify-content: space-between; /* left mic / right group */
+    align-items: center;
+    margin-top: 10px;
 }
 
-.start-btn, .restart-btn {
+/* Left: Mic Button */
+.openVoice {
+    display: none; /* hidden by default */
+    justify-content: center;
+    align-items: center;
+    width: 50px;
+    height: 50px;
+    background-color: var(--secondary);
+    color: #fff;
+    border: none;
+    border-radius: 50%;
+    font-size: 1.3rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+/* Mic active press effect */
+.openVoice:active {
+    background-color: var(--primary);
+    transform: scale(0.95);
+}
+
+/* Show mic when activated */
+.openVoice.show {
+    display: flex;
+}
+
+/* Right side buttons container */
+.start-restart-group {
+    display: flex;
+    align-items: center;
+    gap: 10px; /* space between Start and Restart */
+}
+
+/* Right: Start & Restart Buttons */
+.start-btn,
+.restart-btn {
     background: #ff6b6b;
     border: none;
     color: white;
@@ -284,23 +383,30 @@ main {
     padding: 10px 25px;
     border-radius: 20px;
     cursor: pointer;
+    transition: background 0.3s ease;
 }
 
-.start-btn:hover, .restart-btn:hover {
+.start-btn:hover,
+.restart-btn:hover {
     background: #f74d2b;
 }
 
-.speak-btn {
-    border: none;
-    background: none;
-    color: var(--secondary);
-    cursor: pointer;
-    font-size: 1.2rem;
-    transition: color 0.2s ease;
-}   
+.word-display {
+  font-size: 1.4rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
 
-.speak-btn:hover {
-    color: #0056b3;
+.play-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.2rem;
+  color: #0077cc;
+}
+.play-btn:hover {
+  color: #005fa3;
 }
 
 /* --- RESPONSIVE --- */

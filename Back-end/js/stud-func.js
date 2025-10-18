@@ -1,7 +1,12 @@
 document.getElementById("learn1").addEventListener("click", function () {
-        // Change "lesson.html" to your actual lesson page
-        window.location.href = "../../Front-end/html/learn-act.html";
-    });
+    // Change "lesson.html" to your actual lesson page
+    window.location.href = "../../Front-end/html/learn-act.html?activity=readUnderstand";
+});
+
+document.getElementById("learn2").addEventListener("click", function () {
+    // Change "lesson.html" to your actual lesson page
+    window.location.href = "../../Front-end/html/learn-act.html?activity=sayItRight";
+});
     
 // Load all stories for logged-in student on page load
 async function loadStudentStories() {
