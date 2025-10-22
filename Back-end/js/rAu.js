@@ -1,240 +1,412 @@
 document.addEventListener("DOMContentLoaded", () => {
     const contentBox = document.getElementById("rAuBox");
-    const startBtn = document.querySelector(".start-btn");
-    const restartBtn = document.querySelector(".restart-btn");
-    const modeButtons = document.getElementById("readUnderstand-mode").querySelectorAll("button");
+    const startBtn = document.querySelector("#readUnderstand .start-btn");
+    const restartBtn = document.querySelector("#readUnderstand .restart-btn");
+    const modeButtons = document.querySelectorAll("#readUnderstand .mode-btns button");
 
     let selectedMode = null;
     let currentStoryIndex = 0;
     let currentQuestionIndex = 0;
     let currentStory = null;
-    let speechSynthesisUtterance = null;
-    let stories = {};
-    let storyTimeout = null; // <-- ensure defined globally
-    let storyScores = []; // stores per-story scores
-    let correctCount = 0; // total correct answers across all stories
+    let storyTimeout = null;
+    let storyScores = [];
+    let correctCount = 0;
     let totalQuestions = 0;
+    let stories = {};
 
-    // TTS function
-    function speak(text) {
-        window.speechSynthesis.cancel(); // stop any previous speech
-        speechSynthesisUtterance = new SpeechSynthesisUtterance(text);
-        speechSynthesisUtterance.lang = "en-US"; 
-        window.speechSynthesis.speak(speechSynthesisUtterance);
+    // References to dynamically created AI images / row
+    let aiRowElement = null;
+    let idleImgRef = null;
+    let talkingImgRef = null;
+
+    // Utility: remove existing AI row (if any)
+    function removeAIRow() {
+        if (aiRowElement && aiRowElement.parentElement) {
+            aiRowElement.parentElement.removeChild(aiRowElement);
+        }
+        aiRowElement = null;
+        idleImgRef = null;
+        talkingImgRef = null;
+
     }
 
-    // Add chat bubble
-    function addMessage(text, type = "system", isStoryOrQuestion = false) {
+    function createAndInsertAIRow(text = "Press Start to begin.", isStoryOrQuestion = false, positionTop = false) {
+        // Main row container
+        aiRowElement = document.createElement("div");
+        aiRowElement.classList.add("ai-row");
+
+        // Book AI (idle and talking images)
+        const bookAi = document.createElement("div");
+        bookAi.classList.add("book-ai");
+
+        idleImgRef = document.createElement("img");
+        idleImgRef.dataset.role = "idle";
+        idleImgRef.src = "../asset/AI-bot.png";
+        idleImgRef.alt = "AI Idle";
+        idleImgRef.style.display = "block";
+        idleImgRef.width = 120;
+        idleImgRef.height = 120;
+
+        talkingImgRef = document.createElement("img");
+        talkingImgRef.dataset.role = "talking";
+        talkingImgRef.src = "../asset/AI-bot-rea.gif";
+        talkingImgRef.alt = "AI Talking";
+        talkingImgRef.style.display = "none";
+        talkingImgRef.width = 120;
+        talkingImgRef.height = 120;
+
+        bookAi.appendChild(idleImgRef);
+        bookAi.appendChild(talkingImgRef);
+
+        // AI info container
+        const aiInfo = document.createElement("div");
+        aiInfo.classList.add("ai-info");
+
+        // Name label inside ai-info
+        const nameLabel = document.createElement("div");
+        nameLabel.classList.add("ai-name-label");
+        nameLabel.textContent = "R.E.A";
+
+        // Bubble inside ai-info (with button inside it)
         const bubble = document.createElement("div");
-        bubble.classList.add("bubble", type);
+        bubble.classList.add("bubble", "rau-system");
 
-        // message text
-        const messageText = document.createElement("span");
-        messageText.textContent = text;
-        bubble.appendChild(messageText);
+        // Bubble text
+        const bubbleText = document.createElement("span");
+        bubbleText.classList.add("bubble-text");
+        bubbleText.innerHTML = text;
 
-        // only add Bootstrap icon for story or question bubbles
-        if (type === "system" && isStoryOrQuestion) {
-            const speakBtn = document.createElement("button");
-            speakBtn.innerHTML = `<i class="fa fa-volume-up"></i>`; // Font Awesome icon
-            speakBtn.classList.add("speak-btn");
+        // 🔊 Speak Again button (icon only)
+        const speakBtn = document.createElement("button");
+        speakBtn.classList.add("speak-btn");
+        speakBtn.setAttribute("aria-label", "Hear again");
+        speakBtn.innerHTML = `<i class="fa fa-volume-up"></i>`;
+        speakBtn.addEventListener("click", () => speakTTS(stripHTML(text)));
 
-            speakBtn.addEventListener("click", () => {
-                speak(text);
-            });
+        // Append text + button inside bubble
+        bubble.appendChild(bubbleText);
+        bubble.appendChild(speakBtn);
 
-            bubble.appendChild(speakBtn);
-            speak(text); // speak automatically first time
-        } else if (type === "system") {
-            // still speak system messages without icon
-            speak(text);
+        aiInfo.appendChild(nameLabel);
+        aiInfo.appendChild(bubble);
+
+        aiRowElement.appendChild(bookAi);
+        aiRowElement.appendChild(aiInfo);
+
+        // Append to chat container
+        contentBox.appendChild(aiRowElement);
+        contentBox.scrollTop = contentBox.scrollHeight;
+
+        // Auto-speak if story/question
+        if (isStoryOrQuestion) {
+            speakTTS(stripHTML(text));
         }
 
-        contentBox.appendChild(bubble);
+        return bubble;
+    }
+
+    // Toggle to talking image
+    function showTalking() {
+        if (!idleImgRef || !talkingImgRef) return;
+        idleImgRef.style.display = "none";
+        talkingImgRef.style.display = "block";
+    }
+
+    // Toggle to idle image
+    function showIdle() {
+        if (!idleImgRef || !talkingImgRef) return;
+        idleImgRef.style.display = "block";
+        talkingImgRef.style.display = "none";
+    }
+
+    // TTS wrapper that toggles images during speaking
+    function speakTTS(text) {
+        // stop any current speech
+        window.speechSynthesis.cancel();
+
+        // ensure AI row exists (create if not)
+        if (!aiRowElement) {
+            createAndInsertAIRow(text, true);
+            return; // createAndInsertAIRow will call speak via isStoryOrQuestion path
+        }
+
+        // create utterance
+        const u = new SpeechSynthesisUtterance(text);
+        u.lang = "en-US";
+        u.rate = 0.85;
+
+        u.onstart = () => {
+            showTalking();
+        };
+        u.onend = () => {
+            // small delay before toggling back to idle so GIF finishes nicely
+            setTimeout(() => showIdle(), 120);
+        };
+
+        window.speechSynthesis.speak(u);
+    }
+
+    // Strip HTML helper
+    function stripHTML(html) {
+        return html.replace(/<[^>]*>?/gm, "");
+    }
+
+    // Add user message (creates a fresh user row each time)
+    function addUserMessage(text) {
+        const userRow = document.createElement("div");
+        userRow.classList.add("user-row");
+
+        const bubble = document.createElement("div");
+        bubble.classList.add("bubble", "user");
+        bubble.textContent = text;
+
+        const userProfile = document.createElement("div");
+        userProfile.classList.add("user-profile");
+        const img = document.createElement("img");
+        img.src = "../asset/user_profile.png";
+        img.alt = "User";
+        img.width = 48;
+        img.height = 48;
+        userProfile.appendChild(img);
+
+        const nameLabel = document.createElement("div");
+        nameLabel.classList.add("user-name-label");
+        const fullName = document.getElementById("user-name")?.textContent.trim() || "User";
+        nameLabel.textContent = fullName.split(" ")[0];
+
+        // order: bubble -> profile -> name
+        userRow.appendChild(bubble);
+        userRow.appendChild(userProfile);
+        userRow.appendChild(nameLabel);
+
+        // Always append after AI messages
+        contentBox.appendChild(userRow);
         contentBox.scrollTop = contentBox.scrollHeight;
     }
 
-    // Reset choice buttons back to plain A–D
+    function addSystemMessage(text, isStoryOrQuestion = false) {
+        // Check if this is an "Incorrect" feedback
+        const isIncorrect = /^Incorrect/i.test(stripHTML(text));
+
+        // Recreate AI row fresh whenever a new system message is shown
+        const bubble = createAndInsertAIRow(text, isStoryOrQuestion, false);
+
+        // If the text starts with "Incorrect", remove the speaker button
+        if (isIncorrect) {
+            const speakBtn = bubble.querySelector(".speak-btn");
+            if (speakBtn) speakBtn.remove();
+        }
+
+        if (text.includes("📊 Here are your results")) {
+            const speakBtn = bubble.querySelector(".speak-btn");
+            if (speakBtn) speakBtn.remove();
+        }
+    }
+
+    // Reset A-D buttons
     function resetChoiceButtons() {
-        const answerBtns = document.querySelectorAll(".answer-btn");
+        const answerBtns = document.querySelectorAll("#readUnderstand .answer-btn");
         answerBtns.forEach((btn, i) => {
             btn.textContent = String.fromCharCode(65 + i); // A, B, C, D
-            btn.dataset.answer = ""; // clear stored choice
+            btn.dataset.answer = "";
         });
     }
 
-    // Stories with correct answers
-    fetch("../../Back-end/json/rau-stories.json")
-    .then(res => res.json())
-    .then(data => {
-        stories = data;
-        console.log("Stories loaded:", stories);
-    })
-    .catch(err => console.error("Error loading stories:", err));
+    // Load stories JSON
+    fetch("../json/rau-stories.json")
+        .then(res => res.json())
+        .then(data => {
+            stories = data;
+            console.log("Stories loaded:", stories);
+        })
+        .catch(err => {
+            console.error("Error loading stories:", err);
+            addSystemMessage("⚠️ Failed to load stories. Check JSON file.", false);
+        });
 
-    // Mode instructions
     const modeInstructions = {
         Easy: "Easy Mode: 3 short and simple stories. Focus on recall and facts.",
         Medium: "Medium Mode: 3 medium-length stories. Focus on sequence and main idea.",
         Hard: "Hard Mode: 3 longer passages. Focus on inference and deeper meaning."
     };
 
-    // Mode selection
+    // MODE clicks: recreate AI row and display instruction
     modeButtons.forEach(button => {
         button.addEventListener("click", () => {
             selectedMode = button.textContent.trim();
             currentStoryIndex = 0;
             currentQuestionIndex = 0;
-            contentBox.innerHTML = "";
-            addMessage(modeInstructions[selectedMode] + " Click START to begin.", "system");
+            contentBox.innerHTML = ""; // clear existing rows
+            // create new AI row and speak instruction
+            addSystemMessage(modeInstructions[selectedMode] + " Click START to begin.", true);
         });
     });
 
-    // START button
+    // START behavior: recreate AI row and start the story flow
     startBtn.addEventListener("click", () => {
         if (!selectedMode) {
-            addMessage("Please select a mode first!", "system");
+            addSystemMessage("Please select a mode first!", false);
             return;
         }
-        // lock mode buttons
+        // disable modes while running
         modeButtons.forEach(btn => btn.disabled = true);
         startStory();
     });
 
-    // Restart button
-    restartBtn.addEventListener("click", () => {
-        resetAll();
-    });
+    restartBtn.addEventListener("click", resetAll);
 
-    // Reset function
     function resetAll() {
         if (storyTimeout) clearTimeout(storyTimeout);
+        window.speechSynthesis.cancel();
 
         selectedMode = null;
         currentStoryIndex = 0;
         currentQuestionIndex = 0;
         currentStory = null;
-        contentBox.innerHTML = "";
-        addMessage("Select a mode to see the instructions.", "system");
+        storyScores = [];
+        correctCount = 0;
+        totalQuestions = 0;
 
-        // unlock mode buttons for fresh start
+        // Rebuild initial HTML layout
+        contentBox.innerHTML = `
+            <div class="ai-row">
+                <div class="book-ai">
+                    <img id="bookIdle" src="../asset/AI-bot.png" alt="AI Idle" style="display:block;">
+                    <img id="bookTalking" src="../asset/AI-bot-rea.gif" alt="AI Talking" style="display:none;">
+                </div>
+                <div class="ai-info">
+                    <div class="ai-name-label">R.E.A</div>
+                    <div class="bubble rau-system" id="aiBubble">Select a mode to see the instructions.</div>
+                </div>
+            </div>
+        `;
+
         modeButtons.forEach(btn => btn.disabled = false);
-
-        // reset choices
         resetChoiceButtons();
-
-        // stop TTS
-        window.speechSynthesis.cancel();
     }
 
-    // Begin story flow
     function startStory() {
+        // guard: stories loaded
+        if (!stories[selectedMode] || !stories[selectedMode][currentStoryIndex]) {
+            addSystemMessage("No stories found for this mode.", false);
+            return;
+        }
+
         currentStory = stories[selectedMode][currentStoryIndex];
         currentQuestionIndex = 0;
+        // clear content and show story text as system message (this will create AI row and speak)
         contentBox.innerHTML = "";
-        addMessage(`Story ${currentStoryIndex + 1}: ${currentStory.text}`, "system", true);
+        addSystemMessage(`Story ${currentStoryIndex + 1}: ${currentStory.text}`, true);
 
-        // Show first question after short delay
+        // after a delay, ask first question
+        const storyTimers = {
+            Easy: 10000,    // 10s
+            Medium: 13000,  // 13s
+            Hard: 15000     // 15s
+        };
+
         storyTimeout = setTimeout(() => {
             askQuestion();
-        }, 15000);
+        }, storyTimers[selectedMode] || 15000); // shortened delay for UX; change back to 15000 if you want
     }
 
-    // Ask current question
     function askQuestion() {
+        if (!currentStory) return;
         if (currentQuestionIndex < currentStory.questions.length) {
-            let currentQ = currentStory.questions[currentQuestionIndex];
-            addMessage(currentQ.q, "system", true);
+            const q = currentStory.questions[currentQuestionIndex];
+            addSystemMessage(q.q, true);
 
-            // Update answer buttons
-            const answerBtns = document.querySelectorAll(".answer-btn");
-            currentQ.choices.forEach((choice, i) => {
-                answerBtns[i].textContent = `${String.fromCharCode(65 + i)}. ${choice}`;
-                answerBtns[i].dataset.answer = choice; // store actual text for checking
+            // set answer buttons
+            const answerBtns = document.querySelectorAll("#readUnderstand .answer-btn");
+            q.choices.forEach((choice, i) => {
+                if (answerBtns[i]) {
+                    answerBtns[i].textContent = `${String.fromCharCode(65 + i)}. ${choice}`;
+                    answerBtns[i].dataset.answer = choice;
+                }
             });
         } else {
-            // Finished all questions for this story
-            addMessage("Story finished!", "system");
+            addSystemMessage("Story finished!", true);
 
-            // Save this story's result
-            let storyCorrect = correctCount - storyScores.reduce((sum, s) => sum + s.correct, 0);
-            let storyTotal = currentStory.questions.length;
+            // Track current story score
+            const storyCorrect = correctCount - storyScores.reduce((s, x) => s + x.correct, 0);
+            const storyTotal = currentStory.questions.length;
             storyScores.push({ story: currentStoryIndex + 1, correct: storyCorrect, total: storyTotal });
 
-            // Move to next story
             currentStoryIndex++;
+
             if (currentStoryIndex < stories[selectedMode].length) {
-                setTimeout(() => {
-                    startStory(); // load next story
-                }, 2000);
+                // Go to next story after short delay
+                setTimeout(() => startStory(), 1500);
             } else {
-                // FINISHED ALL STORIES
-                addMessage("All stories finished! Preparing your results...", "system");
+                // All stories done
+                addSystemMessage("All stories finished! Preparing your results...", true);
 
                 setTimeout(() => {
-                    contentBox.innerHTML = ""; 
-                    showResults();             
+                    contentBox.innerHTML = "";
+
+                    removeAIRow();
+                    showResults();
+
+                    // Enable mode buttons again
                     modeButtons.forEach(btn => btn.disabled = false);
                     resetChoiceButtons();
-                }, 2500); // delay for effect
+                }, 2000);
             }
         }
     }
-    // Show final results
-    function showResults() {
-        addMessage("Here are your results:", "system");
 
-        // Show per story
-        storyScores.forEach(score => {
-            addMessage(`Story ${score.story}: ${score.correct}/${score.total}`, "system");
+    function showResults() {
+        let resultHTML = `<b>📊 Here are your results:</b><br><br>`;
+        storyScores.forEach(s => {
+            resultHTML += `Story ${s.story}: ${s.correct}/${s.total}<br>`;
         });
 
-        // Show total
-        addMessage(`Total: ${correctCount}/${totalQuestions}`, "system");
+        const percent = totalQuestions ? Math.round((correctCount / totalQuestions) * 100) : 0;
+        resultHTML += `<br><b>Total Score:</b> ${correctCount}/${totalQuestions} (${percent}%)<br><br>`;
 
-        // Feedback for Grade 3 student
         let feedback = "";
-        let percent = (correctCount / totalQuestions) * 100;
+        if (percent === 100) feedback = "🌟 Excellent! You got everything correct. Great job!";
+        else if (percent >= 80) feedback = "👍 Very good! You understood most of the stories.";
+        else if (percent >= 50) feedback = "💪 Good effort! Keep practicing.";
+        else feedback = "📖 Don’t give up! Try again and you'll improve.";
 
-        if (percent === 100) {
-            feedback = "Excellent! You got everything correct. Great job, super reader!";
-        } else if (percent >= 80) {
-            feedback = "Very good! You understood most of the stories. Keep practicing!";
-        } else if (percent >= 50) {
-            feedback = "Good effort! You got some answers right. Let’s try reading more carefully next time.";
-        } else {
-            feedback = "Don’t give up! Reading takes practice. Try again and you’ll improve!";
-        }
+        resultHTML += feedback;
 
-        addMessage(feedback, "system");
+        // 🟢 Create new AI row like a new screen
+        addSystemMessage(resultHTML, false);
+
+        // 🟢 Add a restart message below results
+        const restartNote = document.createElement("div");
+        restartNote.classList.add("restart-note");
+        restartNote.innerHTML = `<br><b>Click "Restart" to try again or choose a new mode.</b>`;
+        contentBox.appendChild(restartNote);
+        contentBox.scrollTop = contentBox.scrollHeight;
     }
 
-    // Check answer
-    document.querySelectorAll(".answer-btn").forEach(button => {
+
+    // Answer button handling
+    document.querySelectorAll("#readUnderstand .answer-btn").forEach(button => {
         button.addEventListener("click", () => {
-            if (!button.dataset.answer) return; // ignore empty buttons
+            if (!button.dataset.answer || !currentStory) return;
 
-            const selectedAnswer = button.dataset.answer;
-            addMessage(selectedAnswer, "user");
+            const selectedText = button.dataset.answer;
+            // create dynamic user message row (fresh)
+            addUserMessage(selectedText);
 
-            let currentQ = currentStory.questions[currentQuestionIndex];
-            if (selectedAnswer === currentQ.correct) {
-                addMessage("Correct!", "system");
+            const q = currentStory.questions[currentQuestionIndex];
+            if (selectedText === q.correct) {
+                addSystemMessage("Correct!", true);
                 correctCount++;
             } else {
-                addMessage(`Incorrect. Correct answer: ${currentQ.correct}`, "system");
+                addSystemMessage(`Incorrect. Correct answer: ${q.correct}`, true);
             }
 
             totalQuestions++;
-
-            // Move to next question
             currentQuestionIndex++;
-            setTimeout(() => askQuestion(), 3200);
+            setTimeout(() => askQuestion(), 8000);
         });
     });
 
-    // Stop TTS on reload
-    window.addEventListener("beforeunload", () => {
-        window.speechSynthesis.cancel();
-    });
+    // stop TTS on unload
+    window.addEventListener("beforeunload", () => window.speechSynthesis.cancel());
 });

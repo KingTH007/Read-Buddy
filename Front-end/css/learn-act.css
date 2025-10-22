@@ -230,6 +230,82 @@ main {
     flex-direction: column;
 }
 
+#sirBox,
+#rAuBox {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    align-items: stretch;
+}
+
+/* AI Row */
+.ai-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.book-ai {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.book-ai img {
+    width: 120px;
+    height: 120px;
+    object-fit: cover; /* Smooth transition when switching GIFs */
+}
+
+.ai-info {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.ai-name-label {
+    font-weight: 700;
+    margin-bottom: 4px;
+    margin-left: 4px;
+    color: #994040;
+}
+
+/* User Row */
+.user-row {
+    display: flex;
+    align-items: flex-end;
+    justify-content: flex-end;
+    margin: 16px 0;
+    gap: 12px;
+    position: relative;
+    animation: popFade 0.45s ease forwards;
+}
+
+.user-name-label {
+    position: absolute;
+    top: -22px;
+    right: 65px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: #26366A;
+}
+
+.user-profile {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    order: 2;
+}
+
+.user-profile img {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    border: 2px solid #4B6AD0;
+    background-color: #F0F8FF;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
+
 /* --- Bubble Messages --- */
 .bubble {
     display: flex;               /* Make text and button align side-by-side */
@@ -239,70 +315,71 @@ main {
     padding: 8px 12px;
     border-radius: 12px;
     margin: 6px 0;
+    max-width: 70%;
 }
 
-/* Optional: make sure long text wraps properly */
-.bubble span {
-    flex: 1;
+.bubble.rau-system {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: linear-gradient(100deg, #994040 5%, #FF6B6B 25%);
+    color: #fff;
+    border-radius: 16px 16px 16px 0;
+    padding: 10px 14px;
+    margin: 6px 0;
+    max-width: 70%;
     word-wrap: break-word;
+    animation: popFade 0.45s ease forwards;
 }
 
-.system {
-    background: #FF6B6B;
+.bubble.rau-system .bubble-text {
+    flex: 1;
+    margin-right: 10px;
+    line-height: 1.4;
+}
+
+.bubble.rau-system .speak-btn {
+    background: none;
+    border: none;
     color: white;
-    align-self: flex-start;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: transform 0.2s ease, color 0.2s ease;
 }
 
-.user {
-    background: #08C2FF;
+.bubble.rau-system .speak-btn:hover {
+    color: #ffe66d;
+    transform: scale(1.15);
+}
+
+.bubble.user {
+    background: linear-gradient(100deg, rgba(75, 106, 208, 0.85) 85%, #26366A 100%);
     color: white;
-    align-self: flex-end;
+    padding: 12px 16px;
+    border-radius: 16px 16px 0 16px;
+    max-width: 60%;
+    word-wrap: break-word;
+    font-size: 0.95rem;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+    position: relative;
+    animation: popFade 0.45s ease forwards;
 }
 
-/* container layout for the character */
-.book-ai { display:flex; align-items:flex-start; gap:14px; margin:8px 0 18px; }
-
-/* idle breathing (gentle up-down) */
-#bookChar { transform-origin: center; transition: transform 0.25s ease; }
-#bookChar.idle { animation: book-breathe 3.5s ease-in-out infinite; }
-@keyframes book-breathe {
-  0% { transform: translateY(0) scale(1); }
-  50% { transform: translateY(-3px) scale(1.005); }
-  100% { transform: translateY(0) scale(1); }
+/* --- Pop and fade animation --- */
+@keyframes popFade {
+    0% {
+        opacity: 0;
+        transform: scale(0.8) translateY(15px);
+    }
+    60% {
+        opacity: 1;
+        transform: scale(1.05) translateY(0);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
 }
-
-/* mouth default */
-#mouth { transform-origin: 50% 50%; transition: transform 0.08s linear; }
-
-/* when book is "talking", scale mouth in Y to simulate opening and closing.
-   We apply a repeating animation for a mouth "talk" effect. */
-#bookChar.talking #mouth {
-  animation: mouth-talk 220ms steps(2, end) infinite;
-}
-@keyframes mouth-talk {
-  0% { transform: scaleY(0.18) translateY(0); }
-  50% { transform: scaleY(1.05) translateY(2px); }
-  100% { transform: scaleY(0.18) translateY(0); }
-}
-
-/* slightly make mouth color pop while talking */
-#bookChar.talking #mouthPath { fill:#ff4b4b; }
-
-/* little glow/pop when AI updates bubble */
-.bubble.system.pop-in {
-  animation: popIn 0.28s ease;
-}
-@keyframes popIn {
-  0% { opacity:0.3; transform: scale(0.95); }
-  100% { opacity:1; transform: scale(1); }
-}
-
-/* user bubble similar */
-.bubble.user.pop-in { animation: popIn .28s ease; }
-
-/* small pointer for AI bubble and user bubble (adjust to match your bubble styles) */
-.ai-bubble .bubble::after { content:""; position:absolute; left:-8px; top:14px; width:0; height:0; border:6px solid transparent; border-right-color:#FF6B6B; }
-.user-bubble .bubble::after { content:""; position:absolute; right:-8px; top:14px; width:0; height:0; border:6px solid transparent; border-left-color:#08C2FF; }
 
 /* --- Answer Buttons --- */
 .answer-container {
@@ -310,6 +387,7 @@ main {
     justify-content: space-between;
     gap: 10px;
     margin-bottom: 15px;
+    flex-wrap: wrap;
 }
 
 .answer-btn {

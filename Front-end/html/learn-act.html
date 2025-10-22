@@ -52,7 +52,16 @@
 
                 <!-- Chat-style content -->
                 <div class="content-box" id="rAuBox">
-                    <div class="bubble system">Select a mode to see the instructions.</div>
+                    <div class="ai-row">
+                        <div class="book-ai">
+                            <img id="bookIdle" src="../asset/AI-bot.png" alt="AI Idle" style="display:block;">
+                            <img id="bookTalking" src="../asset/AI-bot-rea.gif" alt="AI Talking" style="display:none;">
+                        </div>
+                        <div class="ai-info">
+                            <div class="ai-name-label">R.E.A</div>
+                            <div class="bubble rau-system" id="aiBubble">Select a mode to see the instructions.</div>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Input for user -->
@@ -83,61 +92,22 @@
 
                 <!-- Chat-style content -->
                 <div class="content-box" id="sirBox">
-                    <!-- put this inside .content-box (sirBox) where you want the character -->
-                <div class="book-ai">
-                    <!-- inline SVG so JS/CSS can control it easily -->
-                    <svg id="bookChar" viewBox="0 0 200 200" width="120" height="120" aria-label="Talking book character" role="img">
-                        <defs>
-                            <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
-                                <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000" flood-opacity="0.15"/>
-                            </filter>
-                        </defs>
-
-                        <!-- book body -->
-                        <g id="bookBody" transform="translate(20,18)">
-                            <rect x="0" y="20" width="160" height="110" rx="10" ry="10" fill="#fff6e6" stroke="#ffda9e" stroke-width="3" filter="url(#shadow)"/>
-                            <rect x="6" y="26" width="148" height="96" rx="6" ry="6" fill="#fff" />
-                            <!-- left page line -->
-                            <path d="M10 40 L70 40" stroke="#ffe8b5" stroke-width="2" stroke-linecap="round" />
-                            <path d="M10 58 L140 58" stroke="#ffe8b5" stroke-width="2" stroke-linecap="round" />
-                            <path d="M10 76 L120 76" stroke="#ffe8b5" stroke-width="2" stroke-linecap="round" />
-                        </g>
-
-                        <!-- eyes -->
-                        <g id="eyes" transform="translate(40,36)">
-                            <circle cx="30" cy="40" r="7" fill="#292F36"/>
-                            <circle cx="90" cy="40" r="7" fill="#292F36"/>
-                            <!-- small pupil shine -->
-                            <circle cx="28" cy="38" r="2" fill="#fff"/>
-                            <circle cx="88" cy="38" r="2" fill="#fff"/>
-                        </g>
-
-                        <!-- smiling mouth group: we animate scaleY for talking -->
-                        <g id="mouthGroup" transform="translate(40,68)">
-                            <!-- mouth background -->
-                            <ellipse id="mouthBg" cx="50" cy="20" rx="26" ry="12" fill="#fff" />
-                            <!-- mouth shape that will scale vertically when talking -->
-                            <g id="mouth" transform="translate(0,0)">
-                                <path id="mouthPath" d="M20 20 Q50 32 80 20 Q50 36 20 20 Z" fill="#ff6b6b" />
-                            </g>
-                        </g>
-
-                        <!-- small speech bubble anchor (not the text bubble itself) -->
-                        <g id="chatTail" transform="translate(120,8)">
-                            <path d="M0 0 L22 -12 L14 4 Z" fill="#fff6e6" stroke="#ffda9e" stroke-width="1" />
-                        </g>
-                    </svg>
+                    <div class="ai-row">
+                        <div class="book-ai">
+                            <img id="bookIdle" src="../asset/AI-bot.png" alt="AI Idle" style="display:block;">
+                            <img id="bookTalking" src="../asset/AI-bot-rea.gif" alt="AI Talking" style="display:none;">
+                        </div>
+                        <div class="bubble" id="aiBubble">Press Start to begin.</div>
                     </div>
-
-                    <!-- AI bubble (single, updatable) -->
-                    <div class="ai-bubble">
-                        <div id="aiBubble" class="bubble system">Press Start to begin.</div>
+                    <div class="name-label">REA</div>
+                    <!-- USER Row -->
+                    <div class="user-row">
+                        <div class="bubble" id="userBubble"></div>
+                        <div class="user-profile">
+                            <img src="../asset/logo.png" alt="User">
+                        </div>
                     </div>
-
-                    <!-- User bubble (single, updatable) -->
-                    <div class="user-bubble">
-                        <div id="userBubble" class="bubble user" aria-live="polite"></div>
-                    </div>
+                    <div class="name-label" id="userNameLabel">USERNAME</div>
                 </div>
 
                 <!-- Voice Input -->
