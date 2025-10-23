@@ -2,7 +2,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const contentBox = document.getElementById("rAuBox");
     const startBtn = document.querySelector("#readUnderstand .start-btn");
     const restartBtn = document.querySelector("#readUnderstand .restart-btn");
-    const modeButtons = document.querySelectorAll("#readUnderstand .mode-btns button");
+    const modeButtons = document.querySelectorAll("#readUnderstand-mode button");
 
     let selectedMode = null;
     let currentStoryIndex = 0;
@@ -69,7 +69,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // Bubble inside ai-info (with button inside it)
         const bubble = document.createElement("div");
-        bubble.classList.add("bubble", "rau-system");
+        bubble.classList.add("bubble", "system");
 
         // Bubble text
         const bubbleText = document.createElement("span");
@@ -276,7 +276,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 </div>
                 <div class="ai-info">
                     <div class="ai-name-label">R.E.A</div>
-                    <div class="bubble rau-system" id="aiBubble">Select a mode to see the instructions.</div>
+                    <div class="bubble system" id="aiBubble">Select a mode to see the instructions.</div>
                 </div>
             </div>
         `;
@@ -382,7 +382,6 @@ document.addEventListener("DOMContentLoaded", () => {
         contentBox.appendChild(restartNote);
         contentBox.scrollTop = contentBox.scrollHeight;
     }
-
 
     // Answer button handling
     document.querySelectorAll("#readUnderstand .answer-btn").forEach(button => {

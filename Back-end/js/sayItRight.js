@@ -1,211 +1,274 @@
 document.addEventListener("DOMContentLoaded", () => {
-    const startVoice = document.getElementById("startVoice");
-    const restartVoice = document.getElementById("restartVoice");
-    const aiMessage = document.getElementById("aiMessage");
-    const userMessage = document.getElementById("userMessage");
-    const modeButtons = document.querySelectorAll("#sayItRight-mode button");
-    const micButton = document.querySelector(".openVoice");
-    const aiBubble = document.getElementById('aiBubble');
-    const userBubble = document.getElementById('userBubble');
+  const sirSection = document.querySelector("#sayItRight");
+  if (!sirSection) return;
 
-    let recognition;
-    let words = {};
-    let currentWordIndex = 0;
-    let score = 0;
-    let selectedMode = "";
-    let modeSelected = false;
-    let isStarted = false;
-    let isListening = false;
+  const aiBubble = sirSection.querySelector("#aiBubble");
+  const bookIdle = sirSection.querySelector("#bookIdle");
+  const bookTalking = sirSection.querySelector("#bookTalking");
+  const micButton = sirSection.querySelector(".openVoice");
+  const startBtn = sirSection.querySelector("#startVoice");
+  const restartBtn = sirSection.querySelector("#restartVoice");
+  const modeButtons = sirSection.querySelectorAll("#sayItRight-mode button");
 
-    // Show mic button (add .show)
-    function showMicButton() {
-        micButton.classList.add("show");
-    }
+  if (!aiBubble) {
+    console.error("Missing #aiBubble inside #sayItRight");
+    return;
+  }
 
-    // Hide mic button (remove .show)
-    function hideMicButton() {
-        micButton.classList.remove("show");
-    }
+  let recognition = null;
+  let wordData = {};
+  let selectedMode = "";
+  let modeSelected = false;
+  let currentWordIndex = 0;
+  let score = 0;
+  let isListening = false;
 
-    micButton.addEventListener("mousedown", () => {
-        if (recognition && !isListening) {
-            isListening = true;
-            recognition.start();
-            console.log("🎤 Mic opened...");
-        }
+  // ✅ Correct JSON path
+  const fetchPath = "../../Back-end/json/sayItRightWords.json";
+
+  // Load JSON
+  fetch(fetchPath)
+    .then(res => {
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return res.json();
+    })
+    .then(data => {
+      wordData = {
+        Easy: data.easy || [],
+        Medium: data.medium || [],
+        Hard: data.hard || []
+      };
+    })
+    .catch(err => {
+      console.error("Error loading JSON:", err);
+      aiBubble.innerHTML = `<span class="bubble-text">⚠️ Failed to load word list.</span>`;
     });
 
-    micButton.addEventListener("touchstart", () => {
-        if (recognition && !isListening) {
-            isListening = true;
-            recognition.start();
-            console.log("🎤 Mic opened (mobile)...");
-        }
+  const modeInstructions = {
+    Easy: "Easy Mode: Simple words to warm up your pronunciation.",
+    Medium: "Medium Mode: Practice longer words for clearer speech.",
+    Hard: "Hard Mode: Challenge your tongue with difficult words!"
+  };
+
+  // Mode selection
+  modeButtons.forEach(btn => {
+    btn.addEventListener("click", () => {
+      modeButtons.forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      selectedMode = btn.textContent.trim();
+      modeSelected = true;
+      aiBubble.innerHTML = `<span class="bubble-text">${modeInstructions[selectedMode]} Press START when you are ready.</span>`;
+      speakTTS(modeInstructions[selectedMode] + " Press start when you are ready.");
     });
+  });
 
-    // Stop recognition when released or unheld
-    micButton.addEventListener("mouseup", () => {
-        if (recognition && isListening) {
-            recognition.stop();
-            isListening = false;
-            console.log("🛑 Mic closed...");
-        }
-    });
+  function speakTTS(text) {
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = "en-US";
+    u.rate = 0.95;
+    u.onstart = () => {
+      bookIdle.style.display = "none";
+      bookTalking.style.display = "block";
+    };
+    u.onend = () => {
+      bookIdle.style.display = "block";
+      bookTalking.style.display = "none";
+    };
+    window.speechSynthesis.speak(u);
+  }
 
-    micButton.addEventListener("mouseleave", () => {
-        if (recognition && isListening) {
-            recognition.stop();
-            isListening = false;
-        }
-    });
-
-    micButton.addEventListener("touchend", () => {
-        if (recognition && isListening) {
-            recognition.stop();
-            isListening = false;
-        }
-    });
-
-    // given you already have references:
-    // bookChar = document.getElementById('bookChar')
-
-    function speakWithAnimation(text) {
-        // cancel previous then speak
-        window.speechSynthesis.cancel();
-        const u = new SpeechSynthesisUtterance(text);
-        u.lang = 'en-US';
-        u.rate = 0.85;
-
-        u.onstart = () => {
-            bookChar.classList.add('talking');   // mouth animates
-        };
-        u.onend = () => {
-            bookChar.classList.remove('talking');
-        };
-        window.speechSynthesis.speak(u);
+  // Start exercise
+  startBtn.addEventListener("click", () => {
+    if (!modeSelected) {
+      speakTTS("Please select a mode first.");
+      return;
     }
 
-    function setAIBubble(text, speakNow = false) {
-        aiBubble.innerHTML = text;
-        aiBubble.classList.add('pop-in');
-        setTimeout(()=> aiBubble.classList.remove('pop-in'), 350);
-        if (speakNow) speakWithAnimation(stripHTML(text));
+    const list = wordData[selectedMode];
+    if (!list || list.length === 0) {
+      speakTTS("Words are still loading. Please wait a moment.");
+      return;
     }
 
-    function setUserBubble(text) {
-        userBubble.innerHTML = text;
-        userBubble.classList.add('pop-in');
-        setTimeout(()=> userBubble.classList.remove('pop-in'), 350);
+    micButton.classList.add("show");
+    currentWordIndex = 0;
+    score = 0;
+    showCurrentWord();
+  });
+
+  restartBtn.addEventListener("click", () => {
+    resetActivity();
+  });
+
+  function resetActivity() {
+    window.speechSynthesis.cancel();
+    micButton.classList.remove("show");
+    currentWordIndex = 0;
+    score = 0;
+    aiBubble.innerHTML = `<span class="bubble-text">Select a mode to see the instructions.</span>`;
+  }
+
+  // Render current word card
+  function renderWordCard(wordObj) {
+    const word = wordObj.word || "";
+    const type = wordObj.type || "";
+    const target = wordObj.target || "";
+    const pronunciation = wordObj.pronunciation || "";
+
+    aiBubble.innerHTML = `
+      <div style="display:flex; flex-direction:column; gap:6px;">
+        <div style="font-size:2.6rem; font-weight:700; line-height:1; color:#fff;">
+          ${escapeHtml(word)}
+        </div>
+        <div style="font-size:0.9rem; opacity:0.95; color:#fff;">
+          <em>${escapeHtml(type)}</em> · Target: ${escapeHtml(target)} · Pronunciation: ${escapeHtml(pronunciation)}
+        </div>
+      </div>
+      <button class="speak-btn" aria-label="Play word" title="Play word" style="background:none;border:none;color:white;font-size:1.1rem;">
+        <i class="fa fa-volume-up"></i>
+      </button>
+    `;
+
+    const playBtn = aiBubble.querySelector(".speak-btn");
+    if (playBtn) {
+      playBtn.onclick = (e) => {
+        e.stopPropagation();
+        speakTTS(word);
+      };
     }
-        
-    function stripHTML(html) { return html.replace(/<[^>]*>?/gm, ''); }
+  }
 
-    // ✅ Speech Recognition Setup
-    if ("webkitSpeechRecognition" in window) {
-        recognition = new webkitSpeechRecognition();
-        recognition.lang = "en-US";
-        recognition.continuous = false;
-        recognition.interimResults = false;
+  function showCurrentWord() {
+    const list = wordData[selectedMode];
+    if (!list || currentWordIndex >= list.length) {
 
-        recognition.onresult = (event) => {
-            const userSpeech = event.results[0][0].transcript.trim().toLowerCase();
-            const targetWord = words[selectedMode][currentWordIndex].word.toLowerCase();
-
-            setUserBubble(userSpeech);
-
-            if (userSpeech === targetWord || userSpeech.includes(targetWord)) {
-                score++;
-                setAIBubble(`✅ Great job! You pronounced "${targetWord}" correctly!`);
-                currentWordIndex++;
-
-                if (currentWordIndex < words[selectedMode].length) {
-                    setTimeout(showWord, 2000);
-                } else {
-                    setAIBubble(`🏁 Mode complete! You scored ${score}/${words[selectedMode].length}!`, true);
-                }
-            } else {
-                setAIBubble(`❌ Wrong pronounce, try again.<br><b>${targetWord}</b>`);
-                speakWithAnimation(targetWord);
-            }
-        };
-
-        recognition.onerror = (e) => {
-            setAIBubble("⚠️ Mic error. Please allow microphone access.");
-        };
+      showResults();
+      return;
     }
+    const wordObj = list[currentWordIndex];
+    renderWordCard(wordObj);
+    speakTTS(`Say the word: ${wordObj.word}`);
+  }
 
-    // ✅ Fetch JSON
-    fetch("../../Back-end/json/sayItRightWords.json")
-        .then(res => res.json())
-        .then(data => {
-            words = data;
-            console.log("Loaded words:", words);
-        })
-        .catch(() => {
-            setAIBubble("⚠️ Failed to load words. Check JSON file.");
-        });
-
-    // ✅ Mode Button Behavior
-    modeButtons.forEach(btn => {
-        btn.addEventListener("click", () => {
-            selectedMode = btn.textContent.toLowerCase();
-            currentWordIndex = 0;
-            score = 0;
-            modeSelected = true;
-            isStarted = false;
-            setAIBubble(`Mode: ${selectedMode.toUpperCase()} selected! Press "START" to begin.`, true);
-        });
-    });
-
-    // ✅ Show Word Function
-    function showWord() {
-        const current = words[selectedMode][currentWordIndex];
-        if (!current) return;
-
-        const textHTML = `
-            <b>${current.word}</b><br>
-            <small><i>${current.pronunciation}</i></small><br>
-            <button class="play-btn"><i class="fa fa-volume-up"></i></button>
-        `;
-
-        aiMessage.innerHTML = textHTML;
-
-        // Play button
-        aiMessage.querySelector(".play-btn").addEventListener("click", () => speakWithAnimation(current.word));
-
-        speakWithAnimation(current.word);
-        showMicButton();
+  function setupRecognition() {
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SR) {
+      console.warn("Speech Recognition not supported");
+      return null;
     }
+    const recog = new SR();
+    recog.lang = "en-US";
+    recog.continuous = false;
+    recog.interimResults = false;
 
-    // ✅ START Button Behavior
-    startVoice.addEventListener("click", () => {
-        if (!modeSelected) {
-            setAIBubble("⚠️ Please select a mode first.");
-            return;
-        }
+    recog.onresult = (ev) => {
+      const spoken = ev.results[0][0].transcript.trim().toLowerCase();
+      evaluateSpoken(spoken);
+    };
+    recog.onerror = () => speakTTS("Sorry, I didn't catch that. Try again.");
+    recog.onend = () => isListening = false;
+    return recog;
+  }
 
-        if (!isStarted) {
-            isStarted = true;
-            showWord();
+  recognition = setupRecognition();
+
+  micButton.addEventListener("mousedown", startListening);
+  micButton.addEventListener("touchstart", e => { e.preventDefault(); startListening(); }, {passive:false});
+  micButton.addEventListener("mouseup", stopListening);
+  micButton.addEventListener("mouseleave", stopListening);
+  micButton.addEventListener("touchend", stopListening);
+
+  function startListening() {
+    if (!recognition) recognition = setupRecognition();
+    if (!recognition || isListening) return;
+    isListening = true;
+    try {
+      recognition.start();
+    } catch (err) {
+      console.warn("recognition.start() error:", err);
+    }
+  }
+
+  function stopListening() {
+    if (!recognition || !isListening) return;
+    try {
+      recognition.stop();
+    } catch (err) {
+      console.warn("recognition.stop() error:", err);
+    }
+  }
+
+  function evaluateSpoken(userSpeech) {
+      const current = wordData[selectedMode]?.[currentWordIndex];
+      if (!current) return;
+
+      const correct = current.word.toLowerCase();
+
+      // Track wrong words array
+      if (!window.wrongWords) window.wrongWords = [];
+
+      if (userSpeech.includes(correct)) {
+        score++;
+        speakTTS("Correct");
+        currentWordIndex++;
+
+        // ✅ Check if this was the LAST word
+        if (currentWordIndex >= wordData[selectedMode].length) {
+          setTimeout(() => showResults(), 1000);
         } else {
-            recognition.start();
+          setTimeout(() => showCurrentWord(), 1000);
         }
-    });
+      } else {
+        speakTTS(`Try again. The correct word is ${correct}`);
+        if (!wrongWords.includes(correct)) {
+          wrongWords.push(correct);
+        }
+      }
+  }
 
-    // ✅ RESTART Button
-    restartVoice.addEventListener("click", () => {
-        window.speechSynthesis.cancel();
-        aiMessage.innerHTML = `🔁 Restarted. Select a mode again.`;
-        userMessage.innerHTML = "";
-        currentWordIndex = 0;
-        score = 0;
-        modeSelected = false;
-        isStarted = false;
-        hideMicButton();
-    });
 
-    // ✅ Stop TTS when leaving
-    window.addEventListener("beforeunload", () => {
-        window.speechSynthesis.cancel();
-    });
+  // ✅ Redirects to new page
+  function showResults() {
+    const total = (wordData[selectedMode] || []).length;
+    const wrongCount = wrongWords.length || 0;
+    const rightCount = total - wrongCount;
+    const percent = total ? Math.round((rightCount / total) * 100) : 0;
+
+    let feedback = "";
+    if (percent >= 90) feedback = "Excellent! Keep it up!";
+    else if (percent >= 70) feedback = "Good! You’re improving!";
+    else feedback = "Needs more practice.";
+
+    // ✅ Display list of wrong words without duplicates
+    const wrongListHTML = wrongWords.length
+      ? `<div style="margin-top:6px;color:#fff;">${escapeHtml(wrongWords.join(", "))}</div>`
+      : `<div style="margin-top:6px;color:#fff;"><em>None — great job!</em></div>`;
+
+    const resultHTML = `
+      <div class="bubble-text" style="color:#fff;">
+        <strong>HERE’S YOUR RESULT</strong><br><br>
+        ✅ Correct words: ${rightCount}/${total}<br>
+        ❌ Words pronounced wrong: ${wrongWords.length > 0 ? '' : '(none)'}<br>
+        ${wrongListHTML}
+        <br>
+        Accuracy: ${percent}%<br>
+        <em>${feedback}</em>
+      </div>
+    `;
+
+    aiBubble.innerHTML = resultHTML;
+
+    // ✅ Spoken summary
+    speakTTS(`Here is your result. You pronounced ${rightCount} out of ${total} words correctly. Your accuracy is ${percent} percent.`);
+  }
+
+  function escapeHtml(s) {
+    return String(s)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  }
 });

@@ -318,7 +318,8 @@ main {
     max-width: 70%;
 }
 
-.bubble.rau-system {
+/* System Bubble */
+.bubble.system {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -332,13 +333,13 @@ main {
     animation: popFade 0.45s ease forwards;
 }
 
-.bubble.rau-system .bubble-text {
+.bubble.system .bubble-text {
     flex: 1;
     margin-right: 10px;
     line-height: 1.4;
 }
 
-.bubble.rau-system .speak-btn {
+.bubble.system .speak-btn {
     background: none;
     border: none;
     color: white;
@@ -347,7 +348,7 @@ main {
     transition: transform 0.2s ease, color 0.2s ease;
 }
 
-.bubble.rau-system .speak-btn:hover {
+.bubble.system .speak-btn:hover {
     color: #ffe66d;
     transform: scale(1.15);
 }
