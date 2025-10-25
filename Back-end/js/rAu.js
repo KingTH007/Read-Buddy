@@ -65,7 +65,7 @@ document.addEventListener("DOMContentLoaded", () => {
         // Name label inside ai-info
         const nameLabel = document.createElement("div");
         nameLabel.classList.add("ai-name-label");
-        nameLabel.textContent = "R.E.A";
+        nameLabel.textContent = "Rea";
 
         // Bubble inside ai-info (with button inside it)
         const bubble = document.createElement("div");
@@ -275,8 +275,15 @@ document.addEventListener("DOMContentLoaded", () => {
                     <img id="bookTalking" src="../asset/AI-bot-rea.gif" alt="AI Talking" style="display:none;">
                 </div>
                 <div class="ai-info">
-                    <div class="ai-name-label">R.E.A</div>
-                    <div class="bubble system" id="aiBubble">Select a mode to see the instructions.</div>
+                    <div class="ai-name-label">Rea</div>
+                    <div class="bubble system" id="aiBubble">
+                        <p>
+                            Welcome to <b>Read and Understand!</b> 📖  <br>
+                            In this activity, you'll practice your reading comprehension skills through short and fun stories. After each story, I'll ask you <b>multiple-choice questions</b> to check how well you understood what you read. Choose the correct answer to move forward — it's a great way to train your brain while enjoying different stories!  
+                            <br><br>
+                            <b>Select a difficulty mode to show instructions.</b>
+                        </p>
+                    </div>
                 </div>
             </div>
         `;

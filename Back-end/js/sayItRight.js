@@ -106,7 +106,12 @@ document.addEventListener("DOMContentLoaded", () => {
     micButton.classList.remove("show");
     currentWordIndex = 0;
     score = 0;
-    aiBubble.innerHTML = `<span class="bubble-text">Select a mode to see the instructions.</span>`;
+    aiBubble.innerHTML = `<p>
+                            Welcome to <b>Story Detectives!</b> 🔎  <br>
+                            Here, you’ll become a reading detective! I’ll show you short stories with <b>missing words</b>. Your task is to identify the correct word that completes the sentence by choosing from the given options. This will help you boost your vocabulary and understanding of story context.  
+                            <br><br>
+                            <b>Select a difficulty mode to show instructions.</b>
+                          </p>`;
   }
 
   // Render current word card

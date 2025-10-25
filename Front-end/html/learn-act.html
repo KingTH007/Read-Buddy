@@ -28,6 +28,7 @@
                 <div class="learn-list">
                     <button class="side-btn" id="rAu">Read and Understand</button>
                     <button class="side-btn" id="wPa">Say It Right!</button>
+                    <button class="side-btn" id="sD">Story Detectives</button>
                 </div>
                 
 
@@ -58,8 +59,15 @@
                             <img id="bookTalking" src="../asset/AI-bot-rea.gif" alt="AI Talking" style="display:none;">
                         </div>
                         <div class="ai-info">
-                            <div class="ai-name-label">R.E.A</div>
-                            <div class="bubble system" id="aiBubble">Select a mode to see the instructions.</div>
+                            <div class="ai-name-label">Rea</div>
+                            <div class="bubble system" id="aiBubble">
+                                <p>
+                                    Welcome to <b>Read and Understand!</b> 📖  <br>
+                                    In this activity, you'll practice your reading comprehension skills through short and fun stories. After each story, I'll ask you <b>multiple-choice questions</b> to check how well you understood what you read. Choose the correct answer to move forward — it's a great way to train your brain while enjoying different stories!  
+                                    <br><br>
+                                    <b>Select a difficulty mode to show instructions.</b>
+                                </p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -98,10 +106,16 @@
                             <img id="bookTalking" src="../asset/AI-bot-rea.gif" alt="AI Talking" style="display:none;">
                         </div>
                         <div class="ai-info">
-                            <div class="ai-name-label">R.E.A</div>
-                            <div class="bubble system" id="aiBubble">Select a mode to see the instructions.</div>
+                            <div class="ai-name-label">Rea</div>
+                            <div class="bubble system" id="aiBubble">
+                                <p>
+                                    Welcome to <b>Say It Right!</b> 🎤  <br>
+                                    This activity helps you improve your <b>pronunciation and speaking skills</b>. I’ll show you a word, and your goal is to pronounce it correctly using your voice. Keep speaking until I confirm that you’ve said it right — it’s a fun challenge to help you sound confident and clear when you speak!  
+                                    <br><br>
+                                    <b>Select a difficulty mode to show instructions.</b>
+                                </p>
+                            </div>
                         </div>
-
                     </div>
                 </div>
 
@@ -114,12 +128,59 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Story Detectives! -->
+            <div class="content-container" id="storyDetectives">
+                <div class="content-header">
+                    <h2>Story Detectives</h2>
+                    <div class="mode-btns" id="storyDetectives-mode">
+                        <button>Easy</button>
+                        <button>Medium</button>
+                        <button>Hard</button>
+                    </div>
+                </div>
+
+                <!-- Chat-style content -->
+                <div class="content-box" id="sdBox">
+                    <div class="ai-row">
+                        <div class="book-ai">
+                            <img id="bookIdle" src="../asset/AI-bot.png" alt="AI Idle" style="display:block;">
+                            <img id="bookTalking" src="../asset/AI-bot-rea.gif" alt="AI Talking" style="display:none;">
+                        </div>
+                        <div class="ai-info">
+                            <div class="ai-name-label">Rea</div>
+                            <div class="bubble system" id="aiBubble">
+                                <p>
+                                    Welcome to <b>Story Detectives!</b> 🔎  <br>
+                                    Here, you’ll become a reading detective! I’ll show you short stories with <b>missing words</b>. Your task is to identify the correct word that completes the sentence by choosing from the given options. This will help you boost your vocabulary and understanding of story context.  
+                                    <br><br>
+                                    <b>Select a difficulty mode to show instructions.</b>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="answer-container" id="sdAnswers">
+                    <button class="answer-btn" data-choice="A">A</button>
+                    <button class="answer-btn" data-choice="B">B</button>
+                </div>
+
+                <!-- Voice Input -->
+                <div class="start-btn-container">
+                    <div class="start-restart-group">
+                        <button class="start-btn" id="startStory">START</button>
+                        <button class="restart-btn" id="restartStory">RESTART</button>
+                    </div>
+                </div>
+            </div>
         </section>
 
     </main>
     <script src="../../Back-end/js/learn-func.js"></script>
     <script src="../../Back-end/js/rAu.js"></script>
     <script src="../../Back-end/js/sayItRight.js"></script>
+    <script src="../../Back-end/js/storyD.js"></script>
 
 </body>
 </html>
