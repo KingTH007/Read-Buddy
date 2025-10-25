@@ -234,8 +234,32 @@ document.addEventListener("DOMContentLoaded", () => {
         modeButtons.forEach(b => (b.disabled = false));
     }
 
-    // 🔁 Restart button
+    // Restart confirmation logic
+    const restartNotification = document.getElementById("restart-notification");
+    const yesRestart = document.getElementById("yes-restart");
+    const noRestart = document.getElementById("no-restart");
+    const notifBackground = document.querySelector(".notification-overlay-background");
+
     restartBtn.addEventListener("click", () => {
+        restartNotification.style.display = "flex";
+        notifBackground.classList.add("show"); // Show popup
+    });
+
+    // YES → restart activity
+    yesRestart.addEventListener("click", () => {
+        restartNotification.style.display = "none";
+        notifBackground.classList.remove("show");
+        resetAll(); // existing restart function
+    });
+
+    // NO → stay on current progress
+    noRestart.addEventListener("click", () => {
+        restartNotification.style.display = "none";
+        notifBackground.classList.remove("show");
+    });
+
+    // 🔁 Restart button
+    function resetAll() {
         window.speechSynthesis.cancel();
         sdBox.innerHTML = `
             <div class="ai-row">
@@ -247,8 +271,8 @@ document.addEventListener("DOMContentLoaded", () => {
                     <div class="ai-name-label">Rea</div>
                     <div class="bubble system" id="aiBubble">
                         <p>
-                            Welcome to <b>Say It Right!</b> 🎤  <br>
-                            This activity helps you improve your <b>pronunciation and speaking skills</b>. I’ll show you a word, and your goal is to pronounce it correctly using your voice. Keep speaking until I confirm that you’ve said it right — it’s a fun challenge to help you sound confident and clear when you speak!  
+                            Welcome to <b>Story Detectives!</b> 🔎  <br>
+                            Here, you’ll become a reading detective! I’ll show you short stories with <b>missing words</b>. Your task is to identify the correct word that completes the sentence by choosing from the given options. This will help you boost your vocabulary and understanding of story context.  
                             <br><br>
                             <b>Select a difficulty mode to show instructions.</b>
                         </p>
@@ -260,5 +284,5 @@ document.addEventListener("DOMContentLoaded", () => {
             b.classList.remove("active");
         });
         selectedMode = null;
-    });
+    }
 });

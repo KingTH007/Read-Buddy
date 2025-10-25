@@ -59,25 +59,26 @@ document.addEventListener("DOMContentLoaded", () => {
     const speakSection = document.getElementById("sayItRight");
     const detectSection = document.getElementById("storyDetectives");
 
-    readBtn.addEventListener("click", () => {
+    // Intercept clicks on learn-list buttons (show notification first before proceeding)
+    readBtn.addEventListener("click", (e) => {
+        e.preventDefault();
         stopTTS();
-        readSection.style.display = "flex";
-        speakSection.style.display = "none";
-        detectSection.style.display = "none";
+        pendingActivity = "readUnderstand";
+        openSwitchNotification("Read and Understand");
     });
 
-    speakBtn.addEventListener("click", () => {
+    speakBtn.addEventListener("click", (e) => {
+        e.preventDefault();
         stopTTS();
-        speakSection.style.display = "flex";
-        readSection.style.display = "none";
-        detectSection.style.display = "none";
+        pendingActivity = "sayItRight";
+        openSwitchNotification("Say It Right!");
     });
 
-    detectBtn.addEventListener("click", () => {
+    detectBtn.addEventListener("click", (e) => {
+        e.preventDefault();
         stopTTS();
-        detectSection.style.display = "flex";
-        readSection.style.display = "none";
-        speakSection.style.display = "none";
+        pendingActivity = "storyDetectives";
+        openSwitchNotification("Story Detectives");
     });
 
     // --- Detect selected learning activity from URL ---
@@ -121,4 +122,55 @@ document.addEventListener("DOMContentLoaded", () => {
         localStorage.removeItem("student");
         window.location.href = "../../Front-end/html/home-page.html";
     });
+
+    // ===============================
+    // 🔔 SWITCH LEARNER NOTIFICATION
+    // ===============================
+    const switchNotif = document.getElementById("switch-learner-notification");
+    const notifBackground = document.querySelector(".notification-overlay-background");
+    const yesSwitch = document.getElementById("yes-switch-learner");
+    const noSwitch = document.getElementById("no-switch-learner");
+    const learnTitle = document.querySelector(".learn-title");
+
+    let pendingActivity = null; // stores which activity to switch to
+
+    // Helper to open switch notification
+    function openSwitchNotification(activityName) {
+        stopTTS();
+        learnTitle.textContent = activityName;
+        notifBackground.classList.add("show");
+        switchNotif.classList.add("show");
+    }
+
+    // Helper to close notification
+    function closeSwitchNotification() {
+        notifBackground.classList.remove("show");
+        switchNotif.classList.remove("show");
+    }
+
+    // Handle YES button
+    yesSwitch.addEventListener("click", () => {
+        closeSwitchNotification();
+        if (pendingActivity === "readUnderstand") {
+            readSection.style.display = "flex";
+            speakSection.style.display = "none";
+            detectSection.style.display = "none";
+        } else if (pendingActivity === "sayItRight") {
+            speakSection.style.display = "flex";
+            readSection.style.display = "none";
+            detectSection.style.display = "none";
+        } else if (pendingActivity === "storyDetectives") {
+            detectSection.style.display = "flex";
+            readSection.style.display = "none";
+            speakSection.style.display = "none";
+        }
+        pendingActivity = null;
+    });
+
+    // Handle NO button
+    noSwitch.addEventListener("click", () => {
+        closeSwitchNotification();
+        pendingActivity = null;
+    });
+
 });
