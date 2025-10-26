@@ -1,7 +1,12 @@
 document.getElementById("learn1").addEventListener("click", function () {
-        // Change "lesson.html" to your actual lesson page
-        window.location.href = "/html/learn-act.html";
-    });
+    // Change "lesson.html" to your actual lesson page
+    window.location.href = "../../Front-end/html/learn-act.html?activity=readUnderstand";
+});
+
+document.getElementById("learn2").addEventListener("click", function () {
+    // Change "lesson.html" to your actual lesson page
+    window.location.href = "../../Front-end/html/learn-act.html?activity=sayItRight";
+});
     
 // Load all stories for logged-in student on page load
 async function loadStudentStories() {
@@ -12,7 +17,7 @@ async function loadStudentStories() {
     }
 
     try {
-        const response = await fetch(`/api/get-student-stories/${student.id}`);
+        const response = await fetch(`http://localhost:5000/get-student-stories/${student.id}`);
         const data = await response.json();
 
         if (data.success) {
@@ -39,7 +44,7 @@ async function loadStudentStories() {
             container.addEventListener("click", (e) => {
                 if (e.target.tagName === "BUTTON" && e.target.dataset.id) {
                     const storyId = e.target.dataset.id;
-                    window.location.href = `/html/story-comp.html?story_id=${storyId}`;
+                    window.location.href = `../../Front-end/html/story-comp.html?story_id=${storyId}`;
                 }
             });
         } else {

@@ -10,7 +10,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Function to generate questions using OpenAI
     async function generateQuestionsFromContext(context) {
         try {
-            const response = await fetch("/api/api/generate-questions", {
+            const response = await fetch("http://localhost:5000/api/generate-questions", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ context }),
@@ -29,7 +29,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Function to generate AI image using backend
     async function generateImageFromKeyword(keyword) {
         try {
-            const response = await fetch("/api/api/generate-image", {
+            const response = await fetch("http://localhost:5000/api/generate-image", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
@@ -117,7 +117,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         try {
-            const response = await fetch("/api/save-story", {
+            const response = await fetch("http://localhost:5000/save-story", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
@@ -168,7 +168,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         try {
-            const response = await fetch(`/api/get-stories/${teacher.id}`);
+            const response = await fetch(`http://localhost:5000/get-stories/${teacher.id}`);
             const data = await response.json();
 
             if (data.success) {
@@ -213,7 +213,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const overlay = document.querySelector(".overlay-color");
 
         try {
-            const response = await fetch(`/api/get-story/${storyId}`);
+            const response = await fetch(`http://localhost:5000/get-story/${storyId}`);
             if (!response.ok) {
             const text = await response.text();
             console.error("get-story failed:", response.status, text);
@@ -307,7 +307,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         try {
             console.log("PUT /update-story/" + storyId, updatedStory);
 
-            const response = await fetch(`/api/update-story/${storyId}`, {
+            const response = await fetch(`http://localhost:5000/update-story/${storyId}`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(updatedStory)
@@ -402,7 +402,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const teacherId = teacherData.id;
 
         try {
-            const response = await fetch("/api/create-class", {
+            const response = await fetch("http://localhost:5000/create-class", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
@@ -472,7 +472,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         try {
-            const res = await fetch(`/api/get-classes/${teacher.id}`);
+            const res = await fetch(`http://localhost:5000/get-classes/${teacher.id}`);
             const data = await res.json();
 
             console.log("API response:", data);
@@ -529,14 +529,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                         return;
                     }
                     openClassView(classCode, li.dataset.className);
+                    openClass(classCode);
                 });
             });
         } catch (err) {
             console.error("Error loading classes:", err);
         }
     }
-
-
 
     // 🔹 Auto-load stories after login/reload
     window.addEventListener("DOMContentLoaded", async () => {
@@ -549,7 +548,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-    const socket = io(window.location.origin);
+    const socket = io("http://localhost:5000");
 
     socket.on("student-joined", (data) => {
         console.log("Student joined class:", data.code);
@@ -580,7 +579,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         studentList.innerHTML = "";
 
         try {
-            const res = await fetch(`/api/get-students/${classCode}`);
+            const res = await fetch(`http://localhost:5000/get-students/${classCode}`);
             const data = await res.json();
 
             if (!data.students) {
@@ -617,7 +616,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     const studentId = e.target.dataset.id;
                     showNotification('delete-student', e.target.closest('tr').querySelector('td:nth-child(2)').textContent, async () => {
                         try {
-                            const response = await fetch(`/api/delete-student/${studentId}`, {
+                            const response = await fetch(`http://localhost:5000/delete-student/${studentId}`, {
                                 method: "DELETE"
                             });
 
@@ -666,7 +665,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Delete class
     deleteClassBtn.addEventListener("click", async () => {
         showNotification('delete-class', classViewTitle.textContent, async () => {
-            await fetch(`/api/delete-class/${currentClassCode}`, {
+            await fetch(`http://localhost:5000/delete-class/${currentClassCode}`, {
                 method: "DELETE"
             });
             classViewOverlay.style.display = "none";
@@ -748,4 +747,82 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
+    // === ENROLL STUDENT OVERLAY ===
+    const enrollBtn = document.getElementById('enroll-student-btn');
+    const enrollOverlayColor = document.querySelector('.enroll-overlay-color');
+    const enrollOverlap = document.querySelector('.enroll-overlap');
+    const enrollCancel = document.getElementById('enroll-overlap-cancel');
+    const enrollForm = document.getElementById('enroll-form');
+    const enrollClassCode = document.getElementById('enroll-class-code');
+
+    // 🧩 Variable to store the selected class code (set dynamically when viewing a class)
+    let selectedClassCode = null;
+
+    // Example: when teacher opens a specific class
+    // Call this function after a class is selected from your class list
+    function openClass(code) {
+        selectedClassCode = code;
+        console.log("✅ Selected class code:", selectedClassCode);
+    }
+
+    // Open overlay when clicking "Enroll Student"
+    enrollBtn.addEventListener('click', () => {
+        if (!selectedClassCode) {
+            alert("Please select a class first before enrolling a student.");
+            return;
+        }
+
+        enrollClassCode.value = selectedClassCode;
+        enrollOverlayColor.style.display = 'block';
+        enrollOverlap.style.display = 'block';
+    });
+
+    // Close overlay
+    enrollCancel.addEventListener('click', () => {
+        enrollOverlayColor.style.display = 'none';
+        enrollOverlap.style.display = 'none';
+        enrollForm.reset();
+    });
+
+    // Form submission handler (connected to server)
+    enrollForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const firstName = document.getElementById('enroll-first-name').value.trim();
+        const lastName = document.getElementById('enroll-last-name').value.trim();
+        const classCode = enrollClassCode.value.trim();
+
+        if (!firstName || !lastName || !classCode) {
+            alert("Please fill out all required fields.");
+            return;
+        }
+
+        // Combine to match your server normalization ("Surname, Firstname")
+        const fullname = `${lastName}, ${firstName}`;
+
+        try {
+            const response = await fetch("http://localhost:5000/student-register", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ fullname, code: classCode })
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                alert(`✅ ${result.student.fullname} successfully enrolled in class ${result.student.code}!`);
+                enrollOverlayColor.style.display = 'none';
+                enrollOverlap.style.display = 'none';
+                enrollForm.reset();
+            } else {
+                alert(`⚠️ ${result.message || "Student enrollment failed."}`);
+            }
+
+        } catch (err) {
+            console.error("❌ Enrollment Error:", err);
+            alert("Error connecting to server. Please try again.");
+        }
+    });
 });

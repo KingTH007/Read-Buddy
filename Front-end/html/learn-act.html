@@ -53,6 +53,12 @@
 
                 <!-- Chat-style content -->
                 <div class="content-box" id="rAuBox">
+                    <div class="video-wrapper">
+                        <video autoplay muted loop playsinline class="box-bg-video">
+                            <source src="../asset/bg.mp4" type="video/mp4">
+                        </video>
+                    </div>
+
                     <div class="ai-row">
                         <div class="book-ai">
                             <img id="bookIdle" src="../asset/AI-bot.png" alt="AI Idle" style="display:block;">
@@ -100,6 +106,12 @@
 
                 <!-- Chat-style content -->
                 <div class="content-box" id="sirBox">
+                    <div class="video-wrapper">
+                        <video autoplay muted loop playsinline class="box-bg-video">
+                            <source src="../asset/bg.mp4" type="video/mp4">
+                        </video>
+                    </div>
+
                     <div class="ai-row">
                         <div class="book-ai">
                             <img id="bookIdle" src="../asset/AI-bot.png" alt="AI Idle" style="display:block;">
@@ -142,6 +154,12 @@
 
                 <!-- Chat-style content -->
                 <div class="content-box" id="sdBox">
+                    <div class="video-wrapper">
+                        <video autoplay muted loop playsinline class="box-bg-video">
+                            <source src="../asset/bg.mp4" type="video/mp4">
+                        </video>
+                    </div>
+
                     <div class="ai-row">
                         <div class="book-ai">
                             <img id="bookIdle" src="../asset/AI-bot.png" alt="AI Idle" style="display:block;">
@@ -179,9 +197,9 @@
         <!--Notification Message-->
         <div class="notification-overlay-background"></div>
         <div class="notification-overlay">
+            <div class="nof-img" id="notif-icon"></div>
             <!-- Switch Learner -->
             <div class="notification" id="switch-learner-notification">
-                <div class="notification-content">
                     <p class="notification-message">Switch to learner <span class="learn-title"></span>?</p>
                     <div class="notification-buttons">
                         <button id="yes-switch-learner" class="notification-btn">Yes</button>
@@ -205,10 +223,10 @@
 
 
     </main>
-    <script src="../../Back-end/js/learn-func.js"></script>
-    <script src="../../Back-end/js/rAu.js"></script>
-    <script src="../../Back-end/js/sayItRight.js"></script>
-    <script src="../../Back-end/js/storyD.js"></script>
+    <script src="../js/learn-func.js"></script>
+    <script src="../js/rAu.js"></script>
+    <script src="../js/sayItRight.js"></script>
+    <script src="../js/storyD.js"></script>
 
 </body>
 </html>
