@@ -2,208 +2,341 @@ document.addEventListener('DOMContentLoaded', async () => {
     const fileInput = document.getElementById('file');
     const overlay = document.querySelector('.overlay-color');
     const overlapModal = document.querySelector('.overlap');
-    const cancelBtn = document.getElementById('overlap-cancel');
+    const cancelBtn = document.getElementById('cancel-story-btn');
     const uploadBtn = document.getElementById('overlap-upload');
 
+    if (!fileInput || !overlay || !overlapModal) {
+        console.warn("⚠️ Missing essential elements for upload functionality (file input, overlay, or modal).");
+        return;
+    }
+
+    //===============
+    // STORY SECTION
+    //===============
+
     let imageUrl = "";
+    uploadBtn.disabled = true;
+    uploadBtn.classList.add('locked');
 
-    // Function to generate questions using OpenAI
-    async function generateQuestionsFromContext(context) {
-        try {
-            const response = await fetch("http://localhost:5000/api/generate-questions", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ context }),
-            });
+    // === 🔹 Function to Validate Required Fields ===
+    function checkRequiredFields() {
+        const title = document.getElementById("title").value.trim();
+        const context = document.getElementById("context").value.trim();
+        const q1 = document.getElementById("question1").value.trim();
+        const q2 = document.getElementById("question2").value.trim();
+        const q3 = document.getElementById("question3").value.trim();
 
-            const data = await response.json();
+        const allFilled = title && context && q1 && q2 && q3;
 
-            // ✅ make sure the backend actually returns { questions: "..." }
-            return data.questions || "No questions generated.";
-        } catch (error) {
-            console.error("Error fetching questions:", error);
-            return "Failed to generate questions. Please try again.";
+        if (allFilled) {
+            uploadBtn.disabled = false;
+            uploadBtn.classList.remove('locked');
+        } else {
+            uploadBtn.disabled = true;
+            uploadBtn.classList.add('locked');
         }
     }
 
-    // Function to generate AI image using backend
-    async function generateImageFromKeyword(keyword) {
+    // === 🔹 Add Input Event Listeners to Revalidate ===
+    ["title", "context", "question1", "question2", "question3"].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener("input", checkRequiredFields);
+    });
+
+    // === 🔹 Shake Animation on Click when Locked ===
+    uploadBtn.addEventListener("click", e => {
+        if (uploadBtn.disabled) {
+            uploadBtn.classList.add("shake");
+            setTimeout(() => uploadBtn.classList.remove("shake"), 400);
+            e.preventDefault();
+            e.stopPropagation();
+            return;
+        }
+    });
+
+    // Function to generate questions for each difficulty separately
+    async function generateAllModesQuestions(contextParam) {
         try {
+            // prefer explicit contextParam if caller sends one, otherwise read from textarea
+            const contextText = (contextParam && contextParam.trim()) || (document.getElementById("context")?.value || "").trim();
+
+            if (!contextText) {
+                console.error("No story/context provided.");
+                showNotification("error", "Please provide the story text before generating questions.");
+                return;
+            }
+
+            // abort previous requests if any
+            if (window.currentAbortController) {
+                try { window.currentAbortController.abort(); } catch(e) {}
+            }
+            window.currentAbortController = new AbortController();
+
+            const response = await fetch("http://localhost:5000/api/generate-questions-all-modes", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ context: contextText }),
+                signal: window.currentAbortController.signal,
+            });
+
+            // handle non-200 status
+            if (!response.ok) {
+                const text = await response.text();
+                console.error("❌ Server returned non-OK:", response.status, text);
+                showNotification("error", "Server error while generating questions. Check console for details.");
+                return;
+            }
+
+            const data = await response.json();
+
+            // data should be an object with keys Easy/Medium/Hard arrays - but handle gracefully if not
+            const easyArr = Array.isArray(data.Easy) ? data.Easy : (Array.isArray(data.easy) ? data.easy : []);
+            const medArr  = Array.isArray(data.Medium) ? data.Medium : (Array.isArray(data.medium) ? data.medium : []);
+            const hardArr = Array.isArray(data.Hard) ? data.Hard : (Array.isArray(data.hard) ? data.hard : []);
+
+            const easyQs = easyArr.length ? easyArr.join("\n\n") : "No easy questions generated.";
+            const medQs  = medArr.length ? medArr.join("\n\n") : "No medium questions generated.";
+            const hardQs = hardArr.length ? hardArr.join("\n\n") : "No hard questions generated.";
+
+            if (document.getElementById("question1")) document.getElementById("question1").value = easyQs;
+            if (document.getElementById("question2")) document.getElementById("question2").value = medQs;
+            if (document.getElementById("question3")) document.getElementById("question3").value = hardQs;
+
+            showNotification("success", "Questions generated (check textareas).");
+            checkRequiredFields();
+        } catch (error) {
+            if (error.name === "AbortError") {
+            console.warn("Request aborted by user");
+            showNotification("info", "Generation aborted.");
+            return;
+            }
+            console.error("Error fetching questions:", error);
+            showNotification("error", "Failed to generate questions. See console for details.");
+        }
+    }
+
+    // main.js — generateImageFromKeyword (frontend)
+    async function generateImageFromKeyword(keyword) {
+        const loadingDiv = document.getElementById("loading-img");
+        const overImgDiv = document.getElementById("over-img");
+        
+        // Show loading animation
+        loadingDiv.style.display = "flex";
+        overImgDiv.style.display = "none";
+
+        try {
+            window.currentAbortController = new AbortController();
+
             const response = await fetch("http://localhost:5000/api/generate-image", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    prompt: `illustrate a image about ${keyword}`,
-                    size: "1-1",
-                    refImage: "https://pub-static.aiease.ai/ai-storage/2025/09/02/dd9808737f694e25bb3f380508ad262f.jpeg"
+                    prompt: `Generate a detailed, realistic illustration that accurately represents the main scene or concept of the story: ${keyword}. 
+                    The image must visually match the description and mood of the story, without including any text, captions, or watermarks. 
+                    Focus on clarity, composition, and visual storytelling to ensure the image aligns perfectly with the story’s theme.`,
+                    size: "512x512",
                 }),
+                signal: window.currentAbortController.signal,
             });
 
-            const data = await response.json();
-            console.log("AI Image Generated:", data);
+            let imageUrl;
 
-            // ✅ extract the actual image URL
-            if (data.generatedImage) {
-                const parsed = JSON.parse(data.generatedImage);
-                const url = parsed?.result?.data?.results?.[0]?.origin;
-                return url || `https://source.unsplash.com/512x512/?${encodeURIComponent(keyword)}`;
+            if (!response.ok) {
+                const errText = await response.text();
+                console.error("Image API returned error:", response.status, errText);
+                imageUrl = `https://source.unsplash.com/512x512/?${encodeURIComponent(keyword)}`;
+            } else {
+                const data = await response.json();
+
+                if (data.url && typeof data.url === "string") {
+                    imageUrl = data.url;
+                } else if (data.raw && typeof data.raw === "string" && data.raw.startsWith("data:image/")) {
+                    imageUrl = data.raw;
+                } else {
+                    console.warn("⚠️ No usable image URL, fallback to Unsplash");
+                    imageUrl = `https://source.unsplash.com/512x512/?${encodeURIComponent(keyword)}`;
+                }
             }
 
-            return `https://source.unsplash.com/512x512/?${encodeURIComponent(keyword)}`;
-        } catch (error) {
-            console.error("Error generating image:", error);
+            // ✅ Hide loading and show image
+            loadingDiv.style.display = "none";
+            overImgDiv.style.display = "flex";
+
+            return imageUrl;
+
+        } catch (err) {
+            console.error("Error calling generate-image:", err);
+
+            // ✅ Hide loading even if there’s an error
+            loadingDiv.style.display = "none";
+            overImgDiv.style.display = "flex";
+
             return `https://source.unsplash.com/512x512/?${encodeURIComponent(keyword)}`;
         }
     }
 
-    fileInput.addEventListener('change', async (e) => {
-        const file = e.target.files[0];
+    // ====== 🔹 Handle File Upload (PDF) ======
+    async function handleFileUpload(file) {
+        if (!file || file.type !== "application/pdf") {
+            showNotification('error', "Please upload a valid PDF file.");
+            return;
+        }
 
-        if (file && file.type === "application/pdf") {
-            overlay.style.display = "block";
-            overlapModal.style.display = "block";
+        overlay.style.display = "block";
+        overlapModal.style.display = "block";
 
-            const fileReader = new FileReader();
-            fileReader.onload = async function () {
-                const typedarray = new Uint8Array(this.result);
+        const reader = new FileReader();
+        reader.onload = async function () {
+            const typedarray = new Uint8Array(this.result);
+            const pdf = await pdfjsLib.getDocument(typedarray).promise;
+            let fullText = "";
 
-                // Load PDF
-                const pdf = await pdfjsLib.getDocument(typedarray).promise;
-                let fullText = "";
+            for (let i = 1; i <= pdf.numPages; i++) {
+                const page = await pdf.getPage(i);
+                const textContent = await page.getTextContent();
+                fullText += textContent.items.map(item => item.str).join(" ") + "\n";
+            }
 
-                // Extract text from all pages
-                for (let i = 1; i <= pdf.numPages; i++) {
-                    const page = await pdf.getPage(i);
-                    const textContent = await page.getTextContent();
-                    const pageText = textContent.items.map(item => item.str).join(" ");
-                    fullText += pageText + "\n";
+            const titleGuess = fullText.split(/[.!?]/)[0].split(" ").slice(0, 8).join(" ");
+            const keyword = fullText.split(" ")[0] || "story";
+            imageUrl = await generateImageFromKeyword(keyword);
+
+            document.getElementById("title").value = titleGuess;
+            document.getElementById("context").value = fullText.trim();
+            document.querySelector(".over-img img").src = imageUrl;
+
+            await generateAllModesQuestions(fullText.trim());
+            checkRequiredFields();
+        };
+        reader.readAsArrayBuffer(file);
+    }
+
+    // ====== 🔹 File Input Change ======
+    fileInput.addEventListener('change', e => handleFileUpload(e.target.files[0]));
+    const uploadButton = document.querySelector('.upload-btn');
+    if (uploadButton) {
+        uploadButton.addEventListener('dragover', e => { e.preventDefault(); uploadButton.classList.add('dragover'); });
+        uploadButton.addEventListener('dragleave', () => uploadButton.classList.remove('dragover'));
+        uploadButton.addEventListener('drop', e => {
+            e.preventDefault();
+            uploadButton.classList.remove('dragover');
+            handleFileUpload(e.dataTransfer.files[0]);
+        });
+    }
+
+    // ====== 🔹 Upload Confirmation ======
+    if (uploadBtn) {
+        uploadBtn.addEventListener('click', async () => {
+            if (uploadBtn.disabled) return;
+
+            const editedTitle = document.getElementById("title").value.trim();
+            const editedContext = document.getElementById("context").value.trim();
+            const questionEasy = document.getElementById("question1").value.trim();
+            const questionMedium = document.getElementById("question2").value.trim();
+            const questionHard = document.getElementById("question3").value.trim();
+            const teacher = JSON.parse(localStorage.getItem("teacher"));
+            if (!teacher?.id) return showNotification('error', "Please log in again.");
+
+            try {
+                const res = await fetch("http://localhost:5000/save-story", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        teach_id: teacher.id,
+                        storyname: editedTitle,
+                        storycontent: editedContext,
+                        storyquest_easy: questionEasy,
+                        storyquest_med: questionMedium,
+                        storyquest_hard: questionHard,
+                        storyimage: imageUrl
+                    })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showNotification('success', "Story uploaded successfully!");
+                    overlay.style.display = "none";
+                    overlapModal.style.display = "none";
+                    fileInput.value = "";
+                    await loadStories();
+                } else {
+                    showNotification('error', data.message || "Upload failed.");
+                }
+            } catch (err) {
+                console.error(err);
+                showNotification('error', "Failed to upload story.");
+            }
+        });
+    }
+    
+    // ====== 🔹 Cancel Upload ======
+    if (cancelBtn) {
+        cancelBtn.addEventListener('click', () => {
+            showNotification('close-story', '', () => {
+                // 🧩 Get reference to active AbortController (for API)
+                const activeController = window.currentAbortController;
+
+                // Stop any ongoing API request
+                if (activeController) {
+                    activeController.abort();
+                    console.log("⛔ API generation aborted.");
+                    window.currentAbortController = null;
                 }
 
-                // Generate title (first sentence or first 8 words)
-                let titleGuess = fullText.split(/[.!?]/)[0];
-                titleGuess = titleGuess.split(" ").slice(0, 8).join(" ");
+                // Hide overlay/modal
+                if (overlay) overlay.style.display = "none";
+                if (overlapModal) overlapModal.style.display = "none";
 
-                // Generate placeholder image based on first keyword
-                const keyword = fullText.split(" ")[0] || "story";
-                imageUrl = await generateImageFromKeyword(keyword);
+                // Clear file input
+                if (fileInput) fileInput.value = "";
 
-                // Fill the modal with defaults
-                document.getElementById("title").value = titleGuess;
-                document.getElementById("context").value = fullText.trim();
-                document.querySelector(".over-img img").src = imageUrl;
+                // Clear all textareas
+                document.querySelectorAll('textarea').forEach(t => t.value = '');
 
-                const questions = await generateQuestionsFromContext(fullText.trim());
-                document.getElementById("questions").value = Array.isArray(questions) ? questions.join("\n\n") : questions;
+                // Clear any image preview
+                const img = document.querySelector('.over-img img');
+                if (img) img.src = '';
 
-            };
+                // Clear story title
+                const storyTitle = document.querySelector('.story-title');
+                if (storyTitle) storyTitle.textContent = '';
 
-            fileReader.readAsArrayBuffer(file);
-        } else {
-            alert("Please upload a valid PDF file.");
-            fileInput.value = '';
-        }
-    });
-
-    // Upload button handler (reads updated values)
-    uploadBtn.addEventListener('click', async () => {
-        const editedTitle = document.getElementById("title").value;
-        const editedContext = document.getElementById("context").value;
-        const editedQuestions = document.getElementById("questions").value;
-
-        const teacher = JSON.parse(localStorage.getItem("teacher"));
-        if (!teacher || !teacher.id) {
-            showNotification('login', 'Please log in again.', null);
-            return;
-        }
-
-        try {
-            const response = await fetch("http://localhost:5000/save-story", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    teach_id: teacher.id,
-                    storyname: editedTitle,
-                    storycontent: editedContext,
-                    storyquest: editedQuestions,
-                    storyimage: imageUrl
-                }),
+                // ✅ Notify user
+                showNotification('create', 'Story upload cancelled. All progress cleared.');
             });
+        });
+    }
 
-            const data = await response.json();
-            if (data.success) {
-                console.log("✅ Story saved to DB:", data.story);
 
-                // Create new story card
-                const newStory = document.createElement("div");
-                newStory.classList.add("story", "show");
-                newStory.innerHTML = `
-                    <div class="story-image">
-                        <img src="${imageUrl}" alt="Story Image" />
-                    </div>
-                    <p>${editedTitle}</p>
-                    <button class="modify">Modify Now</button>
-                `;
-                document.querySelector(".act-card").appendChild(newStory);
-
-                await loadStories();
-
-                // Hide modal
-                overlay.style.display = "none";
-                overlapModal.style.display = "none";
-            } else {
-                showNotification('error', data.message);
-            }
-        } catch (err) {
-            console.error("❌ Error uploading story:", err);
-            showNotification('error', "Failed to save story.");
-        }
-    });
-
-    // Load all stories for logged-in teacher on page load
     async function loadStories() {
         const teacher = JSON.parse(localStorage.getItem("teacher"));
-        if (!teacher || !teacher.id) {
-            console.warn("No teacher found in localStorage");
-            return;
-        }
+        if (!teacher?.id) return;
 
         try {
-            const response = await fetch(`http://localhost:5000/get-stories/${teacher.id}`);
-            const data = await response.json();
+            const res = await fetch(`http://localhost:5000/get-stories/${teacher.id}`);
+            const data = await res.json();
+            if (!data.success) return;
 
-            if (data.success) {
-                const container = document.querySelector(".act-card");
+            const container = document.querySelector(".act-card");
+            container.querySelectorAll(".story").forEach(el => el.remove());
 
-                // ✅ Remove only old story elements, NOT the upload div
-                container.querySelectorAll(".story").forEach(storyEl => storyEl.remove());
-
-                // ✅ Append the stories
-                data.stories.forEach(story => {
-                    const storyDiv = document.createElement("div");
-                    storyDiv.classList.add("story", "show");
-                    storyDiv.dataset.storyId = story.story_id;
-                    storyDiv.innerHTML = `
-                        <div class="story-image">
-                            <img src="${story.storyimage}" alt="Story Image" />
-                        </div>
-                        <p>${story.storyname}</p>
-                        <button class="modify">Modify Now</button>
-                    `;
-                    container.appendChild(storyDiv);
-                });
-            } else {
-                console.error("Failed to fetch stories:", data.message);
-            }
+            data.stories.forEach(story => {
+                const div = document.createElement("div");
+                div.className = "story show";
+                div.dataset.storyId = story.story_id;
+                div.innerHTML = `
+                    <div class="story-image"><img src="${story.storyimage}" alt="Story Image"/></div>
+                    <p>${story.storyname}</p>
+                    <button class="modify">Modify Now</button>
+                `;
+                container.appendChild(div);
+            });
         } catch (err) {
-            console.error("❌ Error loading stories:", err);
+            console.error("Failed to load stories:", err);
         }
     }
 
-    cancelBtn.addEventListener('click', () => {
-        overlay.style.display = "none";
-        overlapModal.style.display = "none";
-        fileInput.value = ''; // reset file input
-    });
+    // 🔹 Auto-load stories on page load
+    if (JSON.parse(localStorage.getItem("teacher"))) loadStories();
 
     // ==============================
     // 🔹 Handle Modify Story Button
@@ -214,43 +347,64 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         try {
             const response = await fetch(`http://localhost:5000/get-story/${storyId}`);
-            if (!response.ok) {
-            const text = await response.text();
-            console.error("get-story failed:", response.status, text);
-            alert("Failed to load story details (see console).");
-            return;
-            }
-
             const data = await response.json();
-            if (!data.success) {
-            alert("Failed to load story details: " + (data.message || "Unknown"));
-            return;
-            }
+            if (!data.success) return showNotification('error', "Failed to load story.");
 
             const story = data.story || {};
 
-            // fill fields
+            // Fill input fields
             document.getElementById("modify-title").value = story.storyname || "";
             document.getElementById("modify-context").value = story.storycontent || "";
-            document.getElementById("modify-questions").value = story.storyquest || "";
+            document.getElementById("modify-question1").value = story.storyquest_easy || "";
+            document.getElementById("modify-question2").value = story.storyquest_med || "";
+            document.getElementById("modify-question3").value = story.storyquest_hard || "";
             document.getElementById("modify-img").src = story.storyimage || "https://placehold.co/250x180";
 
-            // show overlay
+            // Show overlay
             overlay.style.display = "block";
             modifyOverlay.style.display = "block";
 
-            // store editing id and original snapshot for diffing later
+            // Store snapshot for change detection
             modifyOverlay.dataset.editingStoryId = story.story_id;
             modifyOverlay.dataset.originalStory = JSON.stringify({
-            storyname: story.storyname || "",
-            storycontent: story.storycontent || "",
-            storyquest: story.storyquest || "",
-            storyimage: story.storyimage || ""
+                storyname: story.storyname || "",
+                storycontent: story.storycontent || "",
+                storyquest_easy: story.storyquest_easy || "",
+                storyquest_med: story.storyquest_med || "",
+                storyquest_hard: story.storyquest_hard || "",
+                storyimage: story.storyimage || ""
             });
-            console.log("openModifyStory: loaded story", story.story_id);
+
+            // Lock save button initially
+            const saveBtn = document.getElementById("modify-save");
+            saveBtn.disabled = true;
+
+            // Enable Save when user edits any field
+            ["modify-title", "modify-context", "modify-question1", "modify-question2", "modify-question3"].forEach(id => {
+                document.getElementById(id).addEventListener("input", () => {
+                    const original = JSON.parse(modifyOverlay.dataset.originalStory);
+                    const current = {
+                        storyname: document.getElementById("modify-title").value.trim(),
+                        storycontent: document.getElementById("modify-context").value.trim(),
+                        storyquest_easy: document.getElementById("modify-question1").value.trim(),
+                        storyquest_med: document.getElementById("modify-question2").value.trim(),
+                        storyquest_hard: document.getElementById("modify-question3").value.trim(),
+                    };
+
+                    const hasChanges =
+                        current.storyname !== original.storyname ||
+                        current.storycontent !== original.storycontent ||
+                        current.storyquest_easy !== original.storyquest_easy ||
+                        current.storyquest_med !== original.storyquest_med ||
+                        current.storyquest_hard !== original.storyquest_hard;
+
+                    saveBtn.disabled = !hasChanges;
+                });
+            });
+
         } catch (err) {
-            console.error("❌ Error fetching story details:", err);
-            alert("Error loading story details. Check console.");
+            console.error("Error fetching story details:", err);
+            showNotification('error', "Error: " + err.message);
         }
     }
 
@@ -268,36 +422,39 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     // 🔹 Close Modify Overlay
-    document.getElementById("modify-cancel").addEventListener("click", () => {
-        document.getElementById("modify-overlap").style.display = "none";
-        document.querySelector(".overlay-color").style.display = "none";
-    });
+    document.getElementById("modify-cancel-btn").addEventListener("click", () => {
+        const modifyOverlay = document.getElementById("modify-overlap");
+        const overlayColor = document.querySelector(".overlay-color");
+        if (!modifyOverlay) return;
 
+        const storyTitle = document.getElementById("modify-title")?.value || "this story";
+
+        showNotification("close-story", storyTitle, () => {
+            modifyOverlay.style.display = "none";
+            overlayColor.style.display = "none";
+        });
+    });
+    
     // 🔹 Save Modified Story
     document.getElementById("modify-save").addEventListener("click", async () => {
         const modifyOverlay = document.getElementById("modify-overlap");
         const storyId = modifyOverlay?.dataset?.editingStoryId;
+        if (!storyId) return showNotification('error', "No story selected.");
 
-        if (!storyId) {
-            alert("No story selected to modify.");
-            return;
-        }
+        const original = JSON.parse(modifyOverlay.dataset.originalStory);
+        const current = {
+            storyname: document.getElementById("modify-title").value.trim(),
+            storycontent: document.getElementById("modify-context").value.trim(),
+            storyquest_easy: document.getElementById("modify-question1").value.trim(),
+            storyquest_med: document.getElementById("modify-question2").value.trim(),
+            storyquest_hard: document.getElementById("modify-question3").value.trim(),
+            storyimage: document.getElementById("modify-img").src || ""
+        };
 
-        // current values
-        const currentTitle = document.getElementById("modify-title").value.trim();
-        const currentContext = document.getElementById("modify-context").value.trim();
-        const currentQuestions = document.getElementById("modify-questions").value.trim();
-        const currentImage = document.getElementById("modify-img").src || "";
-
-        // original snapshot
-        const original = modifyOverlay.dataset.originalStory ? JSON.parse(modifyOverlay.dataset.originalStory) : {};
-
-        // build diff object: only include keys that actually changed
         const updatedStory = {};
-        if (currentTitle !== (original.storyname || "")) updatedStory.storyname = currentTitle;
-        if (currentContext !== (original.storycontent || "")) updatedStory.storycontent = currentContext;
-        if (currentQuestions !== (original.storyquest || "")) updatedStory.storyquest = currentQuestions;
-        if (currentImage !== (original.storyimage || "")) updatedStory.storyimage = currentImage;
+        for (const key in current) {
+            if (current[key] !== original[key]) updatedStory[key] = current[key];
+        }
 
         if (Object.keys(updatedStory).length === 0) {
             showNotification('info', 'No changes detected.');
@@ -305,56 +462,72 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         try {
-            console.log("PUT /update-story/" + storyId, updatedStory);
+            const saveBtn = document.getElementById("modify-save");
+            saveBtn.disabled = true; // lock during saving
 
             const response = await fetch(`http://localhost:5000/update-story/${storyId}`, {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(updatedStory)
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(updatedStory)
             });
 
-            // if response is not ok try to read text (avoid .json() on HTML)
-            if (!response.ok) {
-            const errText = await response.text();
-            console.error("Server returned non-OK:", response.status, errText);
-            alert("Failed to update story. Server responded: " + response.status);
-            return;
-            }
-
-            // parse JSON safely
-            const dataText = await response.text();
-            let data;
-            try {
-                data = JSON.parse(dataText);
-            } catch (parseErr) {
-                console.error("Failed parsing response JSON:", parseErr, "raw:", dataText);
-                alert("Server returned unexpected response. Check server console.");
-                return;
-            }
-
+            const data = await response.json();
             if (data.success) {
-                console.log("Story updated:", data.story);
-                showNotification('modify', currentTitle, async () => {
+                showNotification('modify', current.storyname, async () => {
                     modifyOverlay.style.display = "none";
                     document.querySelector(".overlay-color").style.display = "none";
                     await loadStories();
                 });
             } else {
-                console.error("Update failed:", data);
                 showNotification('error', "Update failed: " + (data.message || "unknown"));
             }
         } catch (err) {
-            console.error("❌ Error updating story:", err);
-            showNotification('error', "Error saving changes. See console for details.");
+            console.error("Error updating story:", err);
+            showNotification('error', "Error saving changes.");
         }
     });
 
-    
-    // Create Class Section
+    // Assuming each story card or row has a data-id attribute
+    document.getElementById("modify-delete").addEventListener("click", () => {
+        const storyId = document.getElementById("modify-overlap").dataset.editingStoryId;
+        if (!storyId) return showNotification('error', "No story selected to delete.");
+
+        showNotification({
+            message: "Are you sure you want to delete this story?",
+            onYes: async () => {
+                try {
+                    const response = await fetch(`http://localhost:5000/delete-story/${storyId}`, {
+                        method: "DELETE",
+                    });
+                    const data = await response.json();
+
+                    if (data.success) {
+                        showNotification('success', "Story deleted successfully!");
+                        document.getElementById("modify-overlap").style.display = "none";
+                        document.querySelector(".overlay-color").style.display = "none";
+                        await loadStories();
+                    } else {
+                        showNotification('error', "Error: " + data.message);
+                    }
+                } catch (err) {
+                    console.error("❌ Error deleting story:", err);
+                    showNotification('error', "Server error while deleting story.");
+                }
+            },
+            onNo: () => {
+                console.log("Delete cancelled.");
+            }
+        });
+    });
+
+    // ===============
+    // Class Section
+    // ===============
+
     const createClassBtn = document.getElementById("create-class-btn");
     const classOverlay = document.querySelector(".class-overlay-color");
     const classOverlap = document.querySelector(".class-overlap");
-    const cancelBtn1 = document.getElementById("class-overlap-cancel");
+    const cancelBtn1 = document.getElementById("class-cancel-btn");
     const codeInput = document.getElementById("class-code");
 
     const createBtn = document.getElementById("class-overlap-create");
@@ -377,7 +550,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     cancelBtn1.addEventListener("click", () => {
         classOverlay.style.display = "none";
         classOverlap.style.display = "none";
+        document.getElementById("class-name").value = '';
     });
+
 
     classOverlay.addEventListener("click", () => {
         classOverlay.style.display = "none";
@@ -396,7 +571,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const teacherData = JSON.parse(localStorage.getItem("teacher"));
         if (!teacherData) {
-            alert("Please log in again. Teacher not found.");
+            showNotification('error', "Please log in again. Teacher not found.");
             return;
         }
         const teacherId = teacherData.id;
@@ -676,17 +851,163 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const searchInput = document.getElementById("student-search");
     if (searchInput) {
-    searchInput.addEventListener("click", () => {
-        if (window.innerWidth <= 768) {
-        searchInput.classList.toggle("expanded");
-        if (searchInput.classList.contains("expanded")) {
-            searchInput.focus();
-        } else {
-            searchInput.blur();
-        }
-        }
-    });
+        searchInput.addEventListener("click", () => {
+            if (window.innerWidth <= 768) {
+                searchInput.classList.toggle("expanded");
+            if (searchInput.classList.contains("expanded")) {
+                searchInput.focus();
+            } else {
+                searchInput.blur();
+            }
+            }
+        });
     }
+
+    // ========================== 🧩 STUDENT VIEW OVERLAY LOGIC ==========================
+
+    // Get student view elements
+    const viewStudentOverlay = document.querySelector(".view-student");
+    const viewStudentBorder = document.querySelector(".view-student-border");
+    const closeViewStudentBtn = document.getElementById("view-student-cancel-btn");
+
+    // Name & progress
+    const studentNameTitle = document.getElementById("student-name-title");
+    const studentProgressBar = document.getElementById("student-progress-bar");
+    const completedActivitiesList = document.getElementById("completed-activities-list");
+
+    // Progress summary table IDs
+    const storyTotal = document.getElementById("story-total");
+    const storyCompleted = document.getElementById("story-completed");
+    const storyAverage = document.getElementById("story-average");
+    const learningTotal = document.getElementById("learning-total");
+    const learningCompleted = document.getElementById("learning-completed");
+    const learningAverage = document.getElementById("learning-average");
+
+    // Chart element
+    const progressChartCanvas = document.getElementById("student-progress-chart");
+    let studentChartInstance = null;
+
+    // Function to open student view
+    async function openStudentView(studentId, studentName) {
+        if (!studentId) return;
+
+        // Show overlay
+        viewStudentOverlay.style.display = "block";
+        viewStudentBorder.style.display = "block";
+
+        // Reset content
+        studentNameTitle.textContent = studentName;
+        studentProgressBar.style.width = "0%";
+        studentProgressBar.textContent = "0%";
+        completedActivitiesList.innerHTML = `<li>Loading progress...</li>`;
+
+        // Reset summary table
+        storyTotal.textContent = "0";
+        storyCompleted.textContent = "0";
+        storyAverage.textContent = "0%";
+        learningTotal.textContent = "0";
+        learningCompleted.textContent = "0";
+        learningAverage.textContent = "0%";
+
+        try {
+            // Fetch student progress data
+            const response = await fetch(`http://localhost:5000/get-student-progress/${studentId}`);
+            const data = await response.json();
+
+            if (data.success) {
+                const { progress, storyStats, learningStats, activities } = data;
+
+                // ✅ Update progress bar
+                studentProgressBar.style.width = `${progress}%`;
+                studentProgressBar.textContent = `${progress}%`;
+
+                // ✅ Update table stats
+                storyTotal.textContent = storyStats.total;
+                storyCompleted.textContent = storyStats.completed;
+                storyAverage.textContent = `${storyStats.average}%`;
+
+                learningTotal.textContent = learningStats.total;
+                learningCompleted.textContent = learningStats.completed;
+                learningAverage.textContent = `${learningStats.average}%`;
+
+                // ✅ Populate completed activities list
+                completedActivitiesList.innerHTML = "";
+                if (activities && activities.length > 0) {
+                    activities.forEach(act => {
+                        const li = document.createElement("li");
+                        li.textContent = `${act.title} (${act.category}) - ${act.score}%`;
+                        completedActivitiesList.appendChild(li);
+                    });
+                } else {
+                    completedActivitiesList.innerHTML = "<li>No completed activities yet.</li>";
+                }
+
+                // ✅ Render chart visualization (bar chart)
+                if (progressChartCanvas) {
+                    if (studentChartInstance) {
+                        studentChartInstance.destroy();
+                    }
+
+                    studentChartInstance = new Chart(progressChartCanvas, {
+                        type: "bar",
+                        data: {
+                            labels: ["Story Comprehension", "Learning Activities"],
+                            datasets: [{
+                                label: "Average Score (%)",
+                                data: [storyStats.average, learningStats.average],
+                                borderWidth: 1,
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            scales: {
+                                y: { beginAtZero: true, max: 100 }
+                            }
+                        }
+                    });
+                }
+            } else {
+                completedActivitiesList.innerHTML = "<li>Unable to load progress data.</li>";
+            }
+        } catch (err) {
+            console.error("Error fetching student progress:", err);
+            completedActivitiesList.innerHTML = "<li>Error loading data.</li>";
+        }
+    }
+
+    // Close student view
+    if (closeViewStudentBtn) {
+        closeViewStudentBtn.addEventListener("click", () => {
+            viewStudentOverlay.style.display = "none";
+            viewStudentBorder.style.display = "none";
+        });
+    }
+
+    // ========================== 🧠 ADD CLICK EVENT TO EACH STUDENT ROW ==========================
+    function attachStudentRowListeners() {
+        document.querySelectorAll("#student-list tr").forEach(row => {
+            const studentNameCell = row.querySelector("td:nth-child(2)");
+            if (studentNameCell) {
+                studentNameCell.style.cursor = "pointer";
+                studentNameCell.addEventListener("click", () => {
+                    const studentId = row.querySelector(".delete-student")?.dataset.id;
+                    const studentName = studentNameCell.textContent.trim();
+                    openStudentView(studentId, studentName);
+                });
+            }
+        });
+    }
+
+    // Reattach listeners after rendering student list
+    const originalOpenClassView = openClassView;
+    openClassView = async function (...args) {
+        await originalOpenClassView.apply(this, args);
+        attachStudentRowListeners();
+    };
+
+    // =====================
+    // NOTIFICATION SECTION
+    // =====================
 
     //Notification
     // ✅ Notification system helper
@@ -751,7 +1072,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const enrollBtn = document.getElementById('enroll-student-btn');
     const enrollOverlayColor = document.querySelector('.enroll-overlay-color');
     const enrollOverlap = document.querySelector('.enroll-overlap');
-    const enrollCancel = document.getElementById('enroll-overlap-cancel');
+    const enrollCancel = document.getElementById('enroll-cancel-btn');
     const enrollForm = document.getElementById('enroll-form');
     const enrollClassCode = document.getElementById('enroll-class-code');
 
@@ -768,7 +1089,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Open overlay when clicking "Enroll Student"
     enrollBtn.addEventListener('click', () => {
         if (!selectedClassCode) {
-            alert("Please select a class first before enrolling a student.");
+            showNotification('error', "Please select a class first before enrolling a student.");
             return;
         }
 
@@ -784,7 +1105,39 @@ document.addEventListener('DOMContentLoaded', async () => {
         enrollForm.reset();
     });
 
-    // Form submission handler (connected to server)
+    // === Load and display enrolled students dynamically ===
+    async function loadEnrolledStudents(classCode) {
+        try {
+            const response = await fetch(`http://localhost:5000/get-enrolled-students?code=${classCode}`);
+            const result = await response.json();
+
+            const studentTableBody = document.getElementById('student-list');
+            studentTableBody.innerHTML = '';
+
+            if (result.success && result.students.length > 0) {
+                result.students.forEach((student, index) => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${index + 1}</td>
+                        <td>${student.fullname}</td>
+                        <td>0%</td>
+                        <td></td>
+                    `;
+                    studentTableBody.appendChild(tr);
+                });
+            } else {
+                studentTableBody.innerHTML = `
+                    <tr>
+                        <td colspan="4" style="text-align:center; color:#777;">No enrolled students yet.</td>
+                    </tr>`;
+            }
+        } catch (err) {
+            console.error('❌ Error loading enrolled students:', err);
+            showNotification('error', 'Failed to load enrolled students.');
+        }
+    }
+
+    // === MANUAL ENROLLMENT SUBMIT ===
     enrollForm.addEventListener('submit', async (e) => {
         e.preventDefault();
 
@@ -793,36 +1146,307 @@ document.addEventListener('DOMContentLoaded', async () => {
         const classCode = enrollClassCode.value.trim();
 
         if (!firstName || !lastName || !classCode) {
-            alert("Please fill out all required fields.");
+            showNotification('error', "Please fill out all required fields.");
             return;
         }
 
-        // Combine to match your server normalization ("Surname, Firstname")
         const fullname = `${lastName}, ${firstName}`;
 
         try {
             const response = await fetch("http://localhost:5000/student-register", {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
+                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ fullname, code: classCode })
             });
 
             const result = await response.json();
 
             if (result.success) {
-                alert(`✅ ${result.student.fullname} successfully enrolled in class ${result.student.code}!`);
-                enrollOverlayColor.style.display = 'none';
-                enrollOverlap.style.display = 'none';
+                showNotification('success', `${result.student.fullname} successfully enrolled!`);
+
+                // 🔹 Keep or re-show the enrollment overlay
+                enrollOverlayColor.style.display = 'block';
+                enrollOverlap.style.display = 'block';
+
+                // 🔹 Instantly reload student list
+                await loadEnrolledStudents(classCode);
+
+                // 🔹 Reset the form fields for next entry
                 enrollForm.reset();
             } else {
-                alert(`⚠️ ${result.message || "Student enrollment failed."}`);
+                showNotification('error', result.message || "Student enrollment failed.");
             }
 
         } catch (err) {
             console.error("❌ Enrollment Error:", err);
-            alert("Error connecting to server. Please try again.");
+            showNotification('error', "Error connecting to server. Please try again.");
         }
     });
+
+    // === CSV IMPORT FUNCTION ===
+    document.getElementById("add-csv").addEventListener("change", async function (event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        if (!file.name.endsWith(".csv")) {
+            showNotification('error', "Error: Please upload a valid CSV file.");
+            event.target.value = "";
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = async function (e) {
+            const csvText = e.target.result.trim();
+            const lines = csvText.split("\n");
+
+            // Validate header
+            const header = lines[0].trim().split(",").map(h => h.trim().toLowerCase());
+            const expectedHeader = ["first name", "last name"];
+
+            if (header.length !== 2 || header[0] !== expectedHeader[0] || header[1] !== expectedHeader[1]) {
+                showNotification('error', "Invalid CSV format! File must only contain 'First Name' and 'Last Name' columns.");
+                event.target.value = "";
+                return;
+            }
+
+            const students = [];
+            for (let i = 1; i < lines.length; i++) {
+                const parts = lines[i].trim().split(",");
+                if (parts.length === 2) {
+                    const firstName = parts[0].trim();
+                    const lastName = parts[1].trim();
+                    if (firstName && lastName) {
+                        students.push({ firstName, lastName });
+                    }
+                }
+            }
+
+            if (students.length === 0) {
+                showNotification('error', "No valid student records found in CSV.");
+                return;
+            }
+
+            const classCode = document.getElementById('enroll-class-code').value.trim();
+            let successCount = 0;
+
+            for (const s of students) {
+                const fullname = `${s.lastName}, ${s.firstName}`;
+                try {
+                    const response = await fetch("http://localhost:5000/student-register", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ fullname, code: classCode })
+                    });
+                    const result = await response.json();
+                    if (result.success) successCount++;
+                } catch (err) {
+                    console.error(`❌ Failed to enroll ${s.firstName} ${s.lastName}:`, err);
+                }
+            }
+
+            showNotification('success', `Successfully imported ${successCount}/${students.length} student(s)!`);
+
+            // 🔹 Keep overlay open and refresh student list live
+            enrollOverlayColor.style.display = 'block';
+            enrollOverlap.style.display = 'block';
+            await loadEnrolledStudents(classCode);
+
+            event.target.value = "";
+        };
+
+        reader.onerror = function () {
+            showNotification('error', "Error reading the CSV file. Please try again.");
+        };
+
+        reader.readAsText(file);
+    });
+
+
+    // ============================
+    // Video Overlay Show / Hide Controls
+    // ============================
+    const lessonOverlayBg = document.getElementById("lesson-overlay-background");
+    const videoOverlay = document.getElementById("video-overlay");
+    const createVideoBtn = document.getElementById("create-video-btn");
+    const cancelVideoBtn = document.getElementById("cancel-video-btn");
+    const overlayplayer = document.getElementById("video-player-overlay");
+    const overlayVideo = document.getElementById("player-video");
+    const overlayTitle = document.getElementById("player-video-title");
+    const closeBtn = overlayplayer?.querySelector(".close-btn");
+
+    createVideoBtn.addEventListener("click", () => {
+        lessonOverlayBg.style.display = "block";
+        videoOverlay.style.display = "block";
+    });
+
+    cancelVideoBtn.addEventListener("click", () => {
+        lessonOverlayBg.style.display = "none";
+        videoOverlay.style.display = "none";
+        document.getElementById("video-name").value = '';
+    });
+
+    // ✅ Close overlay safely
+    if (closeBtn) {
+        closeBtn.addEventListener("click", () => {
+            overlayplayer.style.display = "none";
+            overlayVideo.pause();
+            overlayVideo.src = "";
+            if (overlayTitle) overlayTitle.textContent = "";
+        });
+    }
+
+    // ✅ Optional: click outside video to close
+    if (overlayplayer) {
+        overlayplayer.addEventListener("click", (e) => {
+            if (e.target === overlayplayer) {
+                overlayplayer.style.display = "none";
+                overlayVideo.pause();
+                overlayVideo.src = "";
+                if (overlayTitle) overlayTitle.textContent = "";
+            }
+        });
+    }
+
+    // ============================
+    // File Preview & Label Control
+    // ============================
+    const videoInput = document.getElementById("uploadVideo");
+    const videoLabel = document.getElementById("video-upload-label");
+
+    videoInput.addEventListener("change", (e) => {
+        const file = e.target.files[0];
+        const statusDiv = document.getElementById("video-upload-status");
+        if (file) {
+            statusDiv.innerHTML = `<div class="file-item preview"><i class="fa fa-video"></i> ${file.name}</div>`;
+            videoLabel.style.display = "none"; // hide label when file is selected
+        } else {
+            statusDiv.innerHTML = "";
+            videoLabel.style.display = "block";
+        }
+    });
+
+    // ============================
+    // Upload Video (Local Server)
+    // ============================
+    document.getElementById("upload-video-btn").addEventListener("click", async () => {
+        const file = document.getElementById("uploadVideo").files[0];
+        const videoName = document.getElementById("video-name").value.trim();
+        const teacher = JSON.parse(localStorage.getItem("teacher") || "{}");
+        const statusDiv = document.getElementById("video-upload-status");
+
+        if (!file) return showNotification('error', "Please select a video file.");
+        if (!videoName) return showNotification('error', "Please enter a video name.");
+
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("videoName", videoName);
+        formData.append("teachID", teacher.id || 1);
+
+        statusDiv.innerHTML = `<div class="file-item loading">⏳ Uploading...</div>`;
+
+        try {
+            const response = await fetch("http://localhost:5000/upload-video", {
+                method: "POST",
+                body: formData
+            });
+
+            const text = await response.text();
+            let data;
+
+            try {
+                data = JSON.parse(text);
+            } catch {
+                throw new Error("Invalid server response: " + text);
+            }
+
+            if (data.success) {
+                statusDiv.innerHTML = `
+                    <div class="file-item success">
+                        ✅ <strong>${data.video.videoname}</strong> uploaded successfully!
+                    </div>
+                `;
+
+                addToList("video", data.video.videofile, data.video.videoname);
+                loadVideos(); // refresh video list
+            } else {
+                statusDiv.innerHTML = `<div class="file-item error">❌ ${data.message}</div>`;
+            }
+        } catch (err) {
+            console.error("❌ Video Upload Error:", err);
+            statusDiv.innerHTML = `<div class="file-item error">❌ Upload failed: ${err.message}</div>`;
+        }
+    });
+
+    // ============================
+    // Load Videos from Database and Folder
+    // ============================
+    async function loadVideos() {
+        const container = document.querySelector(".res-video-list");
+        if (!container) return;
+
+        container.innerHTML = "<p>🎥 Loading videos...</p>";
+
+        try {
+            // ✅ Use the correct route
+            const response = await fetch("http://localhost:5000/get-videos");
+            const data = await response.json();
+
+            // ✅ Validate and extract the array correctly
+            const videos = data.videos || [];
+
+            if (!data.success || !Array.isArray(videos)) {
+                container.innerHTML = "<p style='color:red;'>Invalid server response.</p>";
+                console.error("❌ Invalid response:", data);
+                return;
+            }
+
+            if (videos.length === 0) {
+                container.innerHTML = "<p>No videos uploaded yet.</p>";
+                return;
+            }
+
+            // ✅ Build the list dynamically
+            const list = document.createElement("ul");
+            list.className = "res-list-grid";
+
+            videos.forEach(video => {
+                const li = document.createElement("li");
+                li.className = "res-item";
+
+                // ✅ Use 'videoname' from the database, not the upload filename
+                const displayName = video.videoname;
+                const videoUrl = video.videofile;
+
+                li.innerHTML = `
+                    <div class="res-card" title="${displayName}">
+                        <i class="fa fa-video res-icon-file"></i>
+                        <p class="res-name" style="cursor:pointer;">${displayName}</p>
+                    </div>
+                `;
+
+                li.querySelector(".res-card").addEventListener("click", () => {
+                    const overlayplayer = document.getElementById("video-player-overlay");
+                    const overlayVideo = document.getElementById("player-video");
+                    const overlayTitle = document.getElementById("player-video-title");
+
+                    overlayVideo.src = videoUrl;
+                    if (overlayTitle) overlayTitle.textContent = displayName;
+                    overlayplayer.style.display = "flex";
+                    overlayVideo.play();
+                });
+
+                list.appendChild(li);
+            });
+
+            container.innerHTML = "";
+            container.appendChild(list);
+
+        } catch (err) {
+            console.error("❌ Error loading videos:", err);
+            container.innerHTML = "<p style='color:red;'>Error loading videos.</p>";
+        }
+    }
+
+    loadVideos();
+
 });

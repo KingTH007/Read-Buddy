@@ -7,7 +7,17 @@ document.getElementById("learn2").addEventListener("click", function () {
     // Change "lesson.html" to your actual lesson page
     window.location.href = "../../Front-end/html/learn-act.html?activity=sayItRight";
 });
-    
+
+document.getElementById("learn2").addEventListener("click", function () {
+    // Change "lesson.html" to your actual lesson page
+    window.location.href = "../../Front-end/html/learn-act.html?activity=sayItRight";
+});
+
+document.getElementById("learn3").addEventListener("click", function () {
+    // Change "lesson.html" to your actual lesson page
+    window.location.href = "../../Front-end/html/learn-act.html?activity=storyDetectives";
+});
+
 // Load all stories for logged-in student on page load
 async function loadStudentStories() {
     const student = JSON.parse(localStorage.getItem("student")); 

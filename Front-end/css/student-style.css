@@ -137,6 +137,74 @@ main {
     box-shadow: 0 6px 12px rgba(255,107,107,0.4);
 }
 
+/* ==========================
+   ✅ Student Resources Layout
+   ========================== */
+
+.resources-section {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+    max-width: 1200px;
+    margin: 1rem;
+}
+
+.section-title {
+    font-size: 26px;
+    font-weight: bold;
+    color: var(--dark);
+    margin-bottom: 1rem;
+    font-family: 'Baloo 2', cursive;
+}
+
+/* 2-column layout for Lessons & Videos */
+.resources-section .resources {
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+/* Header (icon + title horizontally aligned) */
+.res-header {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-size: 22px;
+    font-weight: bold;
+    margin-bottom: 1rem;
+    color: var(--primary);
+}
+
+/* Resource lists layout (same as teacher’s) */
+.res-lesson-list ul,
+.res-video-list ul {
+    list-style: none;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 1rem;
+    padding: 0;
+    margin: 0;
+}
+
+/* Each resource item (placeholder style) */
+.res-lesson-list li,
+.res-video-list li {
+    background: #fdfdfd;
+    border-radius: 10px;
+    padding: 1rem;
+    box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.05);
+    transition: transform 0.3s ease;
+}
+
+.res-lesson-list li:hover,
+.res-video-list li:hover {
+    transform: translateY(-3px);
+}
+
 /* End of Main Context*/
 
 /*Responsive Layout*/

@@ -25,6 +25,40 @@ const io = new Server(server, {
   cors: { origin: "*" },
 });
 
+const fs = require('fs');
+const multer = require('multer');
+
+// Ensure uploads directories exist
+const uploadsRoot = path.join(__dirname, '../../uploads');
+const lessonsDir = path.join(uploadsRoot, 'lessons');
+const videosDir  = path.join(uploadsRoot, 'videos');
+
+[uploadsRoot, lessonsDir, videosDir].forEach(dir => {
+  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+});
+
+// Serve uploads statically so files are reachable at:
+// http://localhost:5000/uploads/lessons/<file>
+app.use('/uploads/videos', express.static(path.join(__dirname, '../../uploads/videos')));
+
+// Multer disk storage config
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    // choose folder by route usage (we'll use different middleware instances below)
+    cb(null, req.uploadDir || lessonsDir);
+  },
+  filename: (req, file, cb) => {
+    // safe filename with timestamp
+    const safeName = file.originalname.replace(/\s+/g, '_').replace(/[^a-zA-Z0-9._-]/g, '');
+    cb(null, `${Date.now()}_${safeName}`);
+  }
+});
+// limits optional (example: max 200 MB for videos)
+const upload = multer({
+  storage,
+  limits: { fileSize: 200 * 1024 * 1024 } // adjust as needed
+});
+
 // ===================================================
 // 🔹 DATABASE SECTION (PostgreSQL)
 // ===================================================
@@ -366,18 +400,74 @@ app.delete("/delete-student/:id", async (req, res) => {
 // Save uploaded story (keep or replace your existing)
 app.post("/save-story", async (req, res) => {
   try {
-      const { teach_id, storyname, storycontent, storyquest, storyimage } = req.body;
+    const {
+      teach_id,
+      storyname,
+      storycontent,
+      storyquest_easy,
+      storyquest_med,
+      storyquest_hard,
+      storyimage
+    } = req.body;
 
     const result = await pool.query(
-      `INSERT INTO teach_story (teach_id, storyname, storycontent, storyquest, storyimage) 
-       VALUES ($1, $2, $3, $4, $5) RETURNING *`,
-      [teach_id, storyname, storycontent, storyquest, storyimage]
+      `INSERT INTO teach_story 
+       (teach_id, storyname, storycontent, storyquest_easy, storyquest_med, storyquest_hard, storyimage) 
+       VALUES ($1, $2, $3, $4, $5, $6, $7)
+       RETURNING *`,
+      [teach_id, storyname, storycontent, storyquest_easy, storyquest_med, storyquest_hard, storyimage]
     );
 
     res.json({ success: true, story: result.rows[0] });
   } catch (err) {
     console.error("❌ Error saving story:", err);
     res.status(500).json({ success: false, message: err.message || "Failed to save story" });
+  }
+});
+
+/**
+ * Update existing story
+ */
+app.put("/update-story/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!req.body || Object.keys(req.body).length === 0) {
+      return res.status(400).json({ success: false, message: "No fields provided to update" });
+    }
+
+    // Fetch current story
+    const current = await pool.query("SELECT * FROM teach_story WHERE story_id = $1", [id]);
+    if (current.rows.length === 0) {
+      return res.status(404).json({ success: false, message: "Story not found" });
+    }
+
+    const story = current.rows[0];
+
+    const storyname = req.body.storyname ?? story.storyname;
+    const storycontent = req.body.storycontent ?? story.storycontent;
+    const storyquest_easy = req.body.storyquest_easy ?? story.storyquest_easy;
+    const storyquest_med = req.body.storyquest_med ?? story.storyquest_med;
+    const storyquest_hard = req.body.storyquest_hard ?? story.storyquest_hard;
+    const storyimage = req.body.storyimage ?? story.storyimage;
+
+    const result = await pool.query(
+      `UPDATE teach_story
+       SET storyname = $1,
+           storycontent = $2,
+           storyquest_easy = $3,
+           storyquest_med = $4,
+           storyquest_hard = $5,
+           storyimage = $6
+       WHERE story_id = $7
+       RETURNING *`,
+      [storyname, storycontent, storyquest_easy, storyquest_med, storyquest_hard, storyimage, id]
+    );
+
+    res.json({ success: true, story: result.rows[0] });
+  } catch (err) {
+    console.error("❌ Error updating story:", err);
+    res.status(500).json({ success: false, message: "Failed to update story", error: err.message });
   }
 });
 
@@ -400,23 +490,56 @@ app.get("/get-stories/:teacherId", async (req, res) => {
 
 // Get stories for a student
 app.get("/get-student-stories/:studentId", async (req, res) => {
-    const { studentId } = req.params;
-    try {
-        const result = await pool.query(
-            `SELECT ts.story_id, ts.storyname, ts.storycontent, ts.storyquest, ts.storyimage
-             FROM students s
-             JOIN class c ON s.code = c.code
-             JOIN teachers t ON c.teacher_id = t.id
-             JOIN teach_story ts ON ts.teach_id = t.id
-             WHERE s.id = $1`,
-            [studentId]
-        );
+  const { studentId } = req.params;
+  try {
+    const result = await pool.query(
+      `SELECT ts.story_id, ts.storyname, ts.storycontent, ts.storyquest, ts.storyimage
+      FROM students s
+      JOIN class c ON s.code = c.code
+      JOIN teachers t ON c.teacher_id = t.id
+      JOIN teach_story ts ON ts.teach_id = t.id
+      WHERE s.id = $1`,
+      [studentId]
+    );
 
-        res.json({ success: true, stories: result.rows });
-    } catch (err) {
-        console.error("❌ Error fetching student stories:", err);
-        res.json({ success: false, message: "Database error" });
+    res.json({ success: true, stories: result.rows });
+  } catch (err) {
+    console.error("❌ Error fetching student stories:", err);
+    res.json({ success: false, message: "Database error" });
+  }
+});
+
+/**
+ * Delete a story (by story_id)
+ */
+app.delete("/delete-story/:story_id", async (req, res) => {
+  try {
+    const { story_id } = req.params;
+
+    const deleted = await pool.query(
+      "DELETE FROM teach_story WHERE story_id = $1 RETURNING *",
+      [story_id]
+    );
+
+    if (deleted.rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "Story not found.",
+      });
     }
+
+    res.json({
+      success: true,
+      message: "Story deleted successfully.",
+      story: deleted.rows[0],
+    });
+  } catch (err) {
+    console.error("❌ Error deleting story:", err.message);
+    res.status(500).json({
+      success: false,
+      message: "Failed to delete story.",
+    });
+  }
 });
 
 // Get single story by ID
@@ -492,93 +615,135 @@ app.post("/save-result", (req, res) => {
     });
 });
 
-/**
- * Update existing story
- */
-app.put("/update-story/:id", async (req, res) => {
+// ✅ Upload Video File
+app.post("/upload-video", (req, res, next) => {
+  req.uploadDir = videosDir;
+  next();
+}, upload.single("file"), async (req, res) => {
   try {
-    const { id } = req.params;
-    
-    // Ensure body exists
-    if (!req.body || Object.keys(req.body).length === 0) {
-      return res.status(400).json({ success: false, message: "No fields provided to update" });
+    const file = req.file;
+    const { videoName, teachID} = req.body;
+
+    if (!file) {
+      return res.status(400).json({ success: false, message: "No video uploaded." });
+    }
+    if (!videoName) {
+      return res.status(400).json({ success: false, message: "Missing video name." });
     }
 
-    // Check story exists
-    const current = await pool.query("SELECT * FROM teach_story WHERE story_id = $1", [id]);
-    if (current.rows.length === 0) {
-      return res.status(404).json({ success: false, message: "Story not found" });
-    }
+    // ✅ Correct file URL
+    const publicUrl = `${req.protocol}://${req.get("host")}/uploads/videos/${file.filename}`;
 
-    const story = current.rows[0];
+    // ✅ Match your actual column names in Supabase
+    const query = `
+      INSERT INTO video_upload (teachid, videofile, videoname)
+      VALUES ($1, $2, $3)
+      RETURNING *;
+    `;
+    const values = [teachID || null, publicUrl, videoName];
 
-    // Only override fields that are provided; keep existing otherwise
-    const storyname = req.body.storyname ?? story.storyname;
-    const storycontent = req.body.storycontent ?? story.storycontent;
-    const storyquest = req.body.storyquest ?? story.storyquest;
-    const storyimage = req.body.storyimage ?? story.storyimage;
+    const result = await pool.query(query, values);
 
-    const result = await pool.query(
-      `UPDATE teach_story
-       SET storyname = $1, storycontent = $2, storyquest = $3, storyimage = $4
-       WHERE story_id = $5
-       RETURNING *`,
-      [storyname, storycontent, storyquest, storyimage, id]
-    );
+    res.json({ success: true, video: result.rows[0] });
 
-    res.json({ success: true, story: result.rows[0] });
   } catch (err) {
-    console.error("❌ Error updating story:", err);
-    res.status(500).json({ success: false, message: "Failed to update story", error: err.message });
+    console.error("❌ Video upload error:", err.message);
+    res.status(500).json({
+      success: false,
+      message: "Video upload failed.",
+      error: err.message
+    });
+  }
+});
+
+/**
+ * Get all uploaded videos
+ */
+app.get("/get-videos", async (req, res) => {
+  try {
+    // Fetch all videos from your database table 'video_upload'
+    const result = await pool.query("SELECT * FROM video_upload ORDER BY videoid DESC");
+
+    // If there are no videos, return an empty array
+    if (result.rows.length === 0) {
+      return res.json({ success: true, videos: [] });
+    }
+
+    // Map and prepare the data for frontend
+    const videos = result.rows.map(video => ({
+      videoid: video.videoid,       // unique ID from DB
+      videoname: video.videoname,   // name set by teacher
+      videofile: video.videofile    // video file URL or path
+    }));
+
+    // Send success response
+    res.json({ success: true, videos });
+  } catch (err) {
+    console.error("❌ Error fetching videos:", err.message);
+    res.status(500).json({ success: false, message: "Failed to fetch videos" });
   }
 });
 
 // ===================================================
-// 🔹 AI SECTION (RapidAPI GPT + Ghibli Image)
+// 🔹 AI SECTION (RapidAPI GPT + Image)
 // ===================================================
 
 /**
  * Generate AI Questions
  */
-app.post("/api/generate-questions", async (req, res) => {
+app.post("/api/generate-questions-all-modes", async (req, res) => {
   const { context } = req.body;
-  if (!context) return res.status(400).json({ error: "No context provided" });
+
+  if (!context)
+    return res.status(400).json({ error: "Missing required parameters" });
+
+  const modes = ["Easy", "Medium", "Hard"];
+  const result = {};
 
   try {
-    const url = "https://chatgpt-42.p.rapidapi.com/gpt4o";
-    const options = {
-      method: "POST",
-      headers: {
-        "x-rapidapi-key": process.env.RAPIDAPI_KEY,
-        "x-rapidapi-host": "chatgpt-42.p.rapidapi.com",
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        messages: [
-          {
-            role: "user",
-            content: `Based on the following story, create 20 multiple-choice comprehension questions. 
-                      Each question must have 1 correct answer and 3 wrong answers.
-                      Format them as:
+    for (const mode of modes) {
+      const prompt = `Based on the following story, create 20 multiple-choice comprehension questions for ${mode} difficulty. 
+Each question must have 1 correct answer and 3 wrong answers.
+Format them as:
 
-                      Q1: [question]
-                      A) option1
-                      B) option2
-                      C) option3
-                      D) option4
-                      Answer: [letter]
+Q1: [question]
+A) option1
+B) option2
+C) option3
+D) option4
+Answer: [letter]
 
-                      STORY:
-                      ${context}`,
-          },
-        ],
-        web_access: false,
-      }),
-    };
+STORY:
+${context}`;
 
-    const response = await fetch(url, options);
-    const data = await response.json();
-    res.json({ questions: data.result || ["No questions generated"] });
+      const options = {
+        method: "POST",
+        headers: {
+          "x-rapidapi-key": process.env.RAPIDAPI_KEY,
+          "x-rapidapi-host": "chatgpt-42.p.rapidapi.com",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          messages: [{ role: "user", content: prompt }],
+          web_access: false,
+        }),
+      };
+
+      const response = await fetch("https://chatgpt-42.p.rapidapi.com/gpt4o", options);
+      const data = await response.json();
+      const textResult = data.result || "";
+
+      // Split text into array of questions
+      const questions = textResult
+        .split(/\n(?=Q\d+:)/)
+        .map(q => q.trim())
+        .filter(q => q.length > 0);
+
+      result[mode] = questions;
+    }
+
+    res.json(result);
+
   } catch (error) {
     console.error("❌ AI Question Error:", error);
     res.status(500).json({ error: "Failed to generate questions" });
@@ -641,43 +806,66 @@ app.post("/api/format-story", async (req, res) => {
  * Generate AI Image
  */
 app.post("/api/generate-image", async (req, res) => {
-    const { prompt, size = "1-1", refImage = "" } = req.body;
+  const { prompt, size = "512x512" } = req.body;
 
-    if (!prompt) return res.status(400).json({ error: "No prompt provided" });
+  if (!prompt) {
+    return res.status(400).json({ error: "No prompt provided" });
+  }
 
-    try {
-        const url = 'https://ghibli-image-generator-api-open-ai-4o-image-generation-free.p.rapidapi.com/generateghibliimage.php';
-        const options = {
-            method: 'POST',
-            headers: {
-                'x-rapidapi-key': process.env.RAPIDAPI_KEY || '1098f4e1fbmsha80729b29b72a9ep12b064jsn104e5f142388',
-                'x-rapidapi-host': 'ghibli-image-generator-api-open-ai-4o-image-generation-free.p.rapidapi.com',
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                prompt,
-                size,
-                refImage,
-                refWeight: 1
-            })
-        };
+  try {
+    const apiUrl = "https://chatgpt-42.p.rapidapi.com/texttoimage3";
+    const options = {
+      method: "POST",
+      headers: {
+        "x-rapidapi-key": process.env.RAPIDAPI_KEY,
+        "x-rapidapi-host": "chatgpt-42.p.rapidapi.com",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        text: prompt,
+        width: 512,
+        height: 512,
+        steps: 1,
+      }),
+    };
 
-        const response = await fetch(url, options);
-
-        if (!response.ok) {
-            const errorText = await response.text();
-            console.error("❌ Image API Response Error:", errorText);
-            return res.status(500).json({ error: "Failed to generate image", details: errorText });
-        }
-
-        const result = await response.text(); // API returns text
-        console.log("✅ AI Image Response:", result);
-
-        res.json({ generatedImage: result });
-    } catch (error) {
-        console.error("❌ AI Image Error:", error);
-        res.status(500).json({ error: "Failed to generate image", details: error.message });
+    const response = await fetch(apiUrl, options);
+    if (!response.ok) {
+      const errText = await response.text();
+      console.error("❌ Image API Error:", errText);
+      return res.status(502).json({ error: "Image provider error", details: errText });
     }
+
+    let raw = await response.json();
+
+    // ✅ Case 1: Direct URL
+    if (raw.generated_image && typeof raw.generated_image === "string") {
+      return res.json({ url: raw.generated_image });
+    }
+
+    // ✅ Case 2: Base64 or encoded
+    let base64Data = raw.image || raw.data || raw.base64 || null;
+    if (base64Data && typeof base64Data === "string") {
+      const buffer = Buffer.from(base64Data.replace(/^data:image\/\w+;base64,/, ""), "base64");
+
+      const imagesDir = path.join(__dirname, "../../uploads/images");
+      if (!fs.existsSync(imagesDir)) fs.mkdirSync(imagesDir, { recursive: true });
+
+      const filename = `img_${Date.now()}.png`;
+      const filepath = path.join(imagesDir, filename);
+      fs.writeFileSync(filepath, buffer);
+
+      const publicUrl = `${req.protocol}://${req.get("host")}/uploads/images/${encodeURIComponent(filename)}`;
+      return res.json({ url: publicUrl });
+    }
+
+    console.warn("⚠️ Unexpected format from API:", raw);
+    return res.json({ raw });
+
+  } catch (err) {
+    console.error("❌ /api/generate-image error:", err);
+    res.status(500).json({ error: "Server error generating image", details: err.message });
+  }
 });
 
 // ===================================================
