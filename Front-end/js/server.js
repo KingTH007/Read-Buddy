@@ -493,7 +493,7 @@ app.get("/get-student-stories/:studentId", async (req, res) => {
   const { studentId } = req.params;
   try {
     const result = await pool.query(
-      `SELECT ts.story_id, ts.storyname, ts.storycontent, ts.storyquest, ts.storyimage
+      `SELECT ts.story_id, ts.storyname, ts.storycontent, ts.storyquest_easy, ts.storyquest_med, ts.storyquest_hard, ts.storyimage
       FROM students s
       JOIN class c ON s.code = c.code
       JOIN teachers t ON c.teacher_id = t.id
@@ -653,6 +653,34 @@ app.post("/upload-video", (req, res, next) => {
       message: "Video upload failed.",
       error: err.message
     });
+  }
+});
+
+// Fetch videos for a specific student based on their class code
+app.get("/get-student-videos", async (req, res) => {
+  const { code } = req.query;
+
+  try {
+    const teacherResult = await pool.query(
+      "SELECT teacher_id FROM class WHERE code = $1",
+      [code]
+    );
+
+    if (teacherResult.rows.length === 0) {
+      return res.json({ success: false, message: "Class not found" });
+    }
+
+    const teacherId = teacherResult.rows[0].teacher_id;
+
+    const videoResult = await pool.query(
+      "SELECT videoid, videoname, videofile FROM video_upload WHERE teachid = $1 ORDER BY videoid DESC",
+      [teacherId]
+    );
+
+    res.json({ success: true, videos: videoResult.rows });
+  } catch (err) {
+    console.error("❌ Error fetching student videos:", err.message);
+    res.status(500).json({ success: false, message: "Server error" });
   }
 });
 

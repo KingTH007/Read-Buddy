@@ -898,16 +898,6 @@ main {
 }
 
 /* Each resource box (like lessons/videos) */
-.resources {
-    background: #ffffff;
-    padding: 20px;
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-}
-
 .res-video {
   display: flex;
   justify-content: space-between; /* header left, button right */
@@ -948,15 +938,6 @@ main {
     align-items: center;
 }
 
-/* List containers (same layout feel as classes/activities) */
-.res-video-list ul {
-    list-style: none;
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-    gap: 1rem;
-    padding: 0;
-    margin-top: 1rem;
-}
 
 .lesson-overlay-background {
     display: none;
@@ -1056,6 +1037,7 @@ main {
   width: 100%;
   text-align: left;
 }
+
 
 /* Uploaded File Display */
 .file-item {
@@ -1162,6 +1144,7 @@ main {
 /* Each card item */
 .res-item .res-card {
     background: #f9fafc;
+    border: 1px solid #e1e5ee;
     border-radius: 12px;
     padding: 15px;
     text-align: center;
@@ -1184,17 +1167,6 @@ main {
     font-weight: 500;
     color: #333;
     word-break: break-word;
-}
-
-.res-link {
-    text-decoration: none;
-    color: #FF6B6B;
-    font-weight: 500;
-    transition: color 0.2s;
-}
-
-.res-link:hover {
-    color: #ff4d4d;
 }
 
 .video-player-overlay {

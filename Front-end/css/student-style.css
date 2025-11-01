@@ -176,22 +176,19 @@ main {
     font-size: 22px;
     font-weight: bold;
     margin-bottom: 1rem;
-    color: var(--primary);
 }
 
 /* Resource lists layout (same as teacher’s) */
-.res-lesson-list ul,
 .res-video-list ul {
-    list-style: none;
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-    gap: 1rem;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    list-style: none;
     padding: 0;
-    margin: 0;
+    margin-top: 10px;
 }
 
 /* Each resource item (placeholder style) */
-.res-lesson-list li,
 .res-video-list li {
     background: #fdfdfd;
     border-radius: 10px;
@@ -200,9 +197,102 @@ main {
     transition: transform 0.3s ease;
 }
 
-.res-lesson-list li:hover,
 .res-video-list li:hover {
     transform: translateY(-3px);
+}
+
+.res-item .res-card {
+    background: #f9fafc;
+    border: 1px solid #e1e5ee;
+    border-radius: 12px;
+    padding: 15px;
+    text-align: center;
+    transition: 0.3s ease;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+.res-item .res-card:hover {
+    background: #f0f8ff;
+    transform: translateY(-2px);
+}
+
+.res-icon-file {
+    font-size: 2rem;
+    color: #08C2FF;
+}
+
+.res-name {
+    margin: 10px 0;
+    font-weight: 500;
+    color: #333;
+    word-break: break-word;
+}
+
+.video-player-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.8);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.video-player-overlay.active {
+  display: flex;
+}
+
+.video-player-content {
+  position: relative;
+  max-width: 90%;
+  width: 800px;
+}
+
+.video-player-content video {
+  width: 100%;
+  border-radius: 12px;
+  background: #000;
+}
+
+.video-player-overlay .close-btn {
+  position: absolute;
+  top: -40px;
+  right: -10px;
+  font-size: 2rem;
+  color: #fff;
+  cursor: pointer;
+  font-weight: bold;
+  transition: 0.2s;
+}
+
+.video-player-overlay .close-btn:hover {
+  color: #ff5555;
+}
+
+.video-player-content .video-title{
+    font-size: 1.5rem;
+    position: absolute;
+    top: -40px;
+    color: #fff;
+    cursor: pointer;
+    font-weight: bold;
+    transition: 0.2s;
+}
+
+.close-btn {
+    position: absolute;
+    top: 12px;  
+    right: 12px;
+    background: transparent;
+    border: none;
+    color: var(--dark);
+    font-size: 1rem;
+    cursor: pointer;
+    transition: color 0.2s ease;
+    z-index: 25;
 }
 
 /* End of Main Context*/
