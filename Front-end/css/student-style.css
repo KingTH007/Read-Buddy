@@ -21,7 +21,6 @@ body {
 
 /* Main Context */
 main {
-
     padding: 20px;
 }
 
@@ -293,6 +292,94 @@ main {
     cursor: pointer;
     transition: color 0.2s ease;
     z-index: 25;
+}
+
+/* =============================
+   ✅ Notification System Design
+   ============================= */
+.notification-overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.45);
+    backdrop-filter: blur(3px);
+    z-index: 2000;
+    justify-content: center;
+    align-items: center;
+}
+
+.notification {
+    position: relative;
+    background: #fff;
+    border-radius: 16px;
+    padding: 2rem 2.5rem;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+    max-width: 420px;
+    width: 90%;
+    text-align: center;
+    animation: slideIn 0.35s ease forwards;
+}
+
+.notification-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+}
+
+.notification-message {
+    font-size: 1.1rem;
+    color: var(--dark);
+    line-height: 1.4;
+}
+
+.notification-message .story-title {
+    font-weight: bold;
+    color: var(--primary);
+}
+
+.notification-btn {
+    background: var(--secondary);
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 0.6rem 1.2rem;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background 0.2s ease;
+    width: 80px;
+}
+
+.notification-btn:hover {
+    background: #06a0d6;
+}
+
+.notification-btn:nth-child(2) {
+    background: var(--primary);
+}
+
+.notification-btn:nth-child(2):hover {
+    background: #e94e4e;
+}
+
+.overlay-close-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: transparent;
+  border: none;
+  color: #555;
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: color 0.2s ease, transform 0.2s ease;
+  z-index: 10;
+}
+
+.overlay-close-btn:hover {
+  color: var(--primary);
+  transform: scale(1.1);
 }
 
 /* End of Main Context*/

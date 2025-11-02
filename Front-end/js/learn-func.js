@@ -155,17 +155,11 @@ document.addEventListener("DOMContentLoaded", () => {
     yesSwitch.addEventListener("click", () => {
         closeSwitchNotification();
         if (pendingActivity === "readUnderstand") {
-            readSection.style.display = "flex";
-            speakSection.style.display = "none";
-            detectSection.style.display = "none";
+            window.location.href = "../../Front-end/html/learn-act.html?activity=readUnderstand";
         } else if (pendingActivity === "sayItRight") {
-            speakSection.style.display = "flex";
-            readSection.style.display = "none";
-            detectSection.style.display = "none";
+            window.location.href = "../../Front-end/html/learn-act.html?activity=sayItRight";
         } else if (pendingActivity === "storyDetectives") {
-            detectSection.style.display = "flex";
-            readSection.style.display = "none";
-            speakSection.style.display = "none";
+            window.location.href = "../../Front-end/html/learn-act.html?activity=storyDetectives";
         }
         pendingActivity = null;
     });

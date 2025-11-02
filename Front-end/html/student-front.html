@@ -98,6 +98,23 @@
                     <video id="player-video" controls autoplay></video>
                 </div>
             </div>
+
+            <!--Notification bar-->
+            <div class="notification-overlay-background"></div>
+            <div class="notification-overlay">
+                <div class="notification" id="select-story-notification">
+                    <button class="overlay-close-btn" id="select-cancel-btn">
+                        <i class="fa fa-x"></i>
+                    </button>
+                    <div class="notification-content">
+                        <p class="notification-message">Do you want to try learning activities first before <span class="story-title"></span>?</p>
+                        <div class="notification-buttons">
+                            <button id="yes-modify" class="notification-btn">Yes</button>
+                            <button id="no-modify" class="notification-btn">No</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </main>
 
         <!--HOST SCRIPTS-->

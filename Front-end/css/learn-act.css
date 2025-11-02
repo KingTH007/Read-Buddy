@@ -198,17 +198,32 @@ main {
 }
 
 /* --- Mode Buttons --- */
+.mode-btns {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+    width: 100%;
+}
+
 .mode-btns button {
-    background: #08c2ff;
+    flex: 1;
+    background: #08C2FF;
     border: none;
     color: white;
-    padding: 8px 14px;
-    margin-left: 10px;
-    border-radius: 20px;
-    font-weight: 600;
-    font-size: 1rem;
+    padding: 12px;
+    border-radius: 12px;
     cursor: pointer;
+    font-size: 1rem;
+    font-weight: bold;
+    transition: background 0.3s ease;
 }
+
+.mode-btns button:hover {
+    background: #007bbd;
+}
+
 
 /* Hide both content sections by default */
 #readUnderstand,
@@ -295,6 +310,85 @@ main {
     margin-bottom: 4px;
     margin-left: 4px;
     color: #994040;
+}
+
+/* --- AI Container Layout --- */
+.ai-container {
+    position: relative;
+    display: none; /* hidden initially */
+    flex-direction: row; /* side-by-side layout */
+    align-items: flex-end; /* align AI image and bubble bottom edges */
+    justify-content: center; /* centers horizontally */
+    width: 100%;
+    gap: 20px;
+    animation: popFade 0.4s ease forwards;
+    top: 20%;
+}
+
+.ai-container.show {
+    display: flex;
+}
+
+/* --- Book AI beside the bubble --- */
+.text-book-ai {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+}
+
+.text-book-ai img {
+    width: 250px;
+    height: 250px;
+    object-fit: contain;
+}
+
+/* --- AI Text Bubble --- */
+.ai-text {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    background: linear-gradient(100deg, #994040 5%, #FF6B6B 25%);
+    color: #fff;
+    border-radius: 16px 16px 16px 16px;
+    padding: 20px 25px;
+    max-width: 40%;
+    gap: 12px;
+    justify-content: center;
+    align-items: flex-start;
+}
+
+.text-content h2 {
+    font-size: 2.3rem;
+    font-weight: 800;
+}
+
+.text-content p {
+    font-size: 1.5rem;
+}
+
+/* Speak Button */
+.ai-text .speak-btn {
+    align-self: flex-end;
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.3rem;
+    cursor: pointer;
+    transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.ai-text .speak-btn:hover {
+    color: #ffe66d;
+    transform: scale(1.15);
+}
+
+
+#sayItRight .start-btn.disabled-btn,
+#readUnderstand .start-btn.disabled-btn,
+#storyDetectives .start-btn.disabled-btn {
+    opacity: 0.6;
+    cursor: not-allowed;
+    pointer-events: none;
 }
 
 /* User Row */
@@ -409,13 +503,43 @@ main {
     }
 }
 
+/* --- Avatar Section --- */
+.avatar {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+.avatar .select-avatar {
+    background: var(--secondary);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 10px 18px;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+}
+
+.avatar .select-avatar:hover {
+    background: #007bbd;
+    transform: translateY(-2px);
+}
+
 /* --- Answer Buttons --- */
 .answer-container {
-    display: flex;
+    display: none; /* Hidden by default */
     justify-content: space-between;
     gap: 10px;
     margin-bottom: 15px;
     flex-wrap: wrap;
+    width: 100%;
+}
+
+.answer-container.show {
+    display: flex; /* Make visible when needed in JS */
 }
 
 .answer-btn {
@@ -435,16 +559,18 @@ main {
     background: #007bbd;
 }
 
-/* --- Start / Restart Buttons + Mic Button --- */
-.start-btn-container {
+.mic-container {
     display: flex;
-    justify-content: space-between; /* left mic / right group */
+    justify-content: center;
     align-items: center;
-    margin-top: 10px;
+    gap: 25px; /* spacing between mic and skip button */
+    width: 100%;
+    margin-top: 20px;
 }
 
 /* Left: Mic Button */
-.openVoice {
+.openVoice,
+.skip-btn {
   position: relative;
   background: linear-gradient(135deg, #ff5f6d, #ffc371);
   border: none;
@@ -462,22 +588,26 @@ main {
   outline: none;
 }
 
-.openVoice:hover {
+.openVoice:hover,
+.skip-btn:hover {
   transform: scale(1.08);
   box-shadow: 0 0 20px rgba(255, 107, 107, 0.8);
 }
 
-.openVoice:active {
+.openVoice:active,
+.skip-btn:active {
   transform: scale(0.95);
 }
 
-.openVoice i {
+.openVoice i,
+.skip-btn i {
   z-index: 2;
   position: relative;
 }
 
 /* Mic glow animation */
-.openVoice .mic-glow {
+.openVoice .mic-glow,
+.skip-btn .skip-glow {
   position: absolute;
   width: 100%;
   height: 100%;
@@ -494,15 +624,25 @@ main {
 }
 
 /* Hidden state when not shown */
-.openVoice:not(.show) {
+.openVoice:not(.show),
+.skip-btn:not(.show) {
   display: none;
 }
 
-/* Right side buttons container */
-.start-restart-group {
+
+.skip-btn.show {
+  display: inline-block !important;
+  opacity: 1;
+  transition: opacity 0.3s ease;
+}
+
+/* --- Start / Restart Buttons + Mic Button --- */
+.start-btn-container {
     display: flex;
+    justify-content: flex-end;
     align-items: center;
-    gap: 10px; /* space between Start and Restart */
+    gap: 1rem;
+    margin-top: 10px;
 }
 
 /* Right: Start & Restart Buttons */
@@ -668,7 +808,7 @@ main {
     }
 
     .content-header h2 {
-        font-size: 1.5rem;
+        font-size: 2rem;
         text-align: right;
     }
 

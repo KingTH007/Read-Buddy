@@ -5,15 +5,19 @@ document.addEventListener("DOMContentLoaded", () => {
   const aiBubble = sirSection.querySelector("#aiBubble");
   const bookIdle = sirSection.querySelector("#bookIdle");
   const bookTalking = sirSection.querySelector("#bookTalking");
+  const textbookIdle = sirSection.querySelector("#textbookIdle");
+  const textbookTalking = sirSection.querySelector("#textbookTalking");
   const micButton = sirSection.querySelector(".openVoice");
+  const skipButton = sirSection.querySelector(".skip-btn");
   const startBtn = sirSection.querySelector("#startVoice");
   const restartBtn = sirSection.querySelector("#restartVoice");
   const modeButtons = sirSection.querySelectorAll("#sayItRight-mode button");
+  const aiContainer = sirSection.querySelector(".ai-container");
+  const aiRow = sirSection.querySelector(".ai-row");
+  const aiTextCard = sirSection.querySelector("#aiTextCard");
 
-  if (!aiBubble) {
-    console.error("Missing #aiBubble inside #sayItRight");
-    return;
-  }
+  aiContainer.style.display = "none";
+  aiTextCard.style.display = "none";
 
   let recognition = null;
   let wordData = {};
@@ -22,6 +26,10 @@ document.addEventListener("DOMContentLoaded", () => {
   let currentWordIndex = 0;
   let score = 0;
   let isListening = false;
+
+  // Track wrong & skipped words
+  let wrongWords = [];
+  let skippedWords = [];
 
   // ✅ Correct JSON path
   const fetchPath = "../json/sayItRightWords.json";
@@ -62,19 +70,28 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
+  // ✅ Speech function with talking animation
   function speakTTS(text) {
     window.speechSynthesis.cancel();
     const u = new SpeechSynthesisUtterance(text);
     u.lang = "en-US";
     u.rate = 0.95;
+    u.pitch = 1.2;
+
     u.onstart = () => {
       bookIdle.style.display = "none";
       bookTalking.style.display = "block";
+      textbookIdle.style.display = "none";
+      textbookTalking.style.display = "block";
     };
+
     u.onend = () => {
       bookIdle.style.display = "block";
       bookTalking.style.display = "none";
+      textbookIdle.style.display = "block";
+      textbookTalking.style.display = "none";
     };
+
     window.speechSynthesis.speak(u);
   }
 
@@ -91,10 +108,39 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
+    aiRow.style.display = "none";
+    modeButtons.forEach(btn => btn.style.display = "none");
+    startBtn.disabled = true;
+    startBtn.classList.add("disabled-btn");
+
+    aiContainer.style.display = "flex";
+    aiTextCard.style.display = "flex";
     micButton.classList.add("show");
+    skipButton.classList.add("show");
+
     currentWordIndex = 0;
     score = 0;
+    wrongWords = [];
+    skippedWords = [];
     showCurrentWord();
+  });
+
+  // ✅ Skip word feature
+  skipButton.addEventListener("click", () => {
+    const list = wordData[selectedMode];
+    if (!list || currentWordIndex >= list.length) return;
+
+    const skippedWord = list[currentWordIndex].word;
+    if (!skippedWords.includes(skippedWord)) skippedWords.push(skippedWord);
+
+    speakTTS(`Let's skip this one. Moving to the next word.`);
+
+    currentWordIndex++;
+    if (currentWordIndex >= list.length) {
+      setTimeout(() => showResults(), 1000);
+    } else {
+      setTimeout(() => showCurrentWord(), 1000);
+    }
   });
 
   // Restart confirmation logic
@@ -105,78 +151,47 @@ document.addEventListener("DOMContentLoaded", () => {
   const nofimg = document.getElementById("notif-icon");
 
   restartBtn.addEventListener("click", () => {
-      restartNotification.style.display = "flex";
-      notifBackground.classList.add("show");
-      nofimg.classList.add("show");
+    restartNotification.style.display = "flex";
+    notifBackground.classList.add("show");
+    nofimg.classList.add("show");
   });
 
-  // YES → restart activity
   yesRestart.addEventListener("click", () => {
-      restartNotification.style.display = "none";
-      notifBackground.classList.remove("show");
-      nofimg.classList.remove("show");
-      resetAll(); // existing restart function
+    restartNotification.style.display = "none";
+    notifBackground.classList.remove("show");
+    nofimg.classList.remove("show");
+    resetAll();
   });
 
-  // NO → stay on current progress
   noRestart.addEventListener("click", () => {
-      restartNotification.style.display = "none";
-      notifBackground.classList.remove("show");
-      nofimg.classList.remove("show");
+    restartNotification.style.display = "none";
+    notifBackground.classList.remove("show");
+    nofimg.classList.remove("show");
   });
-  
+
   function resetAll() {
-    window.speechSynthesis.cancel();
-    micButton.classList.remove("show");
-    currentWordIndex = 0;
-    score = 0;
-    aiBubble.innerHTML = `<p>
-                            Welcome to <b>Say It Right!</b> 🎤  <br>
-                            This activity helps you improve your <b>pronunciation and speaking skills</b>. I’ll show you a word, and your goal is to pronounce it correctly using your voice. Keep speaking until I confirm that you’ve said it right — it’s a fun challenge to help you sound confident and clear when you speak!  
-                            <br><br>
-                            <b>Select a difficulty mode to show instructions.</b>
-                          </p>`;
+    window.location.href = "../../Front-end/html/learn-act.html?activity=sayItRight";
   }
 
-  // Render current word card
-  function renderWordCard(wordObj) {
-    const word = wordObj.word || "";
-    const type = wordObj.type || "";
-    const target = wordObj.target || "";
-    const pronunciation = wordObj.pronunciation || "";
+  function renderAiText(wordObj) {
+    const wordHeader = sirSection.querySelector("#word-pronouncation");
+    const wordContext = sirSection.querySelector("#word-context");
+    const speakBtn = sirSection.querySelector(".speak-btn");
 
-    aiBubble.innerHTML = `
-      <div style="display:flex; flex-direction:column; gap:6px;">
-        <div style="font-size:2.6rem; font-weight:700; line-height:1; color:#fff;">
-          ${escapeHtml(word)}
-        </div>
-        <div style="font-size:0.9rem; opacity:0.95; color:#fff;">
-          <em>${escapeHtml(type)}</em> · Target: ${escapeHtml(target)} · Pronunciation: ${escapeHtml(pronunciation)}
-        </div>
-      </div>
-      <button class="speak-btn" aria-label="Play word" title="Play word" style="background:none;border:none;color:white;font-size:1.1rem;">
-        <i class="fa fa-volume-up"></i>
-      </button>
-    `;
-
-    const playBtn = aiBubble.querySelector(".speak-btn");
-    if (playBtn) {
-      playBtn.onclick = (e) => {
-        e.stopPropagation();
-        speakTTS(word);
-      };
-    }
+    wordHeader.textContent = wordObj.word;
+    wordContext.textContent = `${wordObj.type} · Target: ${wordObj.target} · Pronunciation: ${wordObj.pronunciation}`;
+    speakBtn.onclick = () => speakTTS(wordObj.word);
   }
 
   function showCurrentWord() {
     const list = wordData[selectedMode];
     if (!list || currentWordIndex >= list.length) {
-
       showResults();
       return;
     }
+
     const wordObj = list[currentWordIndex];
-    renderWordCard(wordObj);
+    renderAiText(wordObj);
     speakTTS(`Say the word: ${wordObj.word}`);
   }
 
@@ -229,67 +244,96 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function evaluateSpoken(userSpeech) {
-      const current = wordData[selectedMode]?.[currentWordIndex];
-      if (!current) return;
+    const current = wordData[selectedMode]?.[currentWordIndex];
+    if (!current) return;
 
-      const correct = current.word.toLowerCase();
+    const correct = current.word.toLowerCase();
+    const spoken = userSpeech.toLowerCase();
 
-      // Track wrong words array
-      if (!window.wrongWords) window.wrongWords = [];
+    // ✅ Track total attempts
+    if (!current.attempted) current.attempted = true;
 
-      if (userSpeech.includes(correct)) {
-        score++;
-        speakTTS("Correct");
-        currentWordIndex++;
+    if (spoken === correct || spoken.includes(correct)) {
+      score++;
+      speakTTS("Correct!");
+      currentWordIndex++;
 
-        // ✅ Check if this was the LAST word
-        if (currentWordIndex >= wordData[selectedMode].length) {
-          setTimeout(() => showResults(), 1000);
-        } else {
-          setTimeout(() => showCurrentWord(), 1000);
-        }
+      // ✅ Mark as correct once
+      current.correct = true;
+
+      if (currentWordIndex >= wordData[selectedMode].length) {
+        setTimeout(() => showResults(), 1000);
       } else {
-        speakTTS(`Try again. The correct word is ${correct}`);
-        if (!wrongWords.includes(correct)) {
-          wrongWords.push(correct);
-        }
+        setTimeout(() => showCurrentWord(), 1000);
       }
+    } else {
+      speakTTS(`Incorrect. The correct word is ${correct}. Try again.`);
+      if (!wrongWords.includes(correct)) wrongWords.push(correct);
+    }
   }
 
-
-  // ✅ Redirects to new page
+  // ✅ Show result as chat bubble & hide ai-container
   function showResults() {
     const total = (wordData[selectedMode] || []).length;
     const wrongCount = wrongWords.length || 0;
-    const rightCount = total - wrongCount;
-    const percent = total ? Math.round((rightCount / total) * 100) : 0;
+    const skippedCount = skippedWords.length || 0;
+
+    // Compute correct words explicitly
+    const correctCount = total - wrongCount - skippedCount;
+
+    const percent = total > 0 ? Math.round((correctCount / total) * 100) : 0;
 
     let feedback = "";
     if (percent >= 90) feedback = "Excellent! Keep it up!";
     else if (percent >= 70) feedback = "Good! You’re improving!";
     else feedback = "Needs more practice.";
 
-    // ✅ Display list of wrong words without duplicates
-    const wrongListHTML = wrongWords.length
+    // Hide AI Text and controls
+    aiContainer.style.display = "none";
+    aiTextCard.style.display = "none";
+    micButton.classList.remove("show");
+    skipButton.classList.remove("show");
+
+    aiRow.style.display = "flex";
+    aiBubble.style.display = "flex";
+
+    const wrongHTML = wrongWords.length
       ? `<div style="margin-top:6px;color:#fff;">${escapeHtml(wrongWords.join(", "))}</div>`
       : `<div style="margin-top:6px;color:#fff;"><em>None — great job!</em></div>`;
 
+    const skippedHTML = skippedWords.length
+      ? `<div style="margin-top:6px;color:#fff;">${escapeHtml(skippedWords.join(", "))}</div>`
+      : `<div style="margin-top:6px;color:#fff;"><em>None — nice work!</em></div>`;
+
+    // ✅ Enhanced bubble styling: larger font, bold, and wider line spacing
     const resultHTML = `
-      <div class="bubble-text" style="color:#fff;">
-        <strong>HERE’S YOUR RESULT</strong><br><br>
-        ✅ Correct words: ${rightCount}/${total}<br>
-        ❌ Words pronounced wrong: ${wrongWords.length > 0 ? '' : '(none)'}<br>
-        ${wrongListHTML}
-        <br>
-        Accuracy: ${percent}%<br>
+      <div class="bubble-text" style="
+        color:#fff; 
+        font-size:1.1rem; 
+        font-weight:500; 
+        line-height:1.6; 
+        max-width:420px;
+        word-wrap: break-word;
+      ">
+        <strong style="font-size:1.2rem;">📊 HERE’S YOUR RESULT</strong><br><br>
+        ✅ Correct words: <strong>${correctCount}/${total}</strong><br>
+        ❌ Wrong words: <strong>${wrongCount}</strong><br>
+        ⏭️ Skipped words: <strong>${skippedCount}</strong><br><br>
+        <strong>Wrong words:</strong><br>${wrongHTML}<br>
+        <strong>Skipped words:</strong><br>${skippedHTML}<br><br>
+        <strong>Accuracy:</strong> <strong>${percent}%</strong><br>
         <em>${feedback}</em>
       </div>
     `;
 
     aiBubble.innerHTML = resultHTML;
 
-    // ✅ Spoken summary
-    speakTTS(`Here is your result. You pronounced ${rightCount} out of ${total} words correctly. Your accuracy is ${percent} percent.`);
+    // Spoken summary
+    speakTTS(
+      `Here is your result. You pronounced ${correctCount} out of ${total} words correctly. 
+      You got ${wrongCount} wrong and skipped ${skippedCount}. 
+      Your accuracy is ${percent} percent.`
+    );
   }
 
   function escapeHtml(s) {

@@ -8,11 +8,6 @@ document.getElementById("learn2").addEventListener("click", function () {
     window.location.href = "../../Front-end/html/learn-act.html?activity=sayItRight";
 });
 
-document.getElementById("learn2").addEventListener("click", function () {
-    // Change "lesson.html" to your actual lesson page
-    window.location.href = "../../Front-end/html/learn-act.html?activity=sayItRight";
-});
-
 document.getElementById("learn3").addEventListener("click", function () {
     // Change "lesson.html" to your actual lesson page
     window.location.href = "../../Front-end/html/learn-act.html?activity=storyDetectives";
@@ -45,16 +40,19 @@ async function loadStudentStories() {
                         <img src="${story.storyimage || "https://placehold.co/600x400"}" alt="Story Image" />
                     </div>
                     <p>${story.storyname}</p>
-                    <button class="button" data-id="${story.story_id}">Read Now</button>
+                    <button class="button" data-id="${story.story_id}" data-name="${story.storyname}">Read Now</button>
                 `;
                 container.appendChild(storyDiv);
             });
 
-            // ✅ Redirect on button click
+            // ✅ Handle notification before redirect
             container.addEventListener("click", (e) => {
                 if (e.target.tagName === "BUTTON" && e.target.dataset.id) {
                     const storyId = e.target.dataset.id;
-                    window.location.href = `../../Front-end/html/story-comp.html?story_id=${storyId}`;
+                    const storyName = e.target.dataset.name;
+
+                    // Show notification popup
+                    showStoryNotification(storyId, storyName);
                 }
             });
         } else {
@@ -62,6 +60,69 @@ async function loadStudentStories() {
         }
     } catch (err) {
         console.error("❌ Error loading student stories:", err);
+    }
+}
+
+function showStoryNotification(storyId, storyName) {
+    const overlay = document.querySelector(".notification-overlay");
+    const background = document.querySelector(".notification-overlay-background");
+    const notification = document.getElementById("select-story-notification");
+    const storyTitle = notification.querySelector(".story-title");
+    const yesBtn = notification.querySelector("#yes-modify");
+    const noBtn = notification.querySelector("#no-modify");
+    const closeBtn = notification.querySelector("#select-cancel-btn"); // 👈 new close button
+
+    if (!overlay || !background || !notification) {
+        console.error("❌ Notification elements missing in DOM.");
+        return;
+    }
+
+    // ✅ Set the story title dynamically
+    storyTitle.textContent = storyName;
+
+    // ✅ Show the overlay (center modal)
+    overlay.style.display = "flex";
+    background.style.display = "block";
+    document.body.style.overflow = "hidden"; // prevent background scrolling
+
+    // ✅ Remove old listeners (to avoid stacking)
+    const newYesBtn = yesBtn.cloneNode(true);
+    const newNoBtn = noBtn.cloneNode(true);
+    const newCloseBtn = closeBtn.cloneNode(true);
+    yesBtn.parentNode.replaceChild(newYesBtn, yesBtn);
+    noBtn.parentNode.replaceChild(newNoBtn, noBtn);
+    closeBtn.parentNode.replaceChild(newCloseBtn, closeBtn);
+
+    // ✅ "Yes" → Go to learning activities
+    newYesBtn.addEventListener("click", () => {
+        hideOverlay();
+        window.location.href = "../../Front-end/html/learn-act.html";
+    });
+
+    // ✅ "No" → Go to story page
+    newNoBtn.addEventListener("click", () => {
+        hideOverlay();
+        window.location.href = `../../Front-end/html/story-comp.html?story_id=${storyId}`;
+    });
+
+    // ✅ "Close" → Just close overlay
+    newCloseBtn.addEventListener("click", () => {
+        hideOverlay();
+    });
+
+    // ✅ Clicking outside closes overlay
+    overlay.addEventListener("click", function handleOutsideClick(e) {
+        if (e.target === overlay) {
+            hideOverlay();
+            overlay.removeEventListener("click", handleOutsideClick);
+        }
+    });
+
+    // ✅ Helper function to hide modal
+    function hideOverlay() {
+        overlay.style.display = "none";
+        background.style.display = "none";
+        document.body.style.overflow = "";
     }
 }
 

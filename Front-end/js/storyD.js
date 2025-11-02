@@ -43,9 +43,25 @@ document.addEventListener("DOMContentLoaded", () => {
         return String(html).replace(/<[^>]*>?/gm, "");
     }
 
+    function toggleModeButtons(state) {
+        answerButtons.forEach(b => {
+            b.disabled = !state;
+            b.classList.toggle("disabled-btn", !state);
+        });
+    }
+
+    answerButtons.forEach(b => b.disabled = true);
+
     function speakTTS(text, callback = null) {
         window.speechSynthesis.cancel();
-        const utter = new SpeechSynthesisUtterance(text);
+
+        // 🧠 Replace one or multiple underscores with a single spoken "blank"
+        const cleanText = String(text)
+            .replace(/_+/g, " blank ") // convert any number of underscores to one "blank"
+            .replace(/\s+/g, " ") // normalize spaces
+            .trim();
+
+        const utter = new SpeechSynthesisUtterance(cleanText);
         utter.lang = "en-US";
         utter.rate = 0.9;
 
@@ -75,6 +91,7 @@ document.addEventListener("DOMContentLoaded", () => {
         window.speechSynthesis.speak(utter);
     }
 
+
     // 💬 Chat functions
     function addUserMessage(text) {
         const row = document.createElement("div");
@@ -93,6 +110,9 @@ document.addEventListener("DOMContentLoaded", () => {
     function addAIMessage(text, speak = false, callback = null) {
         const row = document.createElement("div");
         row.classList.add("ai-row");
+
+        const isChoiceMessage = text.startsWith("A.") || text.startsWith("B.") || text.includes("Question") || text.includes("Choice:");    
+
         row.innerHTML = `
             <div class="book-ai">
                 <img src="../asset/AI-bot.png" alt="AI Idle" style="display:block;">
@@ -107,13 +127,15 @@ document.addEventListener("DOMContentLoaded", () => {
             </div>
         `;
 
-        row.querySelector(".speak-btn").addEventListener("click", () => {
-            speakTTS(stripHTML(text));
-        });
+        const speakBtn = row.querySelector(".speak-btn");
+        if (speakBtn) {
+            speakBtn.addEventListener("click", () => {
+                speakTTS(stripHTML(text));
+            });
+        }
 
         // 🟡 Ensure video background is present before message
         ensureVideoWrapper();
-
         sdBox.appendChild(row);
         sdBox.scrollTop = sdBox.scrollHeight;
 
@@ -122,17 +144,89 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // 🟢 Ensure video wrapper exists
     function ensureVideoWrapper() {
-        let videoWrapper = sdBox.querySelector(".video-wrapper");
-        if (!videoWrapper) {
-            const wrapperHTML = `
-                <div class="video-wrapper">
+        const contentBoxes = document.querySelectorAll(".content-box");
+
+        // 🧱 Prevent body/page scroll
+        document.body.style.overflow = "hidden";
+        document.documentElement.style.overflow = "hidden";
+
+        contentBoxes.forEach(box => {
+            let videoWrapper = box.querySelector(".video-wrapper");
+
+            // ✅ If no video-wrapper exists, create it inside the content-box
+            if (!videoWrapper) {
+                videoWrapper = document.createElement("div");
+                videoWrapper.classList.add("video-wrapper");
+                videoWrapper.innerHTML = `
                     <video autoplay muted loop playsinline class="box-bg-video">
                         <source src="../asset/bg.mp4" type="video/mp4">
                     </video>
-                </div>
-            `;
-            sdBox.insertAdjacentHTML("afterbegin", wrapperHTML);
-        }
+                `;
+                box.prepend(videoWrapper);
+            }
+
+                // ✅ Set video-wrapper position fixed relative to viewport but aligned to box
+            videoWrapper.style.position = "fixed";
+            videoWrapper.style.top = box.getBoundingClientRect().top + "px";
+            videoWrapper.style.left = box.getBoundingClientRect().left + "px";
+            videoWrapper.style.width = box.offsetWidth + "px";
+            videoWrapper.style.height = box.offsetHeight + "px";
+            videoWrapper.style.zIndex = "0";
+            videoWrapper.style.pointerEvents = "none";
+            videoWrapper.style.overflow = "hidden";
+
+            const video = videoWrapper.querySelector("video");
+            if (video) {
+                video.style.width = "100%";
+                video.style.height = "100%";
+                video.style.objectFit = "cover";
+            }
+
+            // ✅ Keep video aligned and fixed even while scrolling inside the box
+            box.addEventListener("scroll", () => {
+                if (box.scrollTop < 0) box.scrollTop = 0;
+                const maxScroll = box.scrollHeight - box.clientHeight;
+                if (box.scrollTop > maxScroll) box.scrollTop = maxScroll;
+
+                videoWrapper.style.top = box.getBoundingClientRect().top + "px";
+            });
+
+            // ✅ Prevent scroll bleed or bounce on mobile (touch)
+            box.addEventListener("touchmove", e => {
+                const maxScroll = box.scrollHeight - box.clientHeight;
+                if (maxScroll <= 0) {
+                    e.preventDefault();
+                    return;
+                }
+
+                const currentY = e.touches[0].clientY;
+                const atTop = box.scrollTop === 0;
+                const atBottom = box.scrollTop === maxScroll;
+                const isScrollingUp = currentY > (box.lastTouchY || 0);
+                const isScrollingDown = currentY < (box.lastTouchY || 0);
+
+                // 🚫 Prevent scrolling beyond top/bottom
+                if ((atTop && isScrollingUp) || (atBottom && isScrollingDown)) {
+                    e.preventDefault();
+                }
+
+                box.lastTouchY = currentY;
+            }, { passive: false });
+
+            // ✅ Adjust video-wrapper on window resize
+            window.addEventListener("resize", () => {
+                videoWrapper.style.width = box.offsetWidth + "px";
+                videoWrapper.style.height = box.offsetHeight + "px";
+                videoWrapper.style.top = box.getBoundingClientRect().top + "px";
+                videoWrapper.style.left = box.getBoundingClientRect().left + "px";
+            });
+
+            // ✅ Ensure all inner elements stay above background
+            box.querySelectorAll("*:not(.video-wrapper)").forEach(el => {
+                el.style.position = "relative";
+                el.style.zIndex = "2";
+            });
+        });
     }
 
     // 🎯 Mode selection
@@ -150,17 +244,23 @@ document.addEventListener("DOMContentLoaded", () => {
     // ▶️ Start story
     startBtn.addEventListener("click", () => {
         if (!selectedMode) {
-            addAIMessage("Please select a mode first.", true);
+            speakTTS("Please select a mode first.", true);
             return;
         }
 
-        const list = stories[selectedMode];
-        if (!list?.length) {
-            addAIMessage("Stories are still loading. Please wait.", true);
-            return;
-        }
+        // ✅ Disable Start button to prevent multiple clicks
+        startBtn.disabled = true;
+        startBtn.classList.add("disabled-btn");
 
-        modeButtons.forEach(b => (b.disabled = true));
+        // ✅ Hide mode buttons
+        modeButtons.forEach(b => b.style.display = "none");
+
+        // ✅ Show answer container
+        answerContainer.style.display = "flex";
+
+        // Disable mode buttons to prevent changing mode during story
+        modeButtons.forEach(b => b.disabled = true);
+
         currentStoryIndex = 0;
         currentQuestionIndex = 0;
         correctCount = 0;
@@ -168,6 +268,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         startNextStory();
     });
+
 
     // 📖 Start each story
     function startNextStory() {
@@ -205,12 +306,16 @@ document.addEventListener("DOMContentLoaded", () => {
             answerContainer.querySelector('[data-choice="A"]').textContent = `A. ${choiceA}`;
             answerContainer.querySelector('[data-choice="B"]').textContent = `B. ${choiceB}`;
             answerContainer.style.display = "flex";
+
+            toggleModeButtons(true);
         });
     }
 
     // ✅ Handle answers
     answerButtons.forEach(btn => {
         btn.addEventListener("click", () => {
+            toggleModeButtons(false);
+
             const q = currentStory.questions[currentQuestionIndex];
             const selectedChoice = btn.dataset.choice === "A" ? q.choices[0] : q.choices[1];
             addUserMessage(selectedChoice);
@@ -310,6 +415,5 @@ document.addEventListener("DOMContentLoaded", () => {
         selectedMode = null;
     }
 
-    // 🟡 Add video wrapper initially
     ensureVideoWrapper();
 });

@@ -1,79 +1,127 @@
 {
   "Easy": [
     {
-      "text": "Anna found a small puppy in the park. The puppy was hungry and lost. She gave it water and brought it home.",
+      "text": "Mia loves to feed the birds every morning. She brings crumbs of bread and puts them near the tree. The birds chirp happily as they eat.",
       "questions": [
-        { "q": "Who found the puppy?", "choices": ["Ben", "Anna", "Maria", "John"], "correct": "Anna" },
-        { "q": "Where did Anna find the puppy?", "choices": ["In school", "In the park", "At home", "On the road"], "correct": "In the park" },
-        { "q": "What did Anna give the puppy?", "choices": ["Food", "Water", "A toy", "Milk"], "correct": "Water" }
+        { "q": "Who feeds the birds?", "choices": ["Lara", "Mia", "Anna", "Ella"], "correct": "Mia" },
+        { "q": "When does Mia feed the birds?", "choices": ["At night", "In the morning", "At noon", "In the afternoon"], "correct": "In the morning" },
+        { "q": "What does she give to the birds?", "choices": ["Rice", "Seeds", "Crumbs of bread", "Water"], "correct": "Crumbs of bread" },
+        { "q": "Where does she put the food?", "choices": ["In the park", "Near the tree", "In a bowl", "On the roof"], "correct": "Near the tree" },
+        { "q": "How do the birds feel?", "choices": ["Angry", "Sad", "Happy", "Tired"], "correct": "Happy" }
       ]
     },
     {
-      "text": "Leo flew his red kite at the beach. The wind was strong, and the kite flew high. Leo laughed and ran with his friends.",
+      "text": "Tom and his dog Max like to play in the yard. Tom throws a ball, and Max runs fast to catch it. They laugh and play until sunset.",
       "questions": [
-        { "q": "What color was Leo’s kite?", "choices": ["Blue", "Green", "Red", "Yellow"], "correct": "Red" },
-        { "q": "Where did Leo fly his kite?", "choices": ["At the beach", "At the park", "At school", "At home"], "correct": "At the beach" },
-        { "q": "Who played with Leo?", "choices": ["His teacher", "His friends", "His parents", "His dog"], "correct": "His friends" }
-      ]
-    },
-    {
-      "text": "Mia baked a chocolate cake for her mom. She put candles on top and sang a song. Her mom smiled happily.",
-      "questions": [
-        { "q": "What flavor was the cake?", "choices": ["Vanilla", "Strawberry", "Chocolate", "Mango"], "correct": "Chocolate" },
-        { "q": "Who baked the cake?", "choices": ["Mia", "Her mom", "Her dad", "Her brother"], "correct": "Mia" },
-        { "q": "How did her mom feel?", "choices": ["Sad", "Angry", "Happy", "Tired"], "correct": "Happy" }
+        { "q": "Who plays with Tom?", "choices": ["His cat", "His dog Max", "His friend", "His sister"], "correct": "His dog Max" },
+        { "q": "What do they play with?", "choices": ["A stick", "A rope", "A ball", "A toy car"], "correct": "A ball" },
+        { "q": "Where do they play?", "choices": ["In the house", "In the yard", "In the park", "In the street"], "correct": "In the yard" },
+        { "q": "When do they stop playing?", "choices": ["At sunrise", "At sunset", "At lunch", "At night"], "correct": "At sunset" },
+        { "q": "Why do they laugh?", "choices": ["Because they are sad", "Because they are tired", "Because they are playing", "Because it rained"], "correct": "Because they are playing" }
       ]
     }
   ],
   "Medium": [
     {
-      "text": "Sara lost her favorite book in the library. She asked the librarian for help. After looking, they found it under a chair.",
+      "text": "Ella and her classmates cleaned their school garden. They picked up trash, watered the plants, and planted new flowers. The garden looked fresh and pretty after.",
       "questions": [
-        { "q": "Where did Sara lose her book?", "choices": ["At home", "In the library", "In school", "At the park"], "correct": "In the library" },
-        { "q": "Who helped Sara?", "choices": ["Her mom", "Her teacher", "The librarian", "Her friend"], "correct": "The librarian" },
-        { "q": "Where was the book found?", "choices": ["On the desk", "On the shelf", "Under a chair", "In her bag"], "correct": "Under a chair" }
+        { "q": "Who cleaned the garden?", "choices": ["Ella and her classmates", "Ella’s family", "The teachers", "The janitor"], "correct": "Ella and her classmates" },
+        { "q": "What did they plant?", "choices": ["Vegetables", "Trees", "New flowers", "Fruits"], "correct": "New flowers" },
+        { "q": "Where did they clean?", "choices": ["In the park", "In the classroom", "In the school garden", "At home"], "correct": "In the school garden" },
+        { "q": "How did the garden look after?", "choices": ["Dirty", "Fresh and pretty", "Empty", "Dark"], "correct": "Fresh and pretty" },
+        { "q": "Why did they clean the garden?", "choices": ["Because they had no class", "Because they were told to", "To make it beautiful", "To find something"], "correct": "To make it beautiful" }
       ]
     },
     {
-      "text": "The class planted flowers in the school garden. They watered them every day. Soon, the flowers bloomed and looked beautiful.",
+      "text": "Ben’s family went to the beach last Sunday. They swam in the sea, built sandcastles, and ate lunch under a big umbrella.",
       "questions": [
-        { "q": "What did the class plant?", "choices": ["Trees", "Fruits", "Flowers", "Vegetables"], "correct": "Flowers" },
-        { "q": "What did they do every day?", "choices": ["Played", "Watered the flowers", "Read books", "Pulled weeds"], "correct": "Watered the flowers" },
-        { "q": "How did the flowers look?", "choices": ["Ugly", "Beautiful", "Old", "Small"], "correct": "Beautiful" }
+        { "q": "Who went to the beach?", "choices": ["Ben’s family", "Ben’s friends", "His classmates", "His teacher"], "correct": "Ben’s family" },
+        { "q": "When did they go to the beach?", "choices": ["Yesterday", "Last Sunday", "Last night", "Tomorrow"], "correct": "Last Sunday" },
+        { "q": "What did they build?", "choices": ["A tent", "A sandcastle", "A house", "A tower"], "correct": "A sandcastle" },
+        { "q": "Where did they eat lunch?", "choices": ["Under a tree", "At a restaurant", "Under a big umbrella", "At home"], "correct": "Under a big umbrella" },
+        { "q": "Why did they enjoy the day?", "choices": ["Because it rained", "Because they had fun swimming", "Because they were tired", "Because they stayed home"], "correct": "Because they had fun swimming" }
       ]
     },
     {
-      "text": "Liam and his family went on a picnic. They ate sandwiches and played games. It was a fun and happy day.",
+      "text": "Liam helped his mother cook dinner. He washed the vegetables, set the table, and poured the juice. His mother thanked him for being helpful.",
       "questions": [
-        { "q": "Who went on a picnic?", "choices": ["Liam’s friends", "Liam and his family", "Liam and his teacher", "Liam alone"], "correct": "Liam and his family" },
-        { "q": "What did they eat?", "choices": ["Rice", "Pizza", "Sandwiches", "Cake"], "correct": "Sandwiches" },
-        { "q": "How was the day?", "choices": ["Boring", "Fun and happy", "Rainy", "Sad"], "correct": "Fun and happy" }
+        { "q": "Who helped cook dinner?", "choices": ["Liam", "Anna", "Ben", "Tom"], "correct": "Liam" },
+        { "q": "What did Liam do to help?", "choices": ["Washed vegetables and set the table", "Played games", "Cleaned his room", "Fed the dog"], "correct": "Washed vegetables and set the table" },
+        { "q": "Where did they cook?", "choices": ["In the garden", "In the kitchen", "In the living room", "Outside"], "correct": "In the kitchen" },
+        { "q": "How did his mother feel?", "choices": ["Angry", "Happy", "Sad", "Tired"], "correct": "Happy" },
+        { "q": "Why did his mother thank him?", "choices": ["Because he was helpful", "Because he was noisy", "Because he finished eating", "Because he was late"], "correct": "Because he was helpful" }
+      ]
+    },
+    {
+      "text": "Sofia loves reading storybooks. Every night, she reads before going to bed. Her favorite story is about a brave princess who saves her village.",
+      "questions": [
+        { "q": "Who loves reading?", "choices": ["Ella", "Sofia", "Tom", "Mia"], "correct": "Sofia" },
+        { "q": "When does Sofia read?", "choices": ["In the morning", "In the afternoon", "Every night", "At school"], "correct": "Every night" },
+        { "q": "What kind of books does she read?", "choices": ["Comics", "Storybooks", "Newspapers", "Magazines"], "correct": "Storybooks" },
+        { "q": "What is her favorite story about?", "choices": ["A king", "A brave princess", "A dragon", "A fairy"], "correct": "A brave princess" },
+        { "q": "Why does Sofia like reading?", "choices": ["Because it’s fun", "Because she must", "Because she gets prizes", "Because she’s bored"], "correct": "Because it’s fun" }
       ]
     }
   ],
   "Hard": [
     {
-      "text": "A farmer planted corn in his field. Every day, he worked hard to water and take care of the plants. One morning, he saw big, yellow corn ready to eat. He shared it with his neighbors.",
+      "text": "Jake joined a science fair at school. He built a small volcano that erupted with bubbles. His classmates clapped when they saw it work.",
       "questions": [
-        { "q": "What did the farmer plant?", "choices": ["Rice", "Corn", "Wheat", "Apples"], "correct": "Corn" },
-        { "q": "How did the farmer take care of the plants?", "choices": ["By watering and working hard", "By leaving them alone", "By selling them early", "By asking neighbors"], "correct": "By watering and working hard" },
-        { "q": "What did the farmer do with the corn?", "choices": ["Ate it alone", "Shared it with neighbors", "Threw it away", "Sold it"], "correct": "Shared it with neighbors" }
+        { "q": "Who joined the science fair?", "choices": ["Liam", "Jake", "Ben", "Ella"], "correct": "Jake" },
+        { "q": "What did Jake build?", "choices": ["A rocket", "A robot", "A volcano", "A bridge"], "correct": "A volcano" },
+        { "q": "Where did the science fair happen?", "choices": ["At home", "At school", "At the park", "In the library"], "correct": "At school" },
+        { "q": "How did his classmates react?", "choices": ["They clapped", "They laughed", "They left", "They ignored him"], "correct": "They clapped" },
+        { "q": "Why did the volcano bubble?", "choices": ["Because of magic", "Because of a science experiment", "Because it rained", "Because it broke"], "correct": "Because of a science experiment" }
       ]
     },
     {
-      "text": "A cat named Snowy saw a bird trapped in a net. Snowy used his sharp claws to cut the net. The bird was free and chirped happily as it flew away.",
+      "text": "Lara and her father went hiking in the mountains. They saw tall trees and heard birds singing. At the top, they took pictures together.",
       "questions": [
-        { "q": "What was the cat’s name?", "choices": ["Fluffy", "Snowy", "Tiger", "Kitty"], "correct": "Snowy" },
-        { "q": "What did Snowy do to the net?", "choices": ["Played with it", "Cut it with claws", "Ignored it", "Slept on it"], "correct": "Cut it with claws" },
-        { "q": "How did the bird feel after being freed?", "choices": ["Sad", "Happy", "Angry", "Tired"], "correct": "Happy" }
+        { "q": "Who went hiking?", "choices": ["Lara and her mother", "Lara and her father", "Lara and her brother", "Lara alone"], "correct": "Lara and her father" },
+        { "q": "Where did they go hiking?", "choices": ["In the park", "In the mountains", "At the beach", "In the forest"], "correct": "In the mountains" },
+        { "q": "What did they see?", "choices": ["Tall trees", "A city", "Cars", "A river"], "correct": "Tall trees" },
+        { "q": "What did they do at the top?", "choices": ["Slept", "Ate lunch", "Took pictures", "Ran"], "correct": "Took pictures" },
+        { "q": "Why were they happy?", "choices": ["Because they finished hiking", "Because they got lost", "Because it was raining", "Because they were tired"], "correct": "Because they finished hiking" }
       ]
     },
     {
-      "text": "Lily loved painting. One day, she painted a picture of the mountains and the river. Her teacher saw it and said she was very talented.",
+      "text": "Noah saw a kitten stuck in a tree. He called the fireman for help. The fireman climbed up and safely brought the kitten down.",
       "questions": [
-        { "q": "Who loved painting?", "choices": ["Lily", "Anna", "Ben", "Tom"], "correct": "Lily" },
-        { "q": "What did Lily paint?", "choices": ["A house", "The mountains and the river", "A flower", "A tree"], "correct": "The mountains and the river" },
-        { "q": "What did the teacher say about Lily?", "choices": ["She was lazy", "She was talented", "She was tired", "She was funny"], "correct": "She was talented" }
+        { "q": "Who saw the kitten?", "choices": ["Noah", "Ella", "Ben", "Tom"], "correct": "Noah" },
+        { "q": "What was stuck in the tree?", "choices": ["A bird", "A kite", "A kitten", "A toy"], "correct": "A kitten" },
+        { "q": "Who helped get the kitten down?", "choices": ["A policeman", "A fireman", "A teacher", "A friend"], "correct": "A fireman" },
+        { "q": "How did the fireman get the kitten?", "choices": ["He threw a rope", "He climbed the tree", "He used a ladder", "He waited"], "correct": "He climbed the tree" },
+        { "q": "Why did Noah call for help?", "choices": ["Because the kitten was stuck", "Because it was his pet", "Because he wanted to play", "Because it was raining"], "correct": "Because the kitten was stuck" }
+      ]
+    },
+    {
+      "text": "Nina practiced playing the piano every day. At the school show, she performed a song for everyone. Her teacher was proud of her.",
+      "questions": [
+        { "q": "Who played the piano?", "choices": ["Anna", "Nina", "Ella", "Sofia"], "correct": "Nina" },
+        { "q": "When did she practice?", "choices": ["Every night", "Every day", "Once a week", "On weekends"], "correct": "Every day" },
+        { "q": "Where did she perform?", "choices": ["At home", "At the school show", "In the park", "At a mall"], "correct": "At the school show" },
+        { "q": "How did her teacher feel?", "choices": ["Proud", "Angry", "Tired", "Sad"], "correct": "Proud" },
+        { "q": "Why did Nina play well?", "choices": ["Because she practiced", "Because it was easy", "Because she got help", "Because she guessed"], "correct": "Because she practiced" }
+      ]
+    },
+    {
+      "text": "Ethan and his friends cleaned the playground after recess. They picked up papers and plastic bottles to keep it clean.",
+      "questions": [
+        { "q": "Who cleaned the playground?", "choices": ["The teacher", "Ethan and his friends", "Parents", "Guards"], "correct": "Ethan and his friends" },
+        { "q": "What did they pick up?", "choices": ["Toys", "Papers and bottles", "Shoes", "Leaves"], "correct": "Papers and bottles" },
+        { "q": "When did they clean?", "choices": ["Before recess", "After recess", "At night", "At lunch"], "correct": "After recess" },
+        { "q": "Why did they clean the playground?", "choices": ["To keep it clean", "Because the teacher said so", "To play again", "Because it was raining"], "correct": "To keep it clean" },
+        { "q": "How did they feel after?", "choices": ["Tired but happy", "Sad", "Angry", "Scared"], "correct": "Tired but happy" }
+      ]
+    },
+    {
+      "text": "Olivia planted a mango seed in her backyard. Every day she watered it and watched it grow into a small tree.",
+      "questions": [
+        { "q": "Who planted the seed?", "choices": ["Nina", "Olivia", "Mia", "Ella"], "correct": "Olivia" },
+        { "q": "What kind of seed did she plant?", "choices": ["Apple", "Banana", "Mango", "Orange"], "correct": "Mango" },
+        { "q": "Where did she plant it?", "choices": ["In the park", "In her backyard", "At school", "In a pot"], "correct": "In her backyard" },
+        { "q": "When did she water it?", "choices": ["Every night", "Every day", "Every week", "Every month"], "correct": "Every day" },
+        { "q": "Why did it grow into a tree?", "choices": ["Because she watered it", "Because it rained", "Because of luck", "Because it was big"], "correct": "Because she watered it" }
       ]
     }
   ]

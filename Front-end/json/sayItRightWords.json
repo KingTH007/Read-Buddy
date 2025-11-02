@@ -1,38 +1,38 @@
 {
   "easy": [
-    { "word": "cat", "type": "noun", "target": "short a sound", "pronunciation": "kat" },
-    { "word": "dog", "type": "noun", "target": "soft g", "pronunciation": "dawg" },
-    { "word": "run", "type": "verb (present)", "target": "short u", "pronunciation": "ruhn" },
-    { "word": "jump", "type": "verb (present)", "target": "final p clarity", "pronunciation": "juhmp" },
-    { "word": "sun", "type": "noun", "target": "short u", "pronunciation": "suhn" },
-    { "word": "big", "type": "adjective", "target": "final g sound", "pronunciation": "big" },
-    { "word": "red", "type": "adjective", "target": "short e", "pronunciation": "red" },
-    { "word": "ball", "type": "noun", "target": "long l sound", "pronunciation": "bawl" },
-    { "word": "sit", "type": "verb (present)", "target": "short i", "pronunciation": "sit" },
-    { "word": "fish", "type": "noun", "target": "sh sound", "pronunciation": "fish" }
+    { "word": "cat", "type": "noun", "target": "short a sound", "pronunciation": "kaet" },
+    { "word": "dog", "type": "noun", "target": "short o sound", "pronunciation": "dohg" },
+    { "word": "sun", "type": "noun", "target": "short u sound", "pronunciation": "san" },
+    { "word": "run", "type": "verb (present)", "target": "short u sound", "pronunciation": "ran" },
+    { "word": "fish", "type": "noun", "target": "sh sound", "pronunciation": "pish" }
   ],
   "medium": [
-    { "word": "walked", "type": "past tense verb", "target": "ed sounds like /t/", "pronunciation": "wahkt" },
-    { "word": "played", "type": "past tense verb", "target": "ed sounds like /d/", "pronunciation": "pleyd" },
-    { "word": "jumped", "type": "past tense verb", "target": "ed sounds like /t/", "pronunciation": "juhmpt" },
-    { "word": "hugged", "type": "past tense verb", "target": "ed sounds like /d/", "pronunciation": "huhgd" },
-    { "word": "helped", "type": "past tense verb", "target": "ed sounds like /t/", "pronunciation": "helpt" },
-    { "word": "garden", "type": "noun", "target": "stress on first syllable", "pronunciation": "gar·duhn" },
-    { "word": "teacher", "type": "noun", "target": "ending er sound", "pronunciation": "tee·chur" },
-    { "word": "table", "type": "noun", "target": "long a sound", "pronunciation": "tay·buhl" },
-    { "word": "opened", "type": "past tense verb", "target": "clear o-pened articulation", "pronunciation": "oh·puhnd" },
-    { "word": "started", "type": "past tense verb", "target": "ed sounds like /id/", "pronunciation": "star·tid" }
+    { "word": "jumped", "type": "verb (past)", "target": "ed sounds like /t/", "pronunciation": "jampd" },
+    { "word": "played", "type": "verb (past)", "target": "ed sounds like /d/", "pronunciation": "pleyd" },
+    { "word": "helped", "type": "verb (past)", "target": "ed sounds like /t/", "pronunciation": "helpt" },
+    { "word": "cleaned", "type": "verb (past)", "target": "clear long e sound", "pronunciation": "kleend" },
+    { "word": "garden", "type": "noun", "target": "stress on first syllable", "pronunciation": "gar-den" },
+    { "word": "teacher", "type": "noun", "target": "ending er sound", "pronunciation": "ti-cher" },
+    { "word": "happy", "type": "adjective", "target": "two syllables, stress on first", "pronunciation": "ha-pee" },
+    { "word": "morning", "type": "noun", "target": "ng sound at the end", "pronunciation": "mor-ning" },
+    { "word": "opened", "type": "verb (past)", "target": "clear two syllables", "pronunciation": "oh-pend" },
+    { "word": "started", "type": "verb (past)", "target": "ed sounds like /id/", "pronunciation": "star-ted" }
   ],
   "hard": [
-    { "word": "gave", "type": "irregular verb", "target": "long a", "pronunciation": "geyv" },
-    { "word": "thought", "type": "irregular verb", "target": "th and ought blend", "pronunciation": "thawt" },
-    { "word": "brought", "type": "irregular verb", "target": "br and ought blend", "pronunciation": "brawt" },
-    { "word": "laughed", "type": "past tense", "target": "ed pronounced /t/", "pronunciation": "laft" },
-    { "word": "watched", "type": "past tense", "target": "ed pronounced /t/", "pronunciation": "wahcht" },
-    { "word": "adventure", "type": "noun", "target": "stress on second syllable", "pronunciation": "ad·ven·chur" },
-    { "word": "beautiful", "type": "adjective", "target": "beau-ti-ful three syllables", "pronunciation": "byoo·tuh·fuhl" },
-    { "word": "elephant", "type": "noun", "target": "stress on first syllable", "pronunciation": "eh·luh·fuhnt" },
-    { "word": "remember", "type": "verb", "target": "stress on second syllable", "pronunciation": "rih·mem·bur" },
-    { "word": "surprised", "type": "past tense", "target": "ed pronounced /d/", "pronunciation": "sur·pryzd" }
+    { "word": "elephant", "type": "noun", "target": "stress on first syllable", "pronunciation": "e-le-fant" },
+    { "word": "remember", "type": "verb", "target": "stress on second syllable", "pronunciation": "ri-mem-ber" },
+    { "word": "beautiful", "type": "adjective", "target": "three syllables", "pronunciation": "byu-ti-ful" },
+    { "word": "yesterday", "type": "noun", "target": "stress on first syllable", "pronunciation": "yes-ter-dey" },
+    { "word": "adventure", "type": "noun", "target": "stress on second syllable", "pronunciation": "ad-ven-chur" },
+    { "word": "surprised", "type": "verb (past)", "target": "ed pronounced /d/", "pronunciation": "sur-prayzd" },
+    { "word": "animal", "type": "noun", "target": "three syllables, soft a", "pronunciation": "a-ni-mal" },
+    { "word": "together", "type": "adverb", "target": "stress on second syllable", "pronunciation": "tu-ge-der" },
+    { "word": "holiday", "type": "noun", "target": "stress on first syllable", "pronunciation": "ho-li-dey" },
+    { "word": "because", "type": "conjunction", "target": "z sound at the end", "pronunciation": "bi-kooz" },
+    { "word": "important", "type": "adjective", "target": "t sound in middle", "pronunciation": "im-por-tant" },
+    { "word": "everything", "type": "pronoun", "target": "th sound", "pronunciation": "ev-ri-ting" },
+    { "word": "computer", "type": "noun", "target": "stress on second syllable", "pronunciation": "kom-pyu-ter" },
+    { "word": "favorite", "type": "adjective", "target": "three syllables", "pronunciation": "fey-vo-rit" },
+    { "word": "togetherness", "type": "noun", "target": "four syllables", "pronunciation": "tu-ge-der-nes" }
   ]
 }

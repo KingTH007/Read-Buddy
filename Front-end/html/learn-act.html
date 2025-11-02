@@ -44,11 +44,9 @@
             <div class="content-container" id="readUnderstand">
                 <div class="content-header">
                     <h2>Read and Understand</h2>
-                    <div class="mode-btns" id="readUnderstand-mode">
-                        <button>Easy</button>
-                        <button>Medium</button>
-                        <button>Hard</button>
-                    </div>
+                    <!--<div class="avatar">
+                        <button class="select-avatar"> CHANGE A.I ASSISTANT </button>
+                    </div>-->
                 </div>
 
                 <!-- Chat-style content -->
@@ -78,6 +76,13 @@
                     </div>
                 </div>
 
+                <!--Mode Difficult-->
+                <div class="mode-btns" id="readUnderstand-mode">
+                    <button>Easy</button>
+                    <button>Medium</button>
+                    <button>Hard</button>
+                </div>
+
                 <!-- Input for user -->
                 <div class="answer-container" id="rAuAnswers">
                     <button class="answer-btn" data-choice="A">A</button>
@@ -97,11 +102,9 @@
             <div class="content-container" id="sayItRight">
                 <div class="content-header">
                     <h2>Say It Right!</h2>
-                    <div class="mode-btns" id="sayItRight-mode">
-                        <button>Easy</button>
-                        <button>Medium</button>
-                        <button>Hard</button>
-                    </div>
+                    <!--<div class="avatar">
+                        <button class="select-avatar"> CHANGE A.I ASSISTANT </button>
+                    </div>-->
                 </div>
 
                 <!-- Chat-style content -->
@@ -129,18 +132,45 @@
                             </div>
                         </div>
                     </div>
+
+                    <div class="ai-container">
+                        <div class="text-book-ai">
+                            <img id="textbookIdle" src="../asset/AI-bot.png" alt="AI Idle" style="display:block;">
+                            <img id="textbookTalking" src="../asset/AI-bot-rea.gif" alt="AI Talking" style="display:none;">
+                        </div>
+                        <div class="ai-text" id="aiTextCard">
+                            <div class="text-content">
+                                <h2 class="word-header" id="word-pronouncation"></h2>
+                                <p class="word-context" id="word-context"></p>
+                            </div>
+                            <button class="speak-btn" aria-label="Play word" title="Play word">
+                                <i class="fa fa-volume-up"></i>
+                            </button>
+                         </div>
+                    </div>
+                </div>
+
+                <div class="mode-btns" id="sayItRight-mode">
+                    <button>Easy</button>
+                    <button>Medium</button>
+                    <button>Hard</button>
+                </div>
+
+                <div class="mic-container">
+                    <button class="openVoice">
+                        <span class="mic-glow"></span>
+                        <i class="fa fa-microphone"></i>
+                    </button>
+                    <button class="skip-btn">
+                        <span class="skip-glow"></span>
+                        <i class="fas fa-forward"></i>
+                    </button>
                 </div>
 
                 <!-- Voice Input -->
                 <div class="start-btn-container">
-                    <button class="openVoice" id="micButton">
-                        <span class="mic-glow"></span>
-                        <i class="fa fa-microphone"></i>
-                    </button>
-                    <div class="start-restart-group">
-                        <button class="start-btn" id="startVoice">START</button>
-                        <button class="restart-btn" id="restartVoice">RESTART</button>
-                    </div>
+                    <button class="start-btn" id="startVoice">START</button>
+                    <button class="restart-btn" id="restartVoice">RESTART</button>
                 </div>
             </div>
 
@@ -148,11 +178,9 @@
             <div class="content-container" id="storyDetectives">
                 <div class="content-header">
                     <h2>Story Detectives</h2>
-                    <div class="mode-btns" id="storyDetectives-mode">
-                        <button>Easy</button>
-                        <button>Medium</button>
-                        <button>Hard</button>
-                    </div>
+                    <!--<div class="avatar">
+                        <button class="select-avatar"> CHANGE A.I ASSISTANT </button>
+                    </div>-->
                 </div>
 
                 <!-- Chat-style content -->
@@ -182,6 +210,12 @@
                     </div>
                 </div>
 
+                <div class="mode-btns" id="storyDetectives-mode">
+                    <button>Easy</button>
+                    <button>Medium</button>
+                    <button>Hard</button>
+                </div>
+
                 <div class="answer-container" id="sdAnswers">
                     <button class="answer-btn" data-choice="A">A</button>
                     <button class="answer-btn" data-choice="B">B</button>
@@ -196,6 +230,25 @@
                 </div>
             </div>
         </section>
+
+        <!--Overlay
+        <div class="overlay-background"></div>
+        <div class="avatar-overlay">
+            <div class="avatar-container">
+                <h2>A.I ASSISTANT</h2>
+                <p> Select what AI Assistand would you choose</p>
+                <div class="avatar-selection">
+                    <div class="ai-avatar">
+                        <img id="ai-1" src="../asset/AI-bot.png" alt="AI Rea">
+                        <p>Zoey</p>
+                    </div>
+                    <div class="ai-avatar">
+                        <img id="ai-2" src="../asset/AI-bot.png" alt="AI Rea">
+                        <p>Niko</p>
+                    </div>
+                </div>
+            </div>
+        </div> -->
 
         <!--Notification Message-->
         <div class="notification-overlay-background"></div>
