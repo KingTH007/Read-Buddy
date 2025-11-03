@@ -15,7 +15,6 @@
         let correctCount = 0;
         let totalQuestions = 0;
         let stories = {};
-        let selectedVoice = null;
         let aiRowElement = null;
         let idleImgRef = null;
         let talkingImgRef = null;
@@ -30,37 +29,6 @@
             idleImgRef = null;
             talkingImgRef = null;
         }
-
-        function loadVoices() {
-            const voices = window.speechSynthesis.getVoices();
-            if (!voices.length) {
-                // Chrome sometimes loads voices late
-                window.speechSynthesis.onvoiceschanged = loadVoices;
-                return;
-            }
-
-            // Look for a youthful/female/male English or Tagalog voice
-            const preferredVoices = [
-                "Google UK English Female",
-                "Google US English",
-                "Microsoft Aria Online (Natural) - English (United States)",
-                "Microsoft Zira Desktop - English (United States)",
-                "Microsoft Ava Online (Natural) - English (United States)",
-                "Microsoft James Online (Natural) - English (United States)",
-                "Google Filipino",
-                "Microsoft Lani Online (Natural) - Filipino (Philippines)"
-            ];
-
-            selectedVoice = voices.find(v => preferredVoices.includes(v.name))
-                || voices.find(v => v.name.toLowerCase().includes("female"))
-                || voices.find(v => v.name.toLowerCase().includes("child"))
-                || voices.find(v => v.lang.startsWith("en") || v.lang.startsWith("fil"))
-                || voices[0];
-
-            console.log("🎤 Using voice:", selectedVoice?.name || "default");
-        }
-        
-        loadVoices();
 
         const boxes = document.querySelectorAll(".content-box");
         document.body.style.overflow = "hidden"; // 🧱 Prevent body/page scroll
@@ -299,13 +267,21 @@
 
         // TTS wrapper that toggles images during speaking
         function speakTTS(text) {
+            const voice = window.selectedVoice;
+
+            if (!voice) {
+                console.warn("Voice not loaded yet. Waiting 100ms...");
+                setTimeout(() => speakTTS(text), 100); // retry
+                return;
+            }
+
             window.speechSynthesis.cancel();
 
             const utter = new SpeechSynthesisUtterance(text);
-            utter.voice = selectedVoice;
-            utter.lang = selectedVoice?.lang || "en-US";
-            utter.rate = 1.3;  // slightly faster (youthful)
-            utter.pitch = 2.2;  // higher pitch (child-like)
+            utter.voice = voice;
+            utter.lang = voice.lang;
+            utter.rate = 1.0;
+            utter.pitch = 2.2;
             utter.volume = 1.0;
 
             utter.onstart = () => showTalking();
@@ -386,24 +362,40 @@
             .then(data => {
                 stories = data;
 
-                // ✅ Insert the limiting logic here
-                if (selectedMode === "easy") {
-                    stories[selectedMode] = stories[selectedMode].slice(0, 2);
-                } else if (selectedMode === "medium") {
-                    stories[selectedMode] = stories[selectedMode].slice(0, 4);
-                } else if (selectedMode === "hard") {
-                    stories[selectedMode] = stories[selectedMode].slice(0, 6);
+                // Normalize selectedMode to lowercase to avoid mismatch (e.g., "Easy" vs "easy")
+                const modeKey = selectedMode?.toLowerCase();
+
+                // Check if the mode exists in the JSON
+                if (!stories || !stories[modeKey]) {
+                    console.error(`⚠️ No stories found for mode: ${modeKey}`);
+                    return; // Stop here to avoid undefined errors
                 }
 
-                stories[selectedMode].forEach(story => {
-                    story.questions = story.questions.slice(0, 5);
+                // ✅ Apply mode-based story limits
+                if (modeKey === "easy") {
+                    stories[modeKey] = stories[modeKey].slice(0, 2);
+                } else if (modeKey === "medium") {
+                    stories[modeKey] = stories[modeKey].slice(0, 4);
+                } else if (modeKey === "hard") {
+                    stories[modeKey] = stories[modeKey].slice(0, 6);
+                }
+
+                // ✅ Limit each story to 5 questions
+                stories[modeKey].forEach(story => {
+                    if (story.questions && Array.isArray(story.questions)) {
+                        story.questions = story.questions.slice(0, 5);
+                    }
                 });
-            });
+
+                console.log(`✅ Loaded ${stories[modeKey].length} stories for mode: ${modeKey}`);
+            })
+            .catch(err => console.error("❌ Error loading stories:", err));
+
 
         const modeInstructions = {
-            Easy: "Easy Mode: 3 short and simple stories. Focus on recall and facts.",
-            Medium: "Medium Mode: 3 medium-length stories. Focus on sequence and main idea.",
-            Hard: "Hard Mode: 3 longer passages. Focus on inference and deeper meaning."
+            Easy: "Easy Mode: 2 short and simple stories, each with 5 questions. Focus on recall and facts. Choose the answer wisely.",
+            Medium: "Medium Mode: 4 medium-length stories. Focus on sequence and main idea. Choose the answer wisely.",
+            Hard: "Hard Mode: 6 longer passages. Focus on inference and deeper meaning. Choose the answer wisely."
         };
 
         // MODE clicks: recreate AI row and display instruction
@@ -483,9 +475,9 @@
 
             // after a delay, ask first question
             const storyTimers = {
-                Easy: 10000,    // 10s
-                Medium: 13000,  // 13s
-                Hard: 15000     // 15s
+                Easy: 12000,    // 10s
+                Medium: 14000,  // 13s
+                Hard: 16000     // 15s
             };
 
             storyTimeout = setTimeout(() => {
@@ -510,8 +502,6 @@
 
                 setAnswerButtonsEnabled(true);
             } else {
-                addSystemMessage("Story finished!", true);
-
                 // Track current story score
                 const storyCorrect = correctCount - storyScores.reduce((s, x) => s + x.correct, 0);
                 const storyTotal = currentStory.questions.length;
@@ -521,7 +511,7 @@
 
                 if (currentStoryIndex < stories[selectedMode].length) {
                     // Go to next story after short delay
-                    setTimeout(() => startStory(), 1500);
+                    setTimeout(() => startStory(), 6000);
                 } else {
                     // All stories done
                     addSystemMessage("All stories finished! Preparing your results...", true);
@@ -561,13 +551,7 @@
 
             // 🟢 Create new AI row like a new screen
             addSystemMessage(resultHTML, false);
-
-            // 🟢 Add a restart message below results
-            const restartNote = document.createElement("div");
-            restartNote.classList.add("restart-note");
-            restartNote.innerHTML = `<br><b>Click "Restart" to try again or choose a new mode.</b>`;
-            contentBox.appendChild(restartNote);
-            contentBox.scrollTop = contentBox.scrollHeight;
+            saveLearningResult("Read and Understand", selectedMode, percent);
         }
 
         // Answer button handling
@@ -587,10 +571,10 @@
                 if (selectedText === q.correct) {
                     addSystemMessage(`Correct! The answer is "${q.correct}"`, true);
                     correctCount++;
-                    delayTime = 3000;
+                    delayTime = 4000;
                 } else {
                     addSystemMessage(`Incorrect. Correct answer is "${q.correct}"`, true);
-                    delayTime = 6000;
+                    delayTime = 8000;
                 }
 
                 totalQuestions++;

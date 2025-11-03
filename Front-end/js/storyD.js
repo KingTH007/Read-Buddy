@@ -13,7 +13,6 @@ document.addEventListener("DOMContentLoaded", () => {
     let currentStory = null;
     let correctCount = 0;
     const storyScores = [];
-    let currentTextToSpeak = "";
 
     const JSON_PATH = "../json/storydetectives.json";
 
@@ -52,7 +51,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
     answerButtons.forEach(b => b.disabled = true);
 
+
     function speakTTS(text, callback = null) {
+        const voice = window.selectedVoice;
+
+        if (!voice) {
+            console.warn("Voice not loaded yet. Waiting 100ms...");
+            setTimeout(() => speakTTS(text), 100); // retry
+            return;
+        }
+        
         window.speechSynthesis.cancel();
 
         // 🧠 Replace one or multiple underscores with a single spoken "blank"
@@ -62,8 +70,11 @@ document.addEventListener("DOMContentLoaded", () => {
             .trim();
 
         const utter = new SpeechSynthesisUtterance(cleanText);
-        utter.lang = "en-US";
-        utter.rate = 0.9;
+        utter.voice = voice;
+        utter.lang = voice.lang;
+        utter.rate = 1.0;
+        utter.pitch = 2.2;
+        utter.volume = 1.0;
 
         const activeRow = sdBox.querySelector(".ai-row:last-child");
         if (activeRow) {
@@ -322,14 +333,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
             if (selectedChoice === q.answer) {
                 correctCount++;
-                addAIMessage("Correct!", true, () => {
+                addAIMessage(`Correct! The correct answer is "${q.answer}".`, false, () => {
                     currentQuestionIndex++;
-                    setTimeout(showQuestion, 1000);
+                    setTimeout(showQuestion, 2500);
                 });
             } else {
-                addAIMessage(`Wrong. The correct answer is "${q.answer}".`, true, () => {
+                addAIMessage(`Wrong. The correct answer is "${q.answer}".`, false, () => {
                     currentQuestionIndex++;
-                    setTimeout(showQuestion, 1000);
+                    setTimeout(showQuestion, 2500);
                 });
             }
         });
@@ -342,16 +353,51 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const totalCorrect = storyScores.reduce((sum, s) => sum + s.correct, 0);
         const totalQs = storyScores.reduce((sum, s) => sum + s.total, 0);
+        const percent = totalQs > 0 ? Math.round((totalCorrect / totalQs) * 100) : 0;
+
+        let feedback = "";
+        if (percent >= 90) {
+            feedback = "🎉 Excellent work!";
+        } else if (percent >= 70) {
+            feedback = "👍 Good job! Keep practicing.";
+        } else if (percent >= 50) {
+            feedback = "🙂 Not bad, but you can do better.";
+        } else {
+            feedback = "⚠️ You need more practice.";
+        }
+
         const breakdown = storyScores.map(s => `Story ${s.story}: ${s.correct}/${s.total}`).join("<br>");
 
         const msg = `
             <b>🎉 You finished all stories!</b><br><br>
-            <strong>Total Score:</strong> ${totalCorrect}/${totalQs}<br><br>
-            ${breakdown}<br><br>
+            <strong>Total Score:</strong> ${totalCorrect}/${totalQs} (${percent}%)<br>
+            <strong>Feedback:</strong> ${feedback}<br><br>
+            <strong>Story Breakdown:</strong><br>${breakdown}<br><br>
             Click <b>Restart</b> to play again.
         `;
-        addAIMessage(msg, true);
+
+        // Add results without speak button
+        const row = document.createElement("div");
+        row.classList.add("ai-row");
+        row.innerHTML = `
+            <div class="book-ai">
+                <img src="../asset/AI-bot.png" alt="AI Idle" style="display:block;">
+                <img src="../asset/AI-bot-rea.gif" alt="AI Talking" style="display:none;">
+            </div>
+            <div class="ai-info">
+                <div class="ai-name-label">Rea</div>
+                <div class="bubble system">
+                    <span class="bubble-text">${msg}</span>
+                </div>
+            </div>
+        `;
+        sdBox.appendChild(row);
+        sdBox.scrollTop = sdBox.scrollHeight;
+
         modeButtons.forEach(b => (b.disabled = false));
+
+        // Save result to backend
+        saveLearningResult("Story Detectives", selectedMode, percent);
     }
 
     // 🔁 Restart confirmation

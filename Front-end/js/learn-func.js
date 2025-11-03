@@ -1,4 +1,3 @@
-document.addEventListener("DOMContentLoaded", () => {
     const hamburger = document.getElementById("hamburger");
     const sidebar = document.getElementById("sidebar");
     const background = document.querySelector(".background");
@@ -170,4 +169,79 @@ document.addEventListener("DOMContentLoaded", () => {
         pendingActivity = null;
     });
 
-});
+// make globally accessible
+window.selectedVoice = null;
+
+function loadVoices() {
+    const voices = window.speechSynthesis.getVoices();
+
+    if (!voices.length) {
+        // Wait for voices to load
+        window.speechSynthesis.onvoiceschanged = loadVoices;
+        return;
+    }
+
+    const preferredVoices = [
+        "Google UK English Female",
+        "Google US English",
+        "Microsoft Aria Online (Natural) - English (United States)",
+        "Microsoft Zira Desktop - English (United States)",
+        "Microsoft Ava Online (Natural) - English (United States)",
+        "Microsoft James Online (Natural) - English (United States)",
+        "Google Filipino",
+        "Microsoft Lani Online (Natural) - Filipino (Philippines)"
+    ];
+
+    window.selectedVoice =
+        voices.find(v => preferredVoices.includes(v.name)) ||
+        voices.find(v => v.name.toLowerCase().includes("female")) ||
+        voices.find(v => v.name.toLowerCase().includes("child")) ||
+        voices.find(v => v.lang.startsWith("en") || v.lang.startsWith("fil")) ||
+        voices[0];
+
+    console.log("🎤 Using voice:", window.selectedVoice?.name || "default");
+}
+
+// call immediately
+loadVoices();
+
+async function saveLearningResult(learningName, difficultyMode, finalResult) {
+  try {
+    // Get student info from localStorage
+    const student = JSON.parse(localStorage.getItem("student"));
+
+    // If no student data or studId, show notification and stop
+    if (!student || !student.id) {
+      alert("⚠️ Student not logged in. Please log in to save your progress.");
+      console.error("❌ No student ID found in localStorage.");
+      return;
+    }
+
+    const studId = student.id; // must match DB column studId
+
+    // Send data to backend
+    const res = await fetch("http://localhost:5000/save-learning-activity", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        studId: studId,
+        learnName: learningName,
+        f_result: finalResult,
+        modes: difficultyMode
+      }),
+    });
+
+    const data = await res.json();
+
+    if (res.ok && data.success) {
+      console.log("✅ Learning activity saved:", data.activity);
+    } else {
+      console.error("❌ Failed to save learning activity:", data.message || data.error);
+    }
+  } catch (err) {
+    console.error("❌ Error sending learning activity:", err);
+  }
+}
+
+// Make globally accessible
+window.saveLearningResult = saveLearningResult;

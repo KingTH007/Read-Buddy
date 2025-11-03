@@ -615,6 +615,30 @@ app.post("/save-result", async (req, res) => {
   }
 });
 
+app.post("/save-learning-activity", async (req, res) => {
+  try {
+    const { studId, learnName, f_result, modes } = req.body;
+
+    if (!studId || !learnName || !modes) {
+      return res.status(400).json({ success: false, message: "Missing required fields." });
+    }
+
+    const query = `
+      INSERT INTO learn_act (studid, learnname, f_result, modes)
+      VALUES ($1, $2, $3, $4)
+      RETURNING *;
+    `;
+    const values = [studId, learnName, f_result || 0, modes];
+
+    const result = await pool.query(query, values);
+    res.json({ success: true, activity: result.rows[0] });
+
+  } catch (err) {
+    console.error("❌ Error saving learning activity:", err.message);
+    res.status(500).json({ success: false, message: "Database error." });
+  }
+});
+
 // ✅ Upload Video File
 app.post("/upload-video", (req, res, next) => {
   req.uploadDir = videosDir;

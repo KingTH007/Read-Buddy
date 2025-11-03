@@ -30,6 +30,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // Track wrong & skipped words
   let wrongWords = [];
   let skippedWords = [];
+  let selectedVoice = null;
 
   // ✅ Correct JSON path
   const fetchPath = "../json/sayItRightWords.json";
@@ -72,27 +73,37 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // ✅ Speech function with talking animation
   function speakTTS(text) {
-    window.speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(text);
-    u.lang = "en-US";
-    u.rate = 0.95;
-    u.pitch = 1.2;
+    const voice = window.selectedVoice;
 
-    u.onstart = () => {
+    if (!voice) {
+        console.warn("Voice not loaded yet. Waiting 100ms...");
+        setTimeout(() => speakTTS(text), 100); // retry
+        return;
+    }
+
+    window.speechSynthesis.cancel();
+    const utter = new SpeechSynthesisUtterance(text);
+    utter.voice = voice;
+    utter.lang = voice.lang;
+    utter.rate = 1.0;
+    utter.pitch = 2.2;
+    utter.volume = 1.0;
+
+    utter.onstart = () => {
       bookIdle.style.display = "none";
       bookTalking.style.display = "block";
       textbookIdle.style.display = "none";
       textbookTalking.style.display = "block";
     };
 
-    u.onend = () => {
+    utter.onend = () => {
       bookIdle.style.display = "block";
       bookTalking.style.display = "none";
       textbookIdle.style.display = "block";
       textbookTalking.style.display = "none";
     };
 
-    window.speechSynthesis.speak(u);
+    window.speechSynthesis.speak(utter);
   }
 
   // Start exercise
@@ -334,6 +345,9 @@ document.addEventListener("DOMContentLoaded", () => {
       You got ${wrongCount} wrong and skipped ${skippedCount}. 
       Your accuracy is ${percent} percent.`
     );
+
+    // After computing percent
+    saveLearningResult("Say It Right", selectedMode, percent);
   }
 
   function escapeHtml(s) {
