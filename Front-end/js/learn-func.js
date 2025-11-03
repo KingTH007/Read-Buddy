@@ -119,7 +119,7 @@
         stopTTS();
         localStorage.removeItem("teacher");
         localStorage.removeItem("student");
-        window.location.href = "../../Front-end/html/home-page.html";
+        window.location.href = "../../Front-end/html/index.html";
     });
 
     // ===============================
