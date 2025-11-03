@@ -876,10 +876,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     const completedActivitiesList = document.getElementById("completed-activities-list");
 
     // Progress summary table IDs
-    const storyTotal = document.getElementById("story-total");
     const storyCompleted = document.getElementById("story-completed");
     const storyAverage = document.getElementById("story-average");
-    const learningTotal = document.getElementById("learning-total");
     const learningCompleted = document.getElementById("learning-completed");
     const learningAverage = document.getElementById("learning-average");
 
@@ -902,10 +900,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         completedActivitiesList.innerHTML = `<li>Loading progress...</li>`;
 
         // Reset summary table
-        storyTotal.textContent = "0";
         storyCompleted.textContent = "0";
         storyAverage.textContent = "0%";
-        learningTotal.textContent = "0";
         learningCompleted.textContent = "0";
         learningAverage.textContent = "0%";
 
@@ -922,11 +918,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                 studentProgressBar.textContent = `${progress}%`;
 
                 // ✅ Update table stats
-                storyTotal.textContent = storyStats.total;
                 storyCompleted.textContent = storyStats.completed;
                 storyAverage.textContent = `${storyStats.average}%`;
 
-                learningTotal.textContent = learningStats.total;
                 learningCompleted.textContent = learningStats.completed;
                 learningAverage.textContent = `${learningStats.average}%`;
 

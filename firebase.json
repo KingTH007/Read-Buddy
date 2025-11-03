@@ -1,0 +1,16 @@
+{
+  "hosting": {
+    "public": "Front-end/html",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/home-page.html"
+      }
+    ]
+  }
+}

@@ -736,6 +736,90 @@ app.get("/get-videos", async (req, res) => {
   }
 });
 
+/**
+ * 🧩 GET STUDENT PROGRESS
+ */
+app.get("/get-student-progress/:studentId", async (req, res) => {
+  try {
+    const studentId = req.params.studentId;
+
+    // --- Fetch story comprehension data with storyname ---
+    const storyQuery = await pool.query(
+      `SELECT s_storyresult.*, ts.storyname, 'Story' AS category
+       FROM s_storyresult
+       JOIN teach_story ts ON s_storyresult.story_id = ts.story_id
+       WHERE s_storyresult.student_id = $1`,
+      [studentId]
+    );
+
+    // --- Fetch learning activities ---
+    const learnQuery = await pool.query(
+      `SELECT learn_act.*, 'Learning' AS category, learnname AS title_id
+       FROM learn_act
+       WHERE studid = $1`,
+      [studentId]
+    );
+
+    const stories = storyQuery.rows;
+    const learnings = learnQuery.rows;
+
+    // --- STORY STATS ---
+    const storyCompleted = stories.length;
+    const storyAvg = storyCompleted
+      ? Math.min(
+          100,
+          stories.reduce((acc, s) => acc + Number(s.final_grade || 0), 0) / storyCompleted
+        )
+      : 0;
+
+    // --- LEARNING STATS ---
+    const learnCompleted = learnings.length;
+    const learnAvg = learnCompleted
+      ? Math.min(
+          100,
+          learnings.reduce((acc, l) => acc + Number(l.f_result || 0), 0) / learnCompleted
+        )
+      : 0;
+
+    // --- OVERALL PROGRESS ---
+    const totalCompleted = storyCompleted + learnCompleted;
+    const totalPossible = totalCompleted > 0 ? totalCompleted : 1;
+    const progress = Math.min(100, (totalCompleted / totalPossible) * 100);
+
+    // --- COMPLETED ACTIVITIES LIST ---
+    const activities = [
+      ...stories.map(s => ({
+        category: "Story",
+        title: s.storyname || `Story #${s.story_id}`,
+        score: Number(s.final_grade || 0)
+      })),
+      ...learnings.map(l => ({
+        category: "Learning",
+        title: l.learnname,
+        score: Number(l.f_result || 0)
+      }))
+    ];
+
+    res.json({
+      success: true,
+      progress: Math.round(progress),
+      storyStats: {
+        completed: storyCompleted,
+        average: Math.round(storyAvg)
+      },
+      learningStats: {
+        completed: learnCompleted,
+        average: Math.round(learnAvg)
+      },
+      activities
+    });
+  } catch (err) {
+    console.error("❌ Error fetching student progress:", err.message);
+    res.status(500).json({ success: false, message: "Failed to get student progress" });
+  }
+});
+
+
 // ===================================================
 // 🔹 AI SECTION (RapidAPI GPT + Image)
 // ===================================================
