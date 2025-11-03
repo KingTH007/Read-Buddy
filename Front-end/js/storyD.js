@@ -382,37 +382,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // 🔁 Reset
     function resetAll() {
-        window.speechSynthesis.cancel();
-        sdBox.innerHTML = "";
-        ensureVideoWrapper();
-
-        const welcomeHTML = `
-            <div class="ai-row">
-                <div class="book-ai">
-                    <img src="../asset/AI-bot.png" alt="AI Idle" style="display:block;">
-                    <img src="../asset/AI-bot-rea.gif" alt="AI Talking" style="display:none;">
-                </div>
-                <div class="ai-info">
-                    <div class="ai-name-label">Rea</div>
-                    <div class="bubble system" id="aiBubble">
-                        <p>
-                            Welcome to <b>Story Detectives!</b> 🔎 <br>
-                            Here, you’ll become a reading detective! I’ll show you short stories with <b>missing words</b>.
-                            Your task is to identify the correct word by choosing from the given options.
-                            <br><br>
-                            <b>Select a difficulty mode to show instructions.</b>
-                        </p>
-                    </div>
-                </div>
-            </div>
-        `;
-        sdBox.insertAdjacentHTML("beforeend", welcomeHTML);
-
-        modeButtons.forEach(b => {
-            b.disabled = false;
-            b.classList.remove("active");
-        });
-        selectedMode = null;
+        window.location.href = "../../Front-end/html/learn-act.html?activity=storyDetectives";
     }
 
     ensureVideoWrapper();

@@ -492,31 +492,31 @@ document.addEventListener('DOMContentLoaded', async () => {
         const storyId = document.getElementById("modify-overlap").dataset.editingStoryId;
         if (!storyId) return showNotification('error', "No story selected to delete.");
 
-        showNotification({
-            message: "Are you sure you want to delete this story?",
-            onYes: async () => {
-                try {
-                    const response = await fetch(`http://localhost:5000/delete-story/${storyId}`, {
-                        method: "DELETE",
-                    });
-                    const data = await response.json();
+        // Show the confirmation notification
+        showNotification('delete-story', "this story", async () => {
+            try {
+                const response = await fetch(`http://localhost:5000/delete-story/${storyId}`, {
+                    method: "DELETE",
+                });
+                const data = await response.json();
 
-                    if (data.success) {
-                        showNotification('success', "Story deleted successfully!");
-                        document.getElementById("modify-overlap").style.display = "none";
-                        document.querySelector(".overlay-color").style.display = "none";
-                        await loadStories();
-                    } else {
-                        showNotification('error', "Error: " + data.message);
-                    }
-                } catch (err) {
-                    console.error("❌ Error deleting story:", err);
-                    showNotification('error', "Server error while deleting story.");
+                if (data.success) {
+                    showNotification('success', "Story deleted successfully!");
+                    document.getElementById("modify-overlap").style.display = "none";
+                    document.querySelector(".overlay-color").style.display = "none";
+                    await loadStories();
+                } else {
+                    showNotification('error', "Error: " + data.message);
                 }
-            },
-            onNo: () => {
-                console.log("Delete cancelled.");
+            } catch (err) {
+                console.error("❌ Error deleting story:", err);
+                showNotification('error', "Server error while deleting story.");
             }
+        }, () => {
+            // ❌ "No" button action
+            console.log("Delete cancelled.");
+            document.getElementById("modify-overlap").style.display = "none";
+            document.querySelector(".overlay-color").style.display = "none";
         });
     });
 
@@ -1105,38 +1105,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         enrollForm.reset();
     });
 
-    // === Load and display enrolled students dynamically ===
-    async function loadEnrolledStudents(classCode) {
-        try {
-            const response = await fetch(`http://localhost:5000/get-enrolled-students?code=${classCode}`);
-            const result = await response.json();
-
-            const studentTableBody = document.getElementById('student-list');
-            studentTableBody.innerHTML = '';
-
-            if (result.success && result.students.length > 0) {
-                result.students.forEach((student, index) => {
-                    const tr = document.createElement('tr');
-                    tr.innerHTML = `
-                        <td>${index + 1}</td>
-                        <td>${student.fullname}</td>
-                        <td>0%</td>
-                        <td></td>
-                    `;
-                    studentTableBody.appendChild(tr);
-                });
-            } else {
-                studentTableBody.innerHTML = `
-                    <tr>
-                        <td colspan="4" style="text-align:center; color:#777;">No enrolled students yet.</td>
-                    </tr>`;
-            }
-        } catch (err) {
-            console.error('❌ Error loading enrolled students:', err);
-            showNotification('error', 'Failed to load enrolled students.');
-        }
-    }
-
     // === MANUAL ENROLLMENT SUBMIT ===
     enrollForm.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -1164,22 +1132,19 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (result.success) {
                 showNotification('success', `${result.student.fullname} successfully enrolled!`);
 
-                // 🔹 Keep or re-show the enrollment overlay
-                enrollOverlayColor.style.display = 'block';
-                enrollOverlap.style.display = 'block';
+                // Keep or re-show the enrollment overlay
+                enrollOverlayColor.style.display = 'none';
+                enrollOverlap.style.display = 'none';
 
-                // 🔹 Instantly reload student list
-                await loadEnrolledStudents(classCode);
-
-                // 🔹 Reset the form fields for next entry
+                // Reset the form fields for next entry
                 enrollForm.reset();
             } else {
                 showNotification('error', result.message || "Student enrollment failed.");
             }
-
         } catch (err) {
             console.error("❌ Enrollment Error:", err);
             showNotification('error', "Error connecting to server. Please try again.");
+            // ❌ removed: loadEnrolledStudents();
         }
     });
 
@@ -1247,16 +1212,15 @@ document.addEventListener('DOMContentLoaded', async () => {
             showNotification('success', `Successfully imported ${successCount}/${students.length} student(s)!`);
 
             // 🔹 Keep overlay open and refresh student list live
-            enrollOverlayColor.style.display = 'block';
-            enrollOverlap.style.display = 'block';
-            await loadEnrolledStudents(classCode);
+            enrollOverlayColor.style.display = 'none';
+            enrollOverlap.style.display = 'none';
 
             event.target.value = "";
         };
 
         reader.onerror = function () {
             showNotification('error', "Error reading the CSV file. Please try again.");
-        };
+        };  
 
         reader.readAsText(file);
     });

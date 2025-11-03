@@ -592,27 +592,27 @@ app.get("/get-story/:id", async (req, res) => {
 /**
  * Save Student Result
  */
-app.post("/save-result", (req, res) => {
-  const { student_id, story_id, read_speed, read_score, final_grade } = req.body;
+app.post("/save-result", async (req, res) => {
+  try {
+    const { student_id, story_id, read_speed, read_score, final_grade } = req.body;
 
-  if (!student_id || !story_id) {
-    return res.status(400).json({ success: false, message: "Missing data" });
+    if (!student_id || !story_id) {
+      return res.status(400).json({ success: false, message: "Missing data" });
+    }
+
+    const query = `
+      INSERT INTO s_storyresult (student_id, story_id, read_speed, read_score, final_grade)
+      VALUES ($1, $2, $3, $4, $5)
+      RETURNING *;
+    `;
+    const values = [student_id, story_id, read_speed, read_score, final_grade];
+
+    const result = await pool.query(query, values);
+    res.json({ success: true, result: result.rows[0] });
+  } catch (err) {
+    console.error("❌ DB Insert Error:", err);
+    res.status(500).json({ success: false, message: "Database error" });
   }
-
-  const query = `
-    INSERT INTO s_storyresult (student_id, story_id, read_speed, read_score, final_grade)
-    VALUES ($1, $2, $3, $4, $5) RETURNING *;
-  `;
-  const values = [student_id, story_id, read_speed, read_score, final_grade];
-
-  pool.query(query, values)
-    .then(result => {
-      res.json({ success: true, result: result.rows[0] });
-    })
-    .catch(err => {
-      console.error("❌ DB Insert Error:", err);
-      res.status(500).json({ success: false, message: "Database error" });
-    });
 });
 
 // ✅ Upload Video File
@@ -730,19 +730,33 @@ app.post("/api/generate-questions-all-modes", async (req, res) => {
 
   try {
     for (const mode of modes) {
-      const prompt = `Based on the following story, create 20 multiple-choice comprehension questions for ${mode} difficulty. 
-Each question must have 1 correct answer and 3 wrong answers.
-Format them as:
+      const prompt = `
+        You are an expert educational content creator.
 
-Q1: [question]
-A) option1
-B) option2
-C) option3
-D) option4
-Answer: [letter]
+        Generate exactly 20 multiple-choice comprehension questions for the story below.
+        Each question must have:
+        - One correct answer and three wrong answers
+        - Choices labeled A), B), C), D)
+        - An answer line formatted as "Answer: [letter]"
+        - No explanations, introductions, or extra commentary
+        - Output must start directly with "Q1:" and continue sequentially to "Q20:" with no skipped numbers
 
-STORY:
-${context}`;
+        Difficulty Level: ${mode}
+
+        Story:
+        ${context}
+
+        ⚠️ Output Format (strictly follow this):
+        Q1: [question]
+        A) [option]
+        B) [option]
+        C) [option]
+        D) [option]
+        Answer: [letter]
+
+        Q2: ...
+        ... (continue until Q20)
+        `;
 
       const options = {
         method: "POST",
@@ -767,6 +781,10 @@ ${context}`;
         .map(q => q.trim())
         .filter(q => q.length > 0);
 
+        if (questions.length < 20) {
+          console.warn(`⚠️ Only ${questions.length} questions generated for ${mode}`);
+        }
+
       result[mode] = questions;
     }
 
@@ -775,58 +793,6 @@ ${context}`;
   } catch (error) {
     console.error("❌ AI Question Error:", error);
     res.status(500).json({ error: "Failed to generate questions" });
-  }
-});
-
-// AI endpoint to format story text
-app.post("/api/format-story", async (req, res) => {
-  const { content } = req.body;
-  if (!content) {
-    return res.status(400).json({ success: false, message: "No content provided" });
-  }
-
-  try {
-    const url = "https://chatgpt-42.p.rapidapi.com/gpt4o";
-    const options = {
-      method: "POST",
-      headers: {
-        "x-rapidapi-key": process.env.RAPIDAPI_KEY,
-        "x-rapidapi-host": "chatgpt-42.p.rapidapi.com",
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        messages: [
-          {
-            role: "user",
-            content: `Reformat the following story for readability. 
-                      Keep words the same. Add proper line breaks and paragraph spacing.
-                      Do not summarize, do not rewrite — only fix layout.\n\n${content}`
-          }
-        ],
-        web_access: false,
-      }),
-    };
-
-    const response = await fetch(url, options);
-    const data = await response.json();
-
-    // ✅ Handle both possible response formats
-    let formatted = null;
-    if (data.result) {
-      formatted = data.result;
-    } else if (data.choices && data.choices[0]?.message?.content) {
-      formatted = data.choices[0].message.content;
-    }
-
-    if (!formatted) {
-      console.error("⚠️ API response:", data);
-      return res.status(500).json({ success: false, message: "AI returned no formatted text" });
-    }
-
-    res.json({ success: true, formatted });
-  } catch (err) {
-    console.error("❌ AI Format Story Error:", err);
-    res.status(500).json({ success: false, message: "Failed to format story" });
   }
 });
 

@@ -18,6 +18,15 @@ document.addEventListener("DOMContentLoaded", async () => {
     return `${String(minutes).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
   }
 
+  // === FORMAT STORY DISPLAY ===
+  function formatStoryText(text) {
+    if (!text) return "";
+    return text
+      .split(/\n+/)
+      .map(p => `<p class="story-paragraph">${p.trim()}</p>`)
+      .join("");
+  }
+
   // Start timer
   function startTimer() {
     timerInterval = setInterval(() => {
@@ -50,15 +59,43 @@ document.addEventListener("DOMContentLoaded", async () => {
           btn.classList.add("side-btn");
           btn.textContent = story.storyname || "Untitled";
 
-          // support both story.id (alias) or story.story_id from DB
           const sid = String(story.id ?? story.story_id ?? "");
 
           if (sid === String(selectedStoryId)) {
             btn.classList.add("selected");
           }
 
+          // ⚠️ Replace direct navigation with notification
           btn.addEventListener("click", () => {
-            window.location.search = `?story_id=${sid}`;
+            const notifOverlayBackground = document.querySelector(".notification-overlay-background");
+            const notifOverlay = document.querySelector(".notification");
+            const yesBtn = document.getElementById("yes-switch-story");
+            const noBtn = document.getElementById("no-switch-story");
+            const storyTitle = document.querySelector(".story-title");
+
+            notifOverlayBackground.classList.add("show");
+            notifOverlay.classList.add("show");
+
+            storyTitle.textContent = story.storyname || "Untitled";
+
+            // Remove old listeners to avoid stacking
+            const newYesBtn = yesBtn.cloneNode(true);
+            const newNoBtn = noBtn.cloneNode(true);
+            yesBtn.parentNode.replaceChild(newYesBtn, yesBtn);
+            noBtn.parentNode.replaceChild(newNoBtn, noBtn);
+
+            // ✅ If user confirms
+            newYesBtn.addEventListener("click", () => {
+              notifOverlayBackground.classList.remove("show");
+              notifOverlay.classList.remove("show");
+              window.location.search = `?story_id=${sid}`;
+            });
+
+            // ❌ If user cancels
+            newNoBtn.addEventListener("click", () => {
+              notifOverlayBackground.classList.remove("show");
+              notifOverlay.classList.remove("show");
+            });
           });
 
           storyListEl.appendChild(btn);
@@ -74,23 +111,29 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Robustly parse storyquest -> questions array
   function parseQuestions(rawText) {
     try {
-      // Split into question blocks (Q1:, Q2:, ...)
-      const blocks = rawText.split(/Q\d+:/).filter(Boolean);
-
+      if (!rawText) return [];
+      // If JSON stored
+      if (typeof rawText === "object") {
+        if (Array.isArray(rawText)) return rawText;
+        if (rawText.questions) return rawText.questions;
+        return [];
+      }
+      // If stored as JSON string
+      if (typeof rawText === "string" && rawText.trim().startsWith("[")) {
+        return JSON.parse(rawText);
+      }
+      // If plain text format (Q1:, Q2:, ...)
+      const blocks = String(rawText).split(/Q\d+:/).filter(Boolean);
       return blocks.map((block, index) => {
         const lines = block.trim().split("\n").map(l => l.trim()).filter(Boolean);
-
         const qText = lines[0];
         const choices = lines.slice(1, -1);
         const answerLine = lines[lines.length - 1] || "";
         const answerLetter = answerLine.replace("Answer:", "").trim();
-
-        // find correct choice index by letter (A/B/C/D)
         let correctIndex = -1;
         if (answerLetter.length === 1) {
           correctIndex = choices.findIndex(c => c.startsWith(answerLetter + ")"));
         }
-
         return {
           number: index + 1,
           question: qText,
@@ -110,18 +153,18 @@ document.addEventListener("DOMContentLoaded", async () => {
     const storyContentEl = document.getElementById("story-content");
     if (!storyContentEl) return;
 
-    storyContentEl.innerHTML = "";
-
-    // Update question progress
-    const timerEl = document.getElementById("timer");
-    if (timerEl && index < questions.length) {
-      timerEl.textContent = `${index + 1}/${questions.length}`;
-    }
-    // If index is past last question → show review page
+    // ✅ If user has answered all questions → show results
     if (index >= questions.length) {
-      showReview();
+      showResults(); 
       return;
     }
+
+    // clear content first
+    storyContentEl.innerHTML = "";
+
+    // Update progress
+    const timerEl = document.getElementById("timer");
+    if (timerEl) timerEl.textContent = `${index + 1}/${questions.length}`;
 
     const q = questions[index];
     const qWrapper = document.createElement("div");
@@ -145,13 +188,10 @@ document.addEventListener("DOMContentLoaded", async () => {
       radio.name = `question-${index}`;
       radio.value = i;
 
-      // restore previous selection
-      if (answers[index] === i) {
-        radio.checked = true;
-      }
+      if (answers[index] === i) radio.checked = true;
 
       radio.addEventListener("change", () => {
-        answers[index] = i; // save selected choice
+        answers[index] = i;
       });
 
       label.appendChild(radio);
@@ -175,25 +215,21 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
 
     const nextBtn = document.createElement("button");
-    if (index === questions.length - 1) {
-      nextBtn.textContent = "Proceed to Review ➡";
-    } else {
-      nextBtn.textContent = "Next ➡";
-    }
+    nextBtn.textContent = index === questions.length - 1 ? "Finish Quiz ➡" : "Next ➡";
 
     nextBtn.addEventListener("click", () => {
-    if (index === questions.length - 1) {
-      // last question → go to review
-      showReview();
-    } else {
       currentQuestionIndex++;
-      showQuestion(currentQuestionIndex);
-    }
-  });
+
+      // ✅ When reaching the 20th question, show the review page
+      if (currentQuestionIndex === 20 || currentQuestionIndex >= questions.length) {
+        showReview();
+      } else {
+        showQuestion(currentQuestionIndex);
+      }
+    });
 
     navDiv.appendChild(backBtn);
     navDiv.appendChild(nextBtn);
-
     qWrapper.appendChild(navDiv);
     storyContentEl.appendChild(qWrapper);
   }
@@ -246,8 +282,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     const storyContentEl = document.getElementById("story-content");
     storyContentEl.innerHTML = "";
 
-    // compute scores
-    correctCount = 0;
+    // ✅ Compute scores
+    let correctCount = 0;
     questions.forEach((q, idx) => {
       if (answers[idx] === q.answerIndex) correctCount++;
     });
@@ -256,33 +292,44 @@ document.addEventListener("DOMContentLoaded", async () => {
     const wpm = timeMinutes > 0 ? (totalWords / timeMinutes).toFixed(2) : totalWords;
     const comprehension = ((correctCount / questions.length) * 100).toFixed(2);
 
-    const wpmCap = 200; 
+    // ✅ Reading speed scoring (200 wpm ideal)
+    const wpmCap = 200;
     const wpmScore = Math.min((wpm / wpmCap) * 100, 100);
 
+    // ✅ Weighted final grade (70% comprehension + 30% speed)
     const finalGrade = Math.min(((comprehension * 0.7) + (wpmScore * 0.3)), 100).toFixed(2);
 
+    // ✅ Remarks
     let remark = "";
-    if (finalGrade >= 90) remark = "Outstanding";
-    else if (finalGrade >= 85) remark = "Very Satisfactory";
-    else if (finalGrade >= 80) remark = "Satisfactory";
-    else if (finalGrade >= 75) remark = "Fairly Satisfactory";
-    else remark = "Did Not Meet Expectations";
+    if (finalGrade >= 90) remark = "🌟 Outstanding! Keep it up!";
+    else if (finalGrade >= 85) remark = "🎉 Very Satisfactory! Great job!";
+    else if (finalGrade >= 80) remark = "👍 Satisfactory! You’re improving!";
+    else if (finalGrade >= 75) remark = "🙂 Fairly Satisfactory! Try to read a bit more carefully next time.";
+    else remark = "💡 Did Not Meet Expectations. Don't give up — practice makes perfect!";
 
     const failClass = finalGrade < 75 ? "fail" : "";
+
+    // ✅ Clear and friendly message for students
     storyContentEl.innerHTML = `
-      <h3>📊 Results</h3>
-      <p><strong>Time:</strong> ${formatTime(seconds)}</p>
-      <p><strong>Correct:</strong> ${correctCount} / ${questions.length}</p>
-      <p><strong>Comprehension:</strong> ${comprehension}%</p>
-      <p><strong>WPM:</strong> ${wpm}</p>
-      <p><strong>Final Grade:</strong> ${finalGrade}%</p>
-      <p class="${failClass}" id="result"><strong>Result:</strong> ${remark}</p>
+      <div class="result-card">
+        <h2>🎯 Your Story Comprehension Results</h2>
+        <p>Great work finishing the story quiz! Here’s a summary of how you did:</p>
+        <div class="result-details">
+          <p><strong>🕒 Total Reading Time:</strong> ${formatTime(seconds)}</p>
+          <p><strong>✅ Correct Answers:</strong> ${correctCount} out of ${questions.length}</p>
+          <p><strong>📖 Comprehension Score:</strong> ${comprehension}%</p>
+          <p><strong>⚡ Reading Speed (WPM):</strong> ${wpm}</p>
+          <p><strong>🏅 Final Grade:</strong> ${finalGrade}%</p>
+          <p class="${failClass}" id="result"><strong>📝 Result:</strong> ${remark}</p>
+        </div>
+        <p>Remember: Reading faster helps, but understanding the story is even more important! You can always try again to improve your score.</p>
+      </div>
     `;
 
-    // ✅ Save results to DB only now
+    // ✅ Save results to database
     const student = JSON.parse(localStorage.getItem("student"));
     if (student && student.id && currentStoryId) {
-      saveResult(student.id, currentStoryId, wpm, correctCount, finalGrade);
+      saveResult(student.id, currentStoryId, wpm, correctCount, finalGrade, remark);
     } else {
       console.error("❌ No student or story ID found in localStorage");
       storyContentEl.insertAdjacentHTML("beforeend",
@@ -290,52 +337,35 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 
-  async function saveResult(studentId, storyId, readSpeed, readScore, finalGrade) {
-    const storyContentEl = document.getElementById("story-content");
-
+  async function saveResult(student_id, story_id, read_speed, read_score, final_grade) {
     try {
-      const response = await fetch("http://localhost:5000/save-result", {
+      const res = await fetch("http://localhost:5000/save-result", { // ✅ Fixed URL
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          student_id: studentId,
-          story_id: storyId,
-          read_speed: readSpeed,
-          read_score: readScore,
-          final_grade: finalGrade
-        })
+        body: JSON.stringify({ student_id, story_id, read_speed, read_score, final_grade }),
       });
 
-      const data = await response.json();
-      if (!data.success) {
-        console.error("❌ Failed to save result:", data.message);
-        storyContentEl.insertAdjacentHTML("beforeend",
-          `<p style="color:red">❌ Failed to save result: ${data.message}</p>`);
+      const data = await res.json();
+      if (data.success) {
+        console.log("✅ Result saved successfully:", data.result);
       } else {
-        console.log("✅ Result saved:", data.result);
-        storyContentEl.insertAdjacentHTML("beforeend",
-          `<p style="color:green">✅ Result saved successfully!</p>`);
+        console.error("❌ Failed to save result:", data.message);
       }
     } catch (err) {
       console.error("❌ Error saving result:", err);
-      storyContentEl.insertAdjacentHTML("beforeend",
-        `<p style="color:red">❌ Error saving result. Check server logs.</p>`);
     }
   }
-
 
   // Fetch one story by ID (and parse questions)
   async function fetchStory() {
     const params = new URLSearchParams(window.location.search);
     const storyId = params.get("story_id");
     const storyContentEl = document.getElementById("story-content");
-
-    // reset question box hidden by default
     const qBox = document.getElementById("question-box");
     if (qBox) qBox.style.display = "none";
 
     if (!storyId) {
-      if (storyContentEl) storyContentEl.innerHTML = "<p>❌ No story selected.</p>";
+      storyContentEl.innerHTML = "<p>❌ No story selected.</p>";
       return;
     }
 
@@ -345,55 +375,51 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       if (data.success) {
         const story = data.story;
-
         const titleEl = document.getElementById("story-title");
         if (titleEl) titleEl.textContent = story.storyname ?? "Untitled";
 
-        currentStory = story.storycontent ?? "";
-        currentStoryId = story.story_id ?? story.id ?? story.storyId ?? storyId;
+        currentStory = formatStoryText(story.storycontent ?? "");
+        currentStoryId = story.story_id ?? story.id ?? storyId;
+        totalWords = (story.storycontent ?? "").split(/\s+/).filter(Boolean).length;
 
-        totalWords = currentStory.split(/\s+/).filter(Boolean).length;
+        // Temporarily hold all question levels
+        window.storyQuestions = {
+          easy: story.storyquest_easy ?? [],
+          medium: story.storyquest_med ?? [],
+          hard: story.storyquest_hard ?? []
+        };
 
-        questions = parseQuestions(story.storyquest ?? story.storyquest_json ?? []);
-
-        // ✅ AI Format story
-        try {
-          const formatRes = await fetch("http://localhost:5000/format-story", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ content: currentStory })
-          });
-
-          const formatData = await formatRes.json();
-          if (formatData.success && formatData.formatted) {
-            console.log("✅ Story formatted by AI");
-            currentStory = formatData.formatted;
-          } else {
-            console.warn("⚠️ Using raw story content, AI format failed:", formatData.message);
-          }
-        } catch (err) {
-          console.error("❌ Error calling format API:", err);
-        }
-
-        if (storyContentEl) storyContentEl.innerHTML = `<p>Click START to read "${story.storyname ?? 'this story'}".</p>`;
-
-        // ensure question-box hidden until STOP
-        if (qBox) qBox.style.display = "none";
+        // Show intro
+        storyContentEl.innerHTML = `
+          <div class="instruction">
+            <p><strong>Story Comprehension Guide:</strong></p>
+                <p>Welcome! In this activity, you will practice your reading and understanding skills.</p>
+                <p>First, click the <strong>START</strong> button to begin reading the story titled 
+                "<strong>${story.storyname ?? 'this story'}</strong>".</p>
+                <p>Take your time to carefully read and understand the story.</p>
+                <p>Once you are done reading, click the <strong>FINISH</strong> button to mark that you are finished.</p>
+                <p>After that, you will be asked to choose your preferred difficulty level — 
+                <strong>Easy</strong>, <strong>Medium</strong>, or <strong>Hard</strong>.</p>
+                <p>The quiz will then begin automatically, showing <strong>20 questions</strong> 
+                based on your chosen difficulty level.</p>
+                <p>Answer each question carefully to test your comprehension of the story. Good luck!</p>
+          </div>
+        `;
       } else {
-        if (storyContentEl) storyContentEl.innerHTML = "<p>❌ Failed to load story.</p>";
+        storyContentEl.innerHTML = "<p>❌ Failed to load story.</p>";
       }
     } catch (err) {
       console.error("Error fetching story:", err);
-      if (storyContentEl) storyContentEl.innerHTML = "<p>❌ Error loading story.</p>";
+      storyContentEl.innerHTML = "<p>❌ Error loading story.</p>";
     }
   }
+
 
   await fetchAllStories();
   await fetchStory();
 
   const startBtn = document.getElementById("start-btn");
   const storyContentEl = document.getElementById("story-content");
-
   if (!startBtn || !storyContentEl) return;
 
   // Handle START/STOP button
@@ -401,25 +427,55 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (!currentStory) return;
 
     if (!timerRunning) {
-      // START
+      // START READING
       storyContentEl.innerHTML = `<p>${currentStory}</p>`;
-      startBtn.textContent = "STOP";
+      startBtn.textContent = "FINISH";
       timerRunning = true;
       seconds = 0;
       startTimer();
     } else {
-      // STOP → show questions
+      // FINISH READING → STOP TIMER
       stopTimer();
-      startBtn.style.display = "none"; // hide button
       timerRunning = false;
-      currentQuestionIndex = 0;
+      startBtn.style.display = "none"; // hide button
 
-      const timerEl = document.getElementById("timer");
-      if (timerEl) {
-        timerEl.textContent = `0/${questions.length}`;
-      }
+      // === Show difficulty mode selection before questions ===
+      storyContentEl.innerHTML = `
+        <div class="difficulty-select">
+          <h3>📘 Choose Difficulty Mode</h3>
+          <p>Select your preferred difficulty before starting the quiz:</p>
+          <div class="difficulty-buttons">
+            <button class="diff-btn easy">Easy</button>
+            <button class="diff-btn medium">Medium</button>
+            <button class="diff-btn hard">Hard</button>
+          </div>
+        </div>
+      `;
 
-      showQuestion(currentQuestionIndex);
+      // Add click listeners for difficulty choices
+      const diffButtons = storyContentEl.querySelectorAll(".diff-btn");
+      diffButtons.forEach(btn => {
+        btn.addEventListener("click", async () => {
+          let chosen = btn.classList.contains("easy") ? "easy" :
+                      btn.classList.contains("medium") ? "medium" : "hard";
+
+          storyContentEl.innerHTML = `<p>Loading <strong>${chosen}</strong> questions...</p>`;
+
+          // Pick correct set of questions
+          const rawSet = window.storyQuestions?.[chosen] ?? [];
+          questions = parseQuestions(rawSet);
+
+          if (!questions.length) {
+            storyContentEl.innerHTML = `<p>❌ No ${chosen} questions available for this story.</p>`;
+            return;
+          }
+
+          setTimeout(() => {
+            currentQuestionIndex = 0;
+            showQuestion(currentQuestionIndex);
+          }, 1000);
+        });
+      });
     }
   });
 

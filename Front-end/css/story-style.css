@@ -13,7 +13,7 @@
 }
 
 body {
-    font-family: 'Poppins', sans-serif;
+    font-family: 'baloo 2', cursive;
     background-color: #F0F8FF;
     color: var(--dark);
     line-height: 1.6;
@@ -367,13 +367,11 @@ main {
 
 #story-content p {
   font-size: 1.2rem;
-  margin: 0.4rem 0;
-  padding: 0.5rem;
   border-radius: 6px;
 }
 
 #story-content p strong {
-  color: #0056b3;
+  color: var(--primary);
 }
 
 #story-content hr {
@@ -397,6 +395,137 @@ main {
   background: #fdeaea;
   border: 2px solid #f44336;
   color: #c62828;
+}
+
+.story-paragraph {
+  text-align: justify;
+  line-height: 1.8;
+  font-size: 1rem;
+  margin-bottom: 10px;
+  padding: 6px 10px;
+  background-color: #f9f9f9;
+  border-left: 4px solid #6c63ff;
+  border-radius: 6px;
+}
+
+.difficulty-select {
+  text-align: center;
+  padding: 20px;
+  background: #f9f9ff;
+  border-radius: 12px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.difficulty-select h3 {
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.difficulty-select p {
+  color: #555;
+  margin-bottom: 15px;
+}
+
+.difficulty-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+}
+
+.diff-btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: 0.3s;
+}
+
+.diff-btn.easy { background-color: #a8e6cf; }
+.diff-btn.medium { background-color: #ffd3b6; }
+.diff-btn.hard { background-color: #ffaaa5; }
+
+.diff-btn:hover {
+  transform: scale(1.05);
+  opacity: 0.9;
+}
+
+.loading-text {
+  text-align: center;
+  font-style: italic;
+  color: #666;
+  margin-top: 40px;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* --- Notification Overlay --- */
+.notification-overlay-background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.6);
+    display: none;
+    z-index: 998;
+}
+
+.notification-overlay-background.show {
+    display: block;
+}
+
+.notification {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    border-radius: 12px;
+    padding: 20px 30px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+    z-index: 999;
+    text-align: center;
+}
+
+.notification.show {
+    display: block;
+}
+
+.notification-message {
+    font-family: 'baloo 2', cursive;
+    font-size: 1.2rem;
+}
+
+.notification-message .story-title {
+    color: var(--primary);
+    font-size: 1.4rem;
+}
+
+.notification-buttons {
+    margin-top: 15px;
+    display: flex;
+    justify-content: center;
+    gap: 50px;
+    font-size: 2rem;
+}
+
+.notification-btn {
+    background-color: #007bff;
+    border: none;
+    color: white;
+    padding: 8px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.notification-btn:hover {
+    background-color: #0056b3;
 }
 
 /* --- RESPONSIVE --- */
