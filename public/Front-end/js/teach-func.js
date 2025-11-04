@@ -723,16 +723,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-    const socket = io("http://localhost:5000");
-
-    socket.on("student-joined", (data) => {
-        console.log("Student joined class:", data.code);
-        const teacher = JSON.parse(localStorage.getItem("teacher"));
-        if (teacher) {
-            loadTeacherClasses(teacher.id); // ✅ pass teacherId
-        }
-    });
-
     // Class View Overlay Elements
     const classViewOverlay = document.querySelector(".class-view-overlay");
     const classViewModal = document.querySelector(".class-view-modal");
@@ -742,6 +732,24 @@ document.addEventListener('DOMContentLoaded', async () => {
     const classViewTitle = document.getElementById("class-view-title");
 
     let currentClassCode = null;
+    let pollingInterval = null;
+
+    async function loadTeacherClasses() {
+    try {
+        const teacher = JSON.parse(localStorage.getItem("teacher"));
+        if (!teacher) return;
+
+        const res = await fetch(`/api/get-classes/${teacher.id}`);
+        const data = await res.json();
+
+        if (data.success) {
+        console.log("✅ Classes loaded:", data.classes);
+        // Update your class list UI here if needed
+        }
+    } catch (err) {
+        console.error("❌ Error loading classes:", err);
+    }
+    }
 
     // Function to open class view
     async function openClassView(classCode, className) {
@@ -762,6 +770,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 return;
             }
 
+            studentList.innerHTML = "";
             data.students.forEach((student, index) => {
                 const tr = document.createElement("tr");
                 tr.innerHTML = `
@@ -789,25 +798,22 @@ document.addEventListener('DOMContentLoaded', async () => {
             document.querySelectorAll(".delete-student").forEach(btn => {
                 btn.addEventListener("click", async (e) => {
                     const studentId = e.target.dataset.id;
-                    showNotification('delete-student', e.target.closest('tr').querySelector('td:nth-child(2)').textContent, async () => {
+                    const studentName = e.target.closest('tr').querySelector('td:nth-child(2)').textContent;
+                    showNotification('delete-student', studentName, async () => {
                         try {
-                            const response = await fetch(`/api/delete-student/${studentId}`, {
-                                method: "DELETE"
-                            });
-
+                            const response = await fetch(`/api/delete-student/${studentId}`, { method: "DELETE" });
                             if (response.ok) {
-                                // ✅ Remove the student row immediately
-                                e.target.closest("tr").remove();
+                            e.target.closest("tr").remove();
 
-                                // ✅ Update the student count in the class list
-                                const classCard = document.querySelector(`.class-card[data-class-code='${currentClassCode}']`);
-                                if (classCard) {
-                                    const countEl = classCard.querySelector(".student-count");
-                                    const currentCount = parseInt(countEl.textContent, 10) || 0;
-                                    countEl.textContent = Math.max(0, currentCount - 1); // avoid negative
-                                }
+                            // Update student count on class card
+                            const classCard = document.querySelector(`.class-card[data-class-code='${currentClassCode}']`);
+                            if (classCard) {
+                                const countEl = classCard.querySelector(".student-count");
+                                const currentCount = parseInt(countEl.textContent, 10) || 0;
+                                countEl.textContent = Math.max(0, currentCount - 1);
+                            }
 
-                                console.log(`Student ${studentId} deleted. Count updated.`);
+                            console.log(`✅ Student ${studentId} deleted`);
                             } else {
                                 showNotification('error', "Failed to delete student.");
                             }
@@ -816,20 +822,28 @@ document.addEventListener('DOMContentLoaded', async () => {
                             showNotification('error', "Error deleting student.");
                         }
                     });
-                });
             });
+        });
 
         } catch (err) {
             console.error("Error fetching students:", err);
         }
     }
 
-    socket.on("student-removed", (data) => {
-        if (data.code === currentClassCode) {
-            openClassView(currentClassCode, classViewTitle.textContent); // reload modal
-            loadTeacherClasses(); // reload sidebar counts
-        }
-    });
+    function startPolling() {
+        const teacher = JSON.parse(localStorage.getItem("teacher"));
+        if (!teacher) return;
+
+        // Clear previous polling
+        if (pollingInterval) clearInterval(pollingInterval);
+
+        pollingInterval = setInterval(async () => {
+            await loadTeacherClasses(); // refresh sidebar
+            if (currentClassCode) {
+            await openClassView(currentClassCode, classViewTitle.textContent); // refresh modal if open
+            }
+        }, 7000); // every 7 seconds
+    }
 
     // Close modal
     closeClassViewBtn.addEventListener("click", () => {
@@ -850,10 +864,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     const searchInput = document.getElementById("student-search");
-    if (searchInput) {
+        if (searchInput) {
         searchInput.addEventListener("click", () => {
             if (window.innerWidth <= 768) {
-                searchInput.classList.toggle("expanded");
+            searchInput.classList.toggle("expanded");
             if (searchInput.classList.contains("expanded")) {
                 searchInput.focus();
             } else {
@@ -862,6 +876,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         });
     }
+
+    loadTeacherClasses();
+    startPolling();
 
     // ========================== 🧩 STUDENT VIEW OVERLAY LOGIC ==========================
 

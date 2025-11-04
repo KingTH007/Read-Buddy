@@ -775,80 +775,185 @@ main {
 }
 
 
-/* --- RESPONSIVE --- */
-@media (max-width: 768px) {
-    .hamburger {
-        display: block;
-    }
+/* ===============================
+   RESPONSIVE DESIGN FIXES
+   =============================== */
 
-    .sidebar {
-        position: fixed;
-        top: 0;
-        right: -240px;
-        left: auto;
-        width: 240px;
-        transition: right 0.3s ease-in-out;
-        border-radius: 12px 0 0 12px;
-    }
+/* --- Tablet Adjustments (<= 1024px) --- */
+@media (max-width: 1024px) {
+  .main-content {
+    margin-left: 0;
+    padding: 15px;
+  }
 
-    .sidebar.show {
-        right: 0;
-    }
+  .sidebar {
+    transform: translateX(-100%);
+    position: fixed;
+    z-index: 1000;
+  }
 
-    .main-content {
-        margin-left: 0;
-        padding: 15px;
-    }
+  .sidebar.active {
+    transform: translateX(0);
+  }
 
-    /* 🔹 Stack the title and mode buttons */
-    .content-header {
-        flex-direction: column;
-        align-items: flex-end;
-        gap: 10px;
-    }
+  .hamburger {
+    display: block;
+  }
 
-    .content-header h2 {
-        font-size: 2rem;
-        text-align: right;
-    }
+  .content-container {
+    margin-top: 60px;
+    max-width: 700px;
+  }
 
-    /* 🔹 Move mode buttons below and align them to the right */
-    .mode-btns {
-        align-self: flex-end;
-    }
+  .content-header {
+    justify-content: flex-end;
+  }
 }
 
+/* =========================================
+   MOBILE VIEW (up to 768px)
+   ========================================= */
+@media (max-width: 768px) {
+  /* Align header to the right */
+  .content-header {
+    justify-content: flex-end;
+    text-align: right;
+  }
+
+  /* Content Box & Video Wrapper (Same size) */
+  .content-box,
+  .video-wrapper {
+    max-width: 430px;
+    max-height: 430px;
+    width: 100%;
+    height: auto;
+    margin: 0 auto;
+    overflow-y: auto;
+  }
+
+  /* Bubble styling for mobile */
+  .bubble {
+    font-size: 0.9rem;
+    max-width: 100%;
+    word-wrap: break-word;
+  }
+
+  .bubble.system,
+  .bubble.user {
+    font-size: 0.9rem;
+    max-width: 100%;
+  }
+
+  /* Ensure chat scrolls properly */
+  .content-box {
+    overflow-y: auto;
+    scroll-behavior: smooth;
+    padding: 10px;
+  }
+
+  /* Smaller book AI image */
+  .text-book-ai img {
+    width: 180px;
+    height: 180px;
+  }
+
+  /* Resize AI bubbles */
+  .ai-text {
+    max-width: 85%;
+    padding: 15px 18px;
+    font-size: 0.95rem;
+  }
+
+  /* Buttons visible and mobile-friendly */
+  .mode-btns button,
+  .start-btn,
+  .restart-btn,
+  .answer-btn,
+  .avatar .select-avatar {
+    font-size: 0.9rem;
+    padding: 10px 12px;
+    width: 100%;
+  }
+
+  /* Center the start/restart buttons */
+  .start-btn-container {
+    justify-content: center;
+    gap: 0.75rem;
+  }
+
+  /* Mic & skip buttons resize */
+  .openVoice,
+  .skip-btn {
+    width: 60px;
+    height: 60px;
+    font-size: 1.5rem;
+  }
+
+  /* Sidebar overlay when open */
+  .background.show {
+    display: block;
+  }
+
+  /* Sidebar width smaller on phones */
+  .sidebar {
+    width: 200px;
+  }
+}
+
+/* =========================================
+   SMALL MOBILE (up to 480px)
+   ========================================= */
 @media (max-width: 480px) {
-    .sidebar {
-        width: 230px;
-        right: -230px;
-        left: auto;
-        padding: 15px;
-        border-radius: 12px 0 0 12px;
-        transition: right 0.3s ease-in-out;
-        z-index: 1001;
-    }
+  body {
+    font-size: 0.9rem;
+  }
 
-    .sidebar.show {
-        right: 0;
-    }
+  .content-container {
+    max-width: 95%;
+    padding: 10px;
+  }
 
-    .hamburger {
-        font-size: 1.6rem;
-        padding: 8px 12px;
-    }
+  /* Make header compact */
+  .content-header h2 {
+    font-size: 1.1rem;
+  }
 
-    .content-container {
-        padding: 10px;
-    }
+  /* Adjust content/video size */
+  .content-box,
+  .video-wrapper {
+    max-width: 380px;
+    max-height: 380px;
+  }
 
-    .content-header h2 {
-        font-size: 1.2rem;
-        text-align: left;
-    }
+  /* Resize chat bubbles */
+  .bubble {
+    font-size: 0.85rem;
+    padding: 8px 10px;
+  }
 
-    .mode-btns button {
-        padding: 6px 10px;
-        font-size: 0.9rem;
-    }
+  /* Scrollable bubbles for phone */
+  #sirBox,
+  #rAuBox,
+  #sdBox {
+    overflow-y: auto;
+    max-height: 350px;
+  }
+
+  /* Reduce spacing */
+  .ai-row,
+  .user-row {
+    gap: 8px;
+  }
+
+  .user-profile img {
+    width: 40px;
+    height: 40px;
+  }
+
+  .openVoice,
+  .skip-btn {
+    width: 55px;
+    height: 55px;
+    font-size: 1.4rem;
+  }
 }

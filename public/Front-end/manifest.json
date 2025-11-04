@@ -1,0 +1,23 @@
+{
+  "name": "Read Buddy",
+  "short_name": "ReadBuddy",
+  "description": "An interactive reading comprehension web app for Grade 3 students.",
+  "start_url": "/Front-end/index.html",
+  "scope": "/Front-end/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#1E88E5",
+  "orientation": "portrait-primary",
+  "icons": [
+    { 
+      "src": "/asset/Logo.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/asset/Logo.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

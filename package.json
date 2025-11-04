@@ -33,7 +33,6 @@
     "node-fetch": "^2.7.0",
     "openai": "^5.19.1",
     "pg": "^8.16.3",
-    "postgres": "^3.4.7",
-    "socket.io": "^4.8.1"
+    "postgres": "^3.4.7"
   }
 }

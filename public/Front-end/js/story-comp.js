@@ -531,7 +531,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (confirm("Are you sure you want to logout?")) {
             localStorage.removeItem("teacher");
             localStorage.removeItem("student");
-            window.location.href = "/home-page.html";
+            window.location.href = "/index.html";
         }
     });
 });

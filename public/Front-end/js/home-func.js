@@ -172,7 +172,7 @@ loginSubmit.addEventListener('click', async (e) => {
 
             if (data.success) {
                 localStorage.setItem("teacher", JSON.stringify(data.teacher));
-                window.location.href = "teacher-front.html";
+                window.location.href = "/teacher-front.html";
             } else {
                 if (data.field === "email") {
                     showError(email, "Email not found.");
@@ -230,7 +230,7 @@ loginSubmit.addEventListener('click', async (e) => {
             if (data.success) {
                 // ✅ Save and redirect
                 localStorage.setItem("student", JSON.stringify(data.student));
-                window.location.href = "student-front.html";
+                window.location.href = "/student-front.html";
             } else {
                 // ❌ Show inline errors
                 if (data.field === "code") {

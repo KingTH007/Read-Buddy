@@ -18,35 +18,29 @@
 
     if (hamburger && sidebar && background) {
         hamburger.addEventListener("click", () => {
-            sidebar.classList.toggle("show");
-            hamburger.classList.toggle("show");
-            background.classList.toggle("show");
-
-            resetActivity();
+        sidebar.classList.toggle("show");
+        hamburger.classList.toggle("show");
+        background.classList.toggle("show");
         });
-
+        
         // Clicking the black overlay closes the sidebar
         background.addEventListener("click", () => {
-            sidebar.classList.remove("show");
-            hamburger.classList.remove("show");
-            background.classList.remove("show");
-
-            resetActivity();
+        sidebar.classList.remove("show");
+        hamburger.classList.remove("show");
+        background.classList.remove("show");
         });
 
         // Click outside sidebar closes it too
         document.addEventListener("click", (e) => {
-            if (
-                !sidebar.contains(e.target) &&
-                !hamburger.contains(e.target) &&
-                sidebar.classList.contains("show")
-            ) {
-                sidebar.classList.remove("show");
-                hamburger.classList.remove("show");
-                background.classList.remove("show");
-
-                resetActivity();
-            }
+        if (
+            !sidebar.contains(e.target) &&
+            !hamburger.contains(e.target) &&
+            sidebar.classList.contains("show")
+        ) {
+            sidebar.classList.remove("show");
+            hamburger.classList.remove("show");
+            background.classList.remove("show");
+        }
         });
     }
 
@@ -182,14 +176,10 @@ function loadVoices() {
     }
 
     const preferredVoices = [
-        "Google UK English Female",
-        "Google US English",
         "Microsoft Aria Online (Natural) - English (United States)",
-        "Microsoft Zira Desktop - English (United States)",
-        "Microsoft Ava Online (Natural) - English (United States)",
-        "Microsoft James Online (Natural) - English (United States)",
-        "Google Filipino",
-        "Microsoft Lani Online (Natural) - Filipino (Philippines)"
+        "Microsoft Jenny Online (Natural) - English (United States)",
+        "Google UK English Female",
+        "Google English (United States)" 
     ];
 
     window.selectedVoice =
