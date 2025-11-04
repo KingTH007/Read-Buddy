@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Baloo+2:wght@700&display=swap" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+        <link rel="stylesheet" href="/css/teacher-style.css">
+        <link rel="stylesheet" href="/css/header.css">
+        <link rel="icon" type="image/png" href="/asset/Logo.png">
+        <title>Read Buddy - Reading Helper</title>
+    </head>
+    <body>
+        <header>
+            <div class="header-content">
+                <div class="logo-container">
+                    <img src="/asset/trans-logo.png" alt="ReadBuddy Logo" class="logo">
+                    <h1 class="logo-text">ReadBuddy</h1>
+                </div>
+
+                <div class="hamburger" id="hamburger">
+                    ☰
+                </div>
+
+                <div class="link" id="nav-menu">
+                    <a href="#" class="nav-btn">Download</a>
+                    <a href="#" class="nav-btn login-btn" id="logout-btn">
+                        <i class="fa fa-user"></i>
+                        <span id="user-name"></span>
+                    </a>
+                </div>
+            </div>
+        </header>
+        <main>
+            <section class="activities">
+                <!--Story Comprehension-->
+                <div class="act-header">
+                    <span class="act-icon">📚</span>
+                    Story Comprehension
+                </div>
+                <!--UPLOAD STORY-->
+                <div class="act-card">
+                    <div class="upload">
+                        <label for="file">
+                            <span>Upload Story</span>   
+                            <p>or drag and drop a file here</p>
+                        </label>
+                        <input type="file" id="file">
+                    </div>
+
+                <!--STORY COMPREHENSION-->
+                </div>
+            </section>
+
+            <!--Overlap-->
+            <div class="overlay-color"></div>
+
+            <div class="overlap">
+                <div class="border">
+                    <button class="overlay-close-btn" id="cancel-story-btn">
+                        <i class="fa fa-x"></i>
+                    </button>
+                    <div class="top-row">
+                        <div class="over-img" id="loading-img">
+                            <div class="circle-loader"></div>
+                            <span>Loading...</span>
+                        </div>
+
+                        <div class="over-img" id="over-img" style="display: none;">
+                            <img src="https://placehold.co/250x180" alt="StoryComprehension" />
+                        </div>
+
+                        <div class="title-area">
+                            <label for="title">Title:</label>
+                            <input type="text" id="title" placeholder="Generating story title">
+                        </div>
+                    </div>
+
+                    <div class="context-area">
+                        <label for="context">Story:</label>
+                        <textarea id="context" placeholder="Generating the story content..."></textarea>
+                    </div>
+                    <div class="question-grind">
+                            <div class="question-area">
+                                <label for="questions">Questions (Easy):</label>
+                                <textarea id="question1" placeholder="Generating comprehension questions easy here..."></textarea>
+                            </div>
+                            <div class="question-area">
+                                <label for="questions">Questions (Medium):</label>
+                                <textarea id="question2" placeholder="Generating comprehension questions medium here..."></textarea>
+                            </div>
+                            <div class="question-area">
+                                <label for="questions">Questions (Hard):</label>
+                                <textarea id="question3" placeholder="Generating comprehension questions hard here..."></textarea>
+                            </div>
+                    </div>
+
+                    <div class="button-row">
+                        <button class="overlap-button" id="overlap-upload">UPLOAD</button>
+                    </div>
+                </div>
+            </div>
+
+            <!--Modify Overlay-->
+            <div class="overlap" id="modify-overlap">
+                <div class="border">
+                    <button class="overlay-close-btn" id="modify-cancel-btn">
+                        <i class="fa fa-x"></i>
+                    </button>
+                    <div class="top-row">
+                        <div class="over-img">
+                            <img id="modify-img" src="https://placehold.co/250x180" alt="StoryComprehension" />
+                        </div>
+
+                        <div class="title-area">
+                            <label for="modify-title">Title:</label>
+                            <input type="text" id="modify-title" placeholder="Generating story title">
+                        </div>
+                    </div>
+
+                    <div class="context-area">
+                        <label for="modify-context">Story:</label>
+                        <textarea id="modify-context" placeholder="Generating the story..."></textarea>
+                    </div>
+
+                    <div class="question-area">
+                        <label for="modify-questions">Question easy:</label>
+                        <textarea id="modify-question1" placeholder="Generating comprehension questions here..."></textarea>
+                    </div>
+                    <div class="question-area">
+                        <label for="modify-questions">Question medium:</label>
+                        <textarea id="modify-question2" placeholder="Generating comprehension questions here..."></textarea>
+                    </div>
+                    <div class="question-area">
+                        <label for="modify-questions">Questions hard:</label>
+                        <textarea id="modify-question3" placeholder="Generating comprehension questions here..."></textarea>
+                    </div>
+
+                    <div class="button-row">
+                        <button class="overlap-button" id="modify-delete">DELETE</button>
+                        <button class="overlap-button" id="modify-save">MODIFY</button>
+                    </div>
+                </div>
+            </div>
+            <!--End of Overlap-->
+
+            <!-- Create Class Section -->
+            <section class="class">
+                <div class="class-header">
+                    <div class="act-header">
+                        <span class="act-icon">🏫</span>
+                        Class Management
+                    </div>
+                    <div class="create-class">
+                        <button class="create-btn" id="create-class-btn">
+                            <span>Create a New Class +</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="class-list">
+                    <ul id="class-list-ul">
+                        <!-- Class items will be dynamically added here -->
+                    </ul>
+                </div>
+            </section>
+
+            <!--Class Create Overlay-->
+            <div class="class-overlay-color"></div>
+
+            <div class="class-overlap">
+                <div class="class-border">
+                    <button class="overlay-close-btn" id="class-cancel-btn">
+                        <i class="fa fa-x"></i>
+                    </button>
+                    <h2>Create New Class</h2>
+                    
+                    <!-- Class Name Input -->
+                    <label for="class-name">Class Name: </label>
+                    <input type="text" id="class-name" placeholder="Enter class name" required>
+                    
+                    <!-- Class Code Display (Read-only) -->
+                    <label for="class-code">Class Code: </label>
+                    <input type="text" id="class-code" readonly>
+
+                    <div class="class-button-row">
+                        <button class="class-overlap-button" id="class-overlap-create">CREATE</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Class View Overlay -->
+            <div class="class-view-overlay"></div>
+
+            <div class="class-view-modal">
+                <button id="close-class-view" class="close-btn">
+                    <i class="fa fa-x"></i>
+                </button> 
+                <div class="class-view-header">
+                    <div class="class-title-container">
+                        <h2 id="class-view-title">CLASS NAME</h2>
+                        <i class="bi bi-trash class-icon" id="delete-class-btn"></i>
+                        <i class="bi bi-person-plus class-icon" id="enroll-student-btn"></i>
+                    </div>
+
+                    <div class="class-view-controls">
+                        <input type="text" id="student-search" placeholder="🔍 Search student..." />
+                    </div>
+                </div>
+
+                <table class="student-table">
+                    <thead>
+                        <tr>
+                            <th>No#</th>
+                            <th>Student Name</th>
+                            <th>Progress</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody id="student-list">
+                        <!-- Students will be dynamically inserted here -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Enroll Student Overlay -->
+            <div class="enroll-overlay-color"></div>
+
+            <div class="enroll-overlap">
+                <div class="enroll-border">
+                    <button class="overlay-close-btn" id="enroll-cancel-btn">
+                        <i class="fa fa-x"></i>
+                    </button>
+                    <h2>Enroll Student</h2>
+
+                    <!-- Enrollment Form -->
+                    <form id="enroll-form">
+                        <!-- Class Code Input -->
+                        <label for="enroll-class-code">Class Code:</label>
+                        <input type="text" id="enroll-class-code" placeholder="Auto-filled class code" readonly>
+
+                        <!-- Student First Name -->
+                        <label for="enroll-first-name">First Name:</label>
+                        <input type="text" id="enroll-first-name" placeholder="Enter student's first name" required>
+
+                        <!-- Student Last Name -->
+                        <label for="enroll-last-name">Last Name:</label>
+                        <input type="text" id="enroll-last-name" placeholder="Enter student's last name" required>
+
+                        <div class="enroll-button-row">
+                            <button type="submit" class="enroll-overlap-button" id="enroll-overlap-enroll">ENROLL</button>
+                            <label for="add-csv" class="enroll-overlap-button">Import CSV</label>
+                            <input type="file" id="add-csv" accept=".csv" hidden>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="view-student-overlay"></div>
+            <div class="view-student">
+                <div class="view-student-border">
+                    <button class="overlay-close-btn" id="view-student-cancel-btn">
+                        <i class="fa fa-x"></i>
+                    </button>
+
+                    <h2 id="student-name-title">Student Name</h2>
+
+                    <!-- 🔹 Student Progress Overview -->
+                    <div class="student-progress-section">
+                        <h3>Progress Overview</h3>
+                        <div class="progress-bar-container">
+                            <div class="progress-bar" id="student-progress-bar" style="width: 0%;">0%</div>
+                        </div>
+                        <p class="progress-desc">Overall completion based on finished lessons and quizzes.</p>
+                    </div>
+
+                    <!-- 🔹 Progress Summary Table -->
+                    <div class="student-progress-table">
+                        <h3>Performance Summary</h3>
+                        <table id="student-progress-summary">
+                            <thead>
+                                <tr>
+                                    <th>Category</th>
+                                    <th>Completed</th>
+                                    <th>Average Score</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Story Comprehension</td>
+                                    <td id="story-completed">0</td>
+                                    <td id="story-average">0%</td>
+                                </tr>
+                                <tr>
+                                    <td>Learning Activities</td>
+                                    <td id="learning-completed">0</td>
+                                    <td id="learning-average">0%</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- 🔹 Graph Visualization -->
+                    <div class="student-chart-section">
+                        <h3>Progress Graph</h3>
+                        <canvas id="student-progress-chart" width="400" height="200"></canvas>
+                    </div>
+
+                    <!-- 🔹 Completed Activities List -->
+                    <div class="student-activities-section">
+                        <h3>Completed Activities</h3>
+                        <ul id="completed-activities-list">
+                            <!-- Filled dynamically -->
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Wrap both resources inside one container -->
+            <div class="class">
+                <section class="resources">
+                    <div class="res-video">
+                        <div class="res-header">
+                            <span class="res-icon">🎥</span>
+                            Videos
+                        </div>
+                        <div class="create-video">
+                            <button class="create-video-btn" id="create-video-btn">
+                                <span>Add a New Video</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="res-video-list">
+                        <ul id="res-video-list-ul">
+                            <!-- Video items -->
+                        </ul>
+                    </div>
+                </section>
+            </div>
+            
+            <!-- Video Resources -->
+            <div class="lesson-overlay-background" id="lesson-overlay-background"></div>
+            <div class="video-overlay" id="video-overlay">
+                <button class="overlay-close-btn" id="cancel-video-btn">
+                    <i class="fa fa-x"></i>
+                </button>
+                <div class="overlay-border">
+                    <h2>Video Upload</h2>
+                    <label for="video-name">Name:</label>
+                    <input type="text" id="video-name" placeholder="Enter video name" />
+
+                    <div class="overlay-upload-container">
+                        <label class="overlay-upload" for="uploadVideo" id ="video-upload-label">
+                            + Upload Video <br><p>or drag and drop a file here</p>
+                            <input type="file" id="uploadVideo" accept=".mp4,.mp3">
+                        </label>
+
+                        <div class="upload-status" id="video-upload-status"></div>
+                    </div>
+
+                    <div class="overlay-button-row">
+                        <button class="overlap-button" id="upload-video-btn">Upload Video</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="video-player-overlay" class="video-player-overlay">
+                <div class="video-player-content">
+                    <span class="close-btn">&times;</span>
+                    <h2 class="video-title" id="player-video-title">Video Title</h2> 
+                    <video id="player-video" controls autoplay></video>
+                </div>
+            </div>
+
+            <!--Overlay Notification-->
+            <div class="notification-overlay">
+                <!-- Modify -->
+                <div class="notification" id="modify-notification">
+                    <div class="notification-content">
+                        <p class="notification-message">Are you sure you want to update <span class="story-title"></span>?</p>
+                        <div class="notification-buttons">
+                            <button id="yes-modify" class="notification-btn">Yes</button>
+                            <button id="no-modify" class="notification-btn">No</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Delete Story -->
+                <div class="notification" id="delete-story-notification">
+                    <div class="notification-content">
+                        <p class="notification-message">Are you sure you want to delete this <span class="story-title"></span>?</p>
+                        <div class="notification-buttons">
+                            <button id="yes-delete-story" class="notification-btn">Yes</button>
+                            <button id="no-delete-story" class="notification-btn">No</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- close story unsave or unchange -->
+                <div class="notification" id="close-story-notification">
+                    <div class="notification-content">
+                        <p class="notification-message">Are you sure you want to close this <span class="story-title"></span>? it will discard all changes.</p>
+                        <div class="notification-buttons">
+                            <button id="yes-close-story" class="notification-btn">Yes</button>
+                            <button id="no-close-story" class="notification-btn">No</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Create -->
+                <div class="notification" id="create-notification">
+                    <div class="notification-content">
+                        <p class="notification-message">Created <span class="class-title"></span> successfully!</p>
+                        <button id="no-create" class="notification-btn">OK</button>
+                    </div>
+                </div>
+
+                <!-- Delete Class -->
+                <div class="notification" id="delete-class-notification">
+                    <div class="notification-content">
+                        <p class="notification-message">Delete class <span class="class-title"></span>?</p>
+                        <div class="notification-buttons">
+                            <button id="yes-delete-class" class="notification-btn">Yes</button>
+                            <button id="no-delete-class" class="notification-btn">No</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Delete Student -->
+                <div class="notification" id="delete-student-notification">
+                    <div class="notification-content">
+                        <p class="notification-message">Remove student <span class="student-name"></span>?</p>
+                        <div class="notification-buttons">
+                            <button id="yes-delete-student" class="notification-btn">Yes</button>
+                            <button id="no-delete-student" class="notification-btn">No</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Success -->
+                <div class="notification" id="success-notification">
+                    <div class="notification-content">
+                        <p class="notification-message">✅ <span class="success-message">Operation successful.</span></p>
+                        <button id="no-success" class="notification-btn">OK</button>
+                    </div>
+                </div>
+
+                <!-- Error -->
+                <div class="notification" id="error-notification">
+                    <div class="notification-content">
+                        <p class="notification-message">⚠️ <span class="error-message">An error occurred.</span></p>
+                        <button id="no-error" class="notification-btn">OK</button>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+
+        <!--HOST SCRIPTS-->
+        <script src="/js/header-func.js"></script>
+        <script src="/js/teach-func.js"></script>
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+        <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    </body>
+</html>

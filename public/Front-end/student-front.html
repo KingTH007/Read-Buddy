@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Baloo+2:wght@700&display=swap" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+        <link rel="stylesheet" href="/css/student-style.css">
+        <link rel="stylesheet" href="/css/header.css">
+        <link rel="icon" type="image/png" href="/asset/Logo.png">
+        <title>Read Buddy - Reading Helper</title>
+    </head>
+    <body>
+        <header>
+            <div class="header-content">
+                <div class="logo-container">
+                    <img src="/asset/trans-logo.png" alt="ReadBuddy Logo" class="logo">
+                    <h1 class="logo-text">ReadBuddy</h1>
+                </div>
+                
+                <div class="hamburger" id="hamburger">
+                    ☰
+                </div>
+
+                <div class="link" id="nav-menu">
+                    <a href="#" class="nav-btn">Download</a>
+                    <a href="#" class="nav-btn login-btn" id="logout-btn">
+                        <i class="fa fa-user"></i>
+                        <span id="user-name"></span>
+                    </a>
+                </div>
+            </div>
+        </header>
+        <main>
+            <section class="activities">
+                <!--Story Comprehension-->
+                <div class="act-header">
+                    <span class="act-icon">📚</span>
+                    Story Comprehension
+                </div>
+
+                <div class="act-card">
+                </div>
+            </section>
+
+            <section class="activities">
+                <div class="act-header">
+                    <span class="act-icon">📘</span>
+                    Learning Activities
+                </div>
+                <!--Learning Activities-->
+                <div class="act-card">
+                    <div class="learn">
+                        <div class="learn-image">
+                            <img src="/asset/ReadandUnderstand.png" alt="LearningActivity" />
+                        </div>
+                        <p>Read And Understand</p>
+                        <button class="button" id="learn1">Learn Now</button>
+                    </div>
+
+                    <div class="learn">
+                        <div class="learn-image">
+                            <img src="/asset/SayItRight.png" alt="LearningActivity" />
+                        </div>
+                        <p>Say It Right!</p>
+                        <button class="button" id="learn2">Learn Now</button>
+                    </div>
+
+                    <div class="learn">
+                        <div class="learn-image">
+                            <img src="/asset/storydetective.png" alt="LearningActivity" />
+                        </div>
+                        <p>Story Detective</p>
+                        <button class="button" id="learn3">Learn Now</button>
+                    </div>
+                </div>
+            </section>
+
+            <section class="activities">
+                <div class="resources">
+                    <div class="res-header">
+                        <div class="res-icon">🎥</div>
+                        <div class="res-title">Videos</div>
+                    </div>
+                    <div class="res-video-list">
+                        <ul id="res-video-list-ul">
+                            <!-- Video items will be dynamically added here -->
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <div class="video-player-background"></div>
+            <div id="video-player-overlay" class="video-player-overlay">
+                <div class="video-player-content">
+                    <span class="close-btn">&times;</span>
+                    <h2 class="video-title" id="player-video-title">Video Title</h2> 
+                    <video id="player-video" controls autoplay></video>
+                </div>
+            </div>
+
+            <!--Notification bar-->
+            <div class="notification-overlay-background"></div>
+            <div class="notification-overlay">
+                <div class="notification" id="select-story-notification">
+                    <button class="overlay-close-btn" id="select-cancel-btn">
+                        <i class="fa fa-x"></i>
+                    </button>
+                    <div class="notification-content">
+                        <p class="notification-message">Do you want to try learning activities first before <span class="story-title"></span>?</p>
+                        <div class="notification-buttons">
+                            <button id="yes-modify" class="notification-btn">Yes</button>
+                            <button id="no-modify" class="notification-btn">No</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!--HOST SCRIPTS-->
+        <script src="/js/header-func.js"></script>
+        <script src="/js/stud-func.js"></script>
+
+    </body>
+</html>

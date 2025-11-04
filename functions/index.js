@@ -1,39 +1,41 @@
-const functions = require("firebase-functions");
+const functions = require("firebase-functions/v2"); // ✅ use v2 API
+const { onRequest } = require("firebase-functions/v2/https");
+
 require("dotenv").config();
 
 const express = require("express");
 const cors = require("cors");
 const fetch = require("node-fetch");
 const bodyParser = require("body-parser");
-const bcrypt = require("bcrypt");
+const bcrypt = require("bcryptjs");
 const { Pool } = require("pg");
 const multer = require("multer");
 
-// Firebase Admin SDK for Storage
+// Firebase Admin SDK
+const { initializeApp } = require('firebase-admin/app');
 const admin = require("firebase-admin");
 admin.initializeApp();
-const bucket = admin.storage().bucket();
 
 const app = express();
 app.use(cors({ origin: true }));
 app.use(express.json());
 app.use(bodyParser.json());
 
-// Multer memory storage
+// 🔹 Multer memory storage
 const upload = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: 200 * 1024 * 1024 } // 200 MB
 });
 
-// PostgreSQL connection (Supabase)
+// 🔹 PostgreSQL Connection (Supabase)
+const { DATABASE_URL, RAPIDAPI_KEY } = process.env;
+
+const dbUrl = DATABASE_URL;
+
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: { rejectUnauthorized: false },
+  ssl: process.env.DATABASE_URL.includes("localhost") ? false : { rejectUnauthorized: false },
 });
-
-pool.connect()
-  .then(() => console.log("✅ Connected to Supabase Database"))
-  .catch(err => console.error("❌ Database connection error:", err));
 
 // ===================================================
 // 🔹 DATABASE SECTION (PostgreSQL)
@@ -42,7 +44,7 @@ pool.connect()
 /**
  * Teacher Registration
  */
-app.post("/register", async (req, res) => {
+app.post("/api/register", async (req, res) => {
   try {
     const { fullname, email, password } = req.body;
 
@@ -102,7 +104,7 @@ app.post("/register", async (req, res) => {
 /**
  * Teacher Login
  */
-app.post("/login", async (req, res) => {
+app.post("/api/login", async (req, res) => {
   try {
     const { email, password } = req.body;
 
@@ -119,7 +121,7 @@ app.post("/login", async (req, res) => {
 
     const teacher = teacherQuery.rows[0];
     const validPassword = await bcrypt.compare(password, teacher.password);
-
+    
     if (!validPassword) {
       return res.status(400).json({
         success: false,
@@ -145,7 +147,7 @@ app.post("/login", async (req, res) => {
 /**
  * Create a Class (Teacher)
  */
-app.post("/create-class", async (req, res) => {
+app.post("/api/create-class", async (req, res) => {
   try {
     const { name, code, teacher_id } = req.body;
 
@@ -170,7 +172,7 @@ app.post("/create-class", async (req, res) => {
 /**
  * STUDENT LOGIN (Existing Students Only)
  */
-app.post("/student-login", async (req, res) => {
+app.post("/api/student-login", async (req, res) => {
   try {
     const { fullname, code } = req.body;
 
@@ -230,7 +232,7 @@ app.post("/student-login", async (req, res) => {
 /**
  * STUDENT REGISTER (New Students Only)
  */
-app.post("/student-register", async (req, res) => {
+app.post("/api/student-register", async (req, res) => {
   try {
     const { fullname, code } = req.body;
 
@@ -288,7 +290,7 @@ app.post("/student-register", async (req, res) => {
 /**
  * Get all classes for a teacher
  */
-app.get("/get-classes/:teacher_id", async (req, res) => {
+app.get("/api/get-classes/:teacher_id", async (req, res) => {
   try {
     const { teacher_id } = req.params;
     const classes = await pool.query(
@@ -306,7 +308,7 @@ app.get("/get-classes/:teacher_id", async (req, res) => {
 /**
  * Get students in a class (by class code)
  */
-app.get("/get-students/:code", async (req, res) => {
+app.get("/api/get-students/:code", async (req, res) => {
   try {
     const { code } = req.params;
 
@@ -325,7 +327,7 @@ app.get("/get-students/:code", async (req, res) => {
 /**
  * Delete a class (by code)
  */
-app.delete("/delete-class/:code", async (req, res) => {
+app.delete("/api/delete-class/:code", async (req, res) => {
   try {
     const { code } = req.params;
 
@@ -345,7 +347,7 @@ app.delete("/delete-class/:code", async (req, res) => {
 /**
  * Delete a student (by ID)
  */
-app.delete("/delete-student/:id", async (req, res) => {
+app.delete("/api/delete-student/:id", async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -363,7 +365,7 @@ app.delete("/delete-student/:id", async (req, res) => {
 });
 
 // Save uploaded story (keep or replace your existing)
-app.post("/save-story", async (req, res) => {
+app.post("/api/save-story", async (req, res) => {
   try {
     const {
       teach_id,
@@ -393,7 +395,7 @@ app.post("/save-story", async (req, res) => {
 /**
  * Update existing story
  */
-app.put("/update-story/:id", async (req, res) => {
+app.put("/api/update-story/:id", async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -437,7 +439,7 @@ app.put("/update-story/:id", async (req, res) => {
 });
 
 // Get all stories for a specific teacher
-app.get("/get-stories/:teacherId", async (req, res) => {
+app.get("/api/get-stories/:teacherId", async (req, res) => {
   const { teacherId } = req.params;
 
   try {
@@ -454,7 +456,7 @@ app.get("/get-stories/:teacherId", async (req, res) => {
 });
 
 // Get stories for a student
-app.get("/get-student-stories/:studentId", async (req, res) => {
+app.get("/api/get-student-stories/:studentId", async (req, res) => {
   const { studentId } = req.params;
   try {
     const result = await pool.query(
@@ -477,7 +479,7 @@ app.get("/get-student-stories/:studentId", async (req, res) => {
 /**
  * Delete a story (by story_id)
  */
-app.delete("/delete-story/:story_id", async (req, res) => {
+app.delete("/api/delete-story/:story_id", async (req, res) => {
   try {
     const { story_id } = req.params;
 
@@ -508,7 +510,7 @@ app.delete("/delete-story/:story_id", async (req, res) => {
 });
 
 // Get single story by ID
-app.get("/get-story/:id", async (req, res) => {
+app.get("/api/get-story/:id", async (req, res) => {
   const { id } = req.params;
   try {
     const result = await pool.query("SELECT * FROM teach_story WHERE story_id = $1", [id]);
@@ -523,7 +525,7 @@ app.get("/get-story/:id", async (req, res) => {
 });
 
 // Get all story titles only
-app.get("/get-stories", async (req, res) => {
+app.get("/api/get-stories", async (req, res) => {
   try {
     const result = await pool.query(
       "SELECT story_id AS id, storyname FROM teach_story ORDER BY story_id DESC"
@@ -535,7 +537,7 @@ app.get("/get-stories", async (req, res) => {
   }
 });
 
-app.get("/get-story/:id", async (req, res) => {
+app.get("/api/get-story/:id", async (req, res) => {
   const { id } = req.params;
 
   try {
@@ -557,7 +559,7 @@ app.get("/get-story/:id", async (req, res) => {
 /**
  * Save Student Result
  */
-app.post("/save-result", async (req, res) => {
+app.post("/api/save-result", async (req, res) => {
   try {
     const { student_id, story_id, read_speed, read_score, final_grade } = req.body;
 
@@ -580,7 +582,7 @@ app.post("/save-result", async (req, res) => {
   }
 });
 
-app.post("/save-learning-activity", async (req, res) => {
+app.post("/api/save-learning-activity", async (req, res) => {
   try {
     const { studId, learnName, f_result, modes } = req.body;
 
@@ -605,8 +607,9 @@ app.post("/save-learning-activity", async (req, res) => {
 });
 
 // ✅ Upload Video File
-app.post("/upload-video", upload.single("file"), async (req, res) => {
+app.post("/api/upload-video", upload.single("file"), async (req, res) => {
   try {
+    const bucket = admin.storage().bucket();
     const file = req.file;
     const { videoName, teachID } = req.body;
 
@@ -635,7 +638,7 @@ app.post("/upload-video", upload.single("file"), async (req, res) => {
 });
 
 // Fetch videos for a specific student based on their class code
-app.get("/get-student-videos", async (req, res) => {
+app.get("/api/get-student-videos", async (req, res) => {
   const { code } = req.query;
 
   try {
@@ -665,7 +668,7 @@ app.get("/get-student-videos", async (req, res) => {
 /**
  * Get all uploaded videos
  */
-app.get("/get-videos", async (req, res) => {
+app.get("/api/get-videos", async (req, res) => {
   try {
     // Fetch all videos from your database table 'video_upload'
     const result = await pool.query("SELECT * FROM video_upload ORDER BY videoid DESC");
@@ -693,7 +696,7 @@ app.get("/get-videos", async (req, res) => {
 /**
  * 🧩 GET STUDENT PROGRESS
  */
-app.get("/get-student-progress/:studentId", async (req, res) => {
+app.get("/api/get-student-progress/:studentId", async (req, res) => {
   try {
     const studentId = req.params.studentId;
 
@@ -823,7 +826,7 @@ app.post("/api/generate-questions-all-modes", async (req, res) => {
       const options = {
         method: "POST",
         headers: {
-          "x-rapidapi-key": process.env.RAPIDAPI_KEY,
+          "x-rapidapi-key": RAPIDAPI_KEY,
           "x-rapidapi-host": "chatgpt-42.p.rapidapi.com",
           "Content-Type": "application/json",
         },
@@ -869,11 +872,12 @@ app.post("/api/generate-image", async (req, res) => {
   }
 
   try {
+    const bucket = admin.storage().bucket();
     const apiUrl = "https://chatgpt-42.p.rapidapi.com/texttoimage3";
     const options = {
       method: "POST",
       headers: {
-        "x-rapidapi-key": process.env.RAPIDAPI_KEY,
+        "x-rapidapi-key": RAPIDAPI_KEY,
         "x-rapidapi-host": "chatgpt-42.p.rapidapi.com",
         "Content-Type": "application/json",
       },
@@ -902,17 +906,21 @@ app.post("/api/generate-image", async (req, res) => {
     // ✅ Case 2: Base64 or encoded
     let base64Data = raw.image || raw.data || raw.base64 || null;
     if (base64Data && typeof base64Data === "string") {
-      const buffer = Buffer.from(base64Data.replace(/^data:image\/\w+;base64,/, ""), "base64");
+        const base64Image = base64Data.replace(/^data:image\/\w+;base64,/, "");
+        const imageBuffer = Buffer.from(base64Image, 'base64');
+        
+        const filename = `generated_images/img_${Date.now()}.png`;
+        const file = bucket.file(filename);
 
-      const imagesDir = path.join(__dirname, "../../uploads/images");
-      if (!fs.existsSync(imagesDir)) fs.mkdirSync(imagesDir, { recursive: true });
+        await file.save(imageBuffer, {
+            metadata: {
+                contentType: 'image/png',
+            },
+            public: true, // Make the file publicly accessible
+        });
 
-      const filename = `img_${Date.now()}.png`;
-      const filepath = path.join(imagesDir, filename);
-      fs.writeFileSync(filepath, buffer);
-
-      const publicUrl = `${req.protocol}://${req.get("host")}/uploads/images/${encodeURIComponent(filename)}`;
-      return res.json({ url: publicUrl });
+        const publicUrl = file.publicUrl();
+        return res.json({ url: publicUrl });
     }
 
     console.warn("⚠️ Unexpected format from API:", raw);
@@ -927,4 +935,8 @@ app.post("/api/generate-image", async (req, res) => {
 // ===================================================
 // START SERVER
 // ===================================================
-exports.api = functions.https.onRequest(app);
+exports.api = onRequest({ 
+    region: "asia-southeast1", 
+    invoker: 'public'
+}, app);
+
