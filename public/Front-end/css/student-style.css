@@ -1,5 +1,5 @@
 :root {
-    --primary: #FF6B6B;
+    --primary: #B57EDC;
     --secondary: #08C2FF;
     --accent: #FFE66D;
     --light: #F7FFF7;
@@ -10,10 +10,10 @@
     box-sizing: border-box;
     margin: 0;
     padding: 0;
+    font-family: 'Century Gothic', sans-serif;
 }
         
 body {
-    font-family: 'Poppins', sans-serif;
     background-color: #F0F8FF;
     color: var(--dark);
     line-height: 1.6;
@@ -34,7 +34,6 @@ main {
 }
 
 .act-header {
-    font-family: 'Baloo 2', cursive;
     font-size: 24px;
     color: var(--secondaryA);
     margin-bottom: 1.5rem;
@@ -128,12 +127,12 @@ main {
     font-size: 1rem;
     cursor: pointer;
     transition: all 0.3s ease;
-    box-shadow: 0 4px 8px rgba(255,107,107,0.3);
+    box-shadow: 0 4px 8px #9e5acf;
 }
 
 .button:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 12px rgba(255,107,107,0.4);
+    box-shadow: 0 6px 12px #9e5acf;
 }
 
 /* ==========================
@@ -153,7 +152,6 @@ main {
     font-weight: bold;
     color: var(--dark);
     margin-bottom: 1rem;
-    font-family: 'Baloo 2', cursive;
 }
 
 /* 2-column layout for Lessons & Videos */
@@ -268,7 +266,7 @@ main {
 }
 
 .video-player-overlay .close-btn:hover {
-  color: #ff5555;
+  color: #9e5acf;
 }
 
 .video-player-content .video-title{
@@ -361,7 +359,7 @@ main {
 }
 
 .notification-btn:nth-child(2):hover {
-    background: #e94e4e;
+    background: #9e5acf;
 }
 
 .overlay-close-btn {

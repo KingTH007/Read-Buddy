@@ -1,5 +1,5 @@
 :root {
-    --primary: #FF6B6B;
+    --primary: #B57EDC;
     --secondary: #08C2FF;
     --accent: #FFE66D;
     --light: #F7FFF7;
@@ -10,141 +10,465 @@
     box-sizing: border-box;
     margin: 0;
     padding: 0;
+    font-family: 'Century Gothic', sans-serif;
 }
         
 body {
-    font-family: 'Poppins', sans-serif;
     background-color: #F0F8FF;
     color: var(--dark);
     line-height: 1.6;
 }
 
-/* MAIN SECTION */
+/* ==== MAIN SECTION ==== */
 .main-section {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    padding: 3rem 8%;
-    gap: 2rem;
-    height: 100vh;              
-    box-sizing: border-box;
-    padding-top: 6rem;
-    flex-direction: row-reverse;
+    background: linear-gradient(to top, #AEE2FF 0%, #F7F3FF 100%);
+    text-align: center;
+    padding: 4rem 2rem 6rem;
+    position: relative;
+    overflow: visible;
 }
 
-.main-text {
-    flex: 1;
+/* TEXT CONTENT */
+.main-content {
+    max-width: 700px;
+    margin: 0 auto 3rem;
+    z-index: 2;
+    position: relative;
 }
 
-.main-text h2 {
-    font-size: 2.3rem;
-    font-weight: 700;
-    color: #FF6B6B; 
-    margin-bottom: 1rem;
-    line-height: 1.3;
+.main-title {
+    font-size: 2.8rem;
+    font-weight: 800;
+    color: #B57EDC;
+    text-shadow: 2px 2px 0 #FFD5FD;
+    margin-bottom: 1.2rem;
+    font-family: 'Century Gothic', sans-serif;
 }
 
-.main-text p {
-    font-size: 1.3rem;
-    color: #292F36;
-    margin-bottom: 1.5rem;
-    max-width: 480px;
+.main-description {
+    font-size: 1.1rem;
+    color: #4A2C82;
+    line-height: 1.6;
+    font-family: 'Century Gothic', sans-serif;
+    margin-bottom: 2rem;
 }
 
 .student-btn {
-    background-color: #FF6B6B;
-    color: #fff;
+    background-color: var(--primary);
+    color: white;
     border: none;
-    padding: 0.8rem 1.5rem;
-    border-radius: 999px;
+    padding: 0.9rem 1.8rem;
     font-size: 1rem;
-    font-weight: 600;
+    font-weight: 700;
+    border-radius: 30px;
+    box-shadow: 0 4px 10px rgba(255, 111, 111, 0.4);
     cursor: pointer;
+    transition: all 0.3s ease;
 }
 
-.main-image img {
-    width: 100%;
-    height: 100%;
-    align-items: center;
-    object-fit: cover;
-    border-radius: 12px;
-    
+.student-btn:hover {
+    background-color: #9e5acf;
+    transform: translateY(-2px);
 }
 
-.main-image {
-    flex: 1;
-    border-radius: 12px;
-    height: 350px;
-    margin-top: 10px;
-    overflow: hidden;
+/* ==== ILLUSTRATION AREA ==== */
+.illustration {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 5;
+    width: 280px;
+    max-width: 30%;
+    opacity: 0.95;
+    transition: all 0.3s ease;
 }
+
+.illustration img {
+    width: 20rem;
+    height: auto;
+    display: block;
+    animation: float 4s ease-in-out infinite;
+}
+
+/* Position Variants */
+.illustration.left {
+    left: 2%;
+}
+
+.illustration.center {
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, 40%); /* centers perfectly */
+    z-index: 10;
+}
+
+.illustration.right {
+    right: 5%;
+}
+
+/* Optional hover animation */
+.illustration img:hover {
+  transform: scale(1.05);
+}
+
+/* DECORATIVE SPARKLES */
+.main-section::before,
+.main-section::after {
+    content: "✨";
+    position: absolute;
+    color: #ffffffaa;
+    font-size: 2rem;
+}
+
+.main-section::before { top: 30px; left: 50px; }
+.main-section::after { bottom: 40px; right: 60px; }
 
 /* SECOND SECTION */
 .second-section {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+    background: var(--light);
+    padding: 4rem 2rem;
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 6rem 8%;
-    gap: 6rem;
-    min-height: 100vh; /* full screen height like Grammarly sections */
-    opacity: 0;
-    transform: translateY(50px);
+    justify-content: center; 
 }
 
-/* Active state when visible */
-.second-section.visible {
-    animation: sectionReveal 1s ease forwards;
+/* === Carousel Container === */
+.carousel-container {
+    position: relative;
+    width: 95%; /* reduce width */
+    max-width: 1100px; /* set a max width */
+    overflow: hidden;
 }
 
-/* Image fixed effect */
-.second-section .second-image {
-    position: sticky;
-    top: 100px; /* stays fixed during scroll */
-    flex: 1;
-    height: 500px;
-    border-radius: 12px;
-    background: #d3d3d3;
+.carousel-track {
+    display: flex;
+    transition: transform 0.6s ease-in-out;
+}
+
+/* === Slide === */
+.slide {
+  min-width: 100%;
+  display: grid;
+  grid-template-columns: auto auto; /* make columns only as wide as content */
+  align-items: center;
+  justify-content: center; /* center the whole grid horizontally */
+  gap: 2rem; /* space between image and text */
+  background: #fff;
+  border-radius: 20px;
+  padding: 2rem;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+}
+
+.second-image {
+  width: 500px;
+  border-radius: 16px;
 }
 
 .second-text {
-    flex: 1;
+  padding: 0 3rem 0 0;
 }
 
 .second-text h2 {
-    font-size: 2.5rem;
-    font-weight: 700;
-    color: #FF6B6B;
-    margin-bottom: 1rem;
-    line-height: 1.3;
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--primary);
+  margin-bottom: 1rem;
 }
 
 .second-text p {
-    font-size: 1.5rem;
-    color: #292F36;
-    margin-bottom: 1.5rem;
-    max-width: 480px;
-    
+  font-size: 1.2rem;
+  color: #292F36;
+  line-height: 1.6;
+}
+
+/* === Arrows === */
+.arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  cursor: pointer;
+  font-size: 2rem;
+  z-index: 10;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+
+.arrow:hover {
+  background: var(--secondary);
+  transform: translateY(-50%) scale(1.1);
+}
+
+.arrow.left {
+  left: 3%;
+}
+
+.arrow.right {
+  right: 3%;
+}
+
+/* === Dots === */
+.carousel-dots {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 2rem;
+  gap: 1rem;
+}
+
+.dot {
+  width: 14px;
+  height: 14px;
+  background-color: #ccc;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+}
+
+.dot.active {
+  width: 22px;
+  height: 22px;
+  background-color: var(--primary);
+  box-shadow: 0 0 10px rgba(181, 126, 220, 0.6);
 }
 
 /* THIRD SECTION */
 .third-section {
-    background: #1c2a44; /* dark blue like in your screenshot */
-    color: #fff;
-    text-align: center;
-    padding:12rem 8% 10rem;
+  background: #fff;
+  color: #000;
+  text-align: center;
+  padding: 6rem 5%;
+  position: relative;
+  overflow: hidden;
 }
 
 .third-section h2 {
-    font-size: 2rem;
-    font-weight: 700;
-    margin-bottom: 1rem;
+  font-size: 3rem;
+  font-weight: 700;
+  color: #1c2a44;
+  margin-bottom: 1rem;
 }
 
 .third-section p {
-    font-size: 1.2rem;
-    max-width: 700px;
-    margin: 0 auto;
-    line-height: 1.6;
+  font-size: 1.2rem;
+  max-width: 900px;
+  margin: 0 auto 1rem;
+  line-height: 1.7;
+  color: #333;
+}
+
+.character {
+  position: absolute;
+  top: 45%;
+  transform: translateY(-50%);
+  z-index: 5;
+}
+
+.character.left {
+  left: 0;
+}
+
+.character.right {
+  right: 0;
+}
+
+.character img {
+  width: 130px;
+  height: auto;
+}
+
+/* Fourth Section */
+.fourth-section {
+  background: var(--secondary);
+  color: #fff;
+  text-align: center;
+  padding: 6rem 5%;
+  position: relative;
+  overflow: hidden;
+}
+
+.fourth-section h2 {
+  font-size: 2.5rem;
+  font-weight: 800;
+  margin-bottom: 3rem;
+  color: #fff;
+  text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.1);
+}
+
+/* Grid layout (3x3) */
+.faq-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+/* FAQ Item Styling */
+.faq-item {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 16px;
+  padding: 1.5rem;
+  text-align: left;
+  backdrop-filter: blur(6px);
+  transition: all 0.3s ease;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+}
+
+.faq-item:hover {
+  background: rgba(255, 255, 255, 0.25);
+  transform: translateY(-5px);
+}
+
+.faq-item h3 {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 0.8rem;
+  cursor: pointer;
+}
+
+.faq-item p {
+  font-size: 1rem;
+  color: #f9f9f9;
+  line-height: 1.6;
+}
+
+/* Fifth Section */
+.fifth-section.contact {
+  position: relative;
+  padding: 2rem 3% 4rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: url('/asset/contact-bg.png') no-repeat center bottom;
+  background-size: cover;
+  background-color: #e8f7ff; /* fallback color for sky tone */
+  overflow: hidden;
+}
+
+.contact-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  max-width: 1100px;
+  width: 100%;
+  background: #fff;
+  border-radius: 20px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+/* LEFT SIDE */
+.contact-info {
+  background: var(--primary);
+  color: #fff;
+  padding: 3rem 2.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.contact-info h2 {
+  font-size: 2rem;
+  margin-bottom: 1.5rem;
+}
+
+.contact-info p {
+  font-size: 1.1rem;
+  margin-bottom: 0.8rem;
+  line-height: 1.6;
+}
+
+.social-links {
+  margin-top: 2rem;
+}
+
+.social-links h3 {
+  font-size: 1.3rem;
+  margin-bottom: 1rem;
+  color: #fff;
+  font-weight: 600;
+}
+
+.social-icons {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.social-icons a {
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+  font-size: 1.3rem;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+  text-decoration: none;
+}
+
+.social-icons a:hover {
+  background: var(--secondary);
+  transform: translateY(-3px);
+  color: #fff;
+}
+
+/* RIGHT SIDE */
+.contact-form {
+  padding: 3rem 2.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.contact-form h2 {
+  font-size: 2rem;
+  color: var(--dark);
+  margin-bottom: 1.5rem;
+}
+
+.contact-form input,
+.contact-form textarea {
+  width: 100%;
+  padding: 0.9rem;
+  margin-bottom: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-family: 'Century Gothic', sans-serif;
+  transition: border-color 0.3s;
+}
+
+.contact-form input:focus,
+.contact-form textarea:focus {
+  border-color: var(--secondary);
+  outline: none;
+}
+
+.send-btn {
+  background: linear-gradient(90deg, var(--primary), var(--secondary));
+  color: #fff;
+  border: none;
+  padding: 0.9rem;
+  font-size: 1rem;
+  font-weight: 700;
+  border-radius: 30px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.send-btn:hover {
+  background: var(--secondary);
+  transform: translateY(-2px);
 }
 
 /* Overlay Background */
@@ -159,7 +483,6 @@ body {
     align-items: center;
     justify-content: center;
     z-index: 1000;
-    font-family: Arial, sans-serif;
 }
 
 /* Modal Box */
@@ -419,6 +742,10 @@ footer {
     font-size: 0.9rem;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 /* Animations */
 @keyframes fadeSlideUp {
     from {
@@ -442,158 +769,208 @@ footer {
     }
 }
 
-/* =======================
-   📱 Responsive Design
-   ======================= */
-
-/* For tablets (≤ 768px) */
-@media (max-width: 768px) {
-    /* MAIN SECTION */
-    .main-section {
-        flex-direction: column-reverse;
-        align-items: center;
-        text-align: center;
-        padding: 4rem 5%;
-        height: auto;
-    }
-
-    .main-text h2 {
-        font-size: 1.9rem;
-    }
-
-    .main-text p {
-        font-size: 1.1rem;
-        max-width: 100%;
-    }
-
-    .main-image {
-        width: 90%;
-        height: auto;
-        margin-top: 1.5rem;
-    }
-
-    /* SECOND SECTION */
-    .second-section {
-        flex-direction: column;
-        gap: 2rem;
-        padding: 4rem 5%;
-        text-align: center;
-    }
-
-    .second-image {
-        position: relative;
-        top: 0;
-        height: 400px;
-        width: 100%;
-    }
-
-    .second-text h2 {
-        font-size: 2rem;
-    }
-
-    .second-text p {
-        font-size: 1.2rem;
-        max-width: 100%;
-    }
-
-    /* Remove unwanted image scrolls */
-    .main-image, .second-image {
-        overflow: hidden;
-        object-fit: cover;
-        max-width: 100%;
-    }
-
-    /* Make sure the modal fits smaller screens */
-    .login-overlay {
-        overflow: hidden;
-    }
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
 }
 
-/* For mobile phones (≤ 480px) */
+/* ========================= */
+/* 📱 RESPONSIVE DESIGN */
+/* ========================= */
+
+/* --- Tablets and smaller (max 1024px) --- */
+@media (max-width: 1024px) {
+  .main-title {
+    font-size: 2.3rem;
+  }
+
+  .main-description {
+    font-size: 1rem;
+  }
+
+  .illustration img {
+    width: 15rem;
+  }
+
+  .slide {
+    grid-template-columns: 1fr;
+    text-align: center;
+  }
+
+  .second-image {
+    width: 80%;
+    margin: 0 auto 1.5rem;
+  }
+
+  .second-text {
+    padding: 0;
+  }
+
+  .contact-container {
+    grid-template-columns: 1fr;
+  }
+
+  .contact-info,
+  .contact-form {
+    padding: 2rem;
+  }
+
+  .faq-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .character img {
+    width: 90px;
+  }
+}
+
+/* --- Mobile phones (max 768px) --- */
+@media (max-width: 768px) {
+  .main-section {
+    padding: 5rem 1rem 3rem;
+  }
+
+  .main-title {
+    font-size: 1.9rem;
+  }
+
+  .main-description {
+    font-size: 0.95rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .student-btn {
+    padding: 0.8rem 1.5rem;
+    font-size: 0.9rem;
+  }
+
+  .illustration {
+    display: none;
+  }
+
+  .carousel-container {
+    width: 100%;
+  }
+
+  .slide {
+    padding: 1.5rem 1rem;
+  }
+
+  .second-text h2 {
+    font-size: 1.5rem;
+  }
+
+  .second-text p {
+    font-size: 1rem;
+  }
+
+  .arrow {
+    width: 40px;
+    height: 40px;
+    font-size: 1.5rem;
+  }
+
+  .third-section {
+    padding: 3rem 5%
+  }
+
+  .third-section h2 {
+    font-size: 2rem;
+  }
+
+  .third-section p {
+    font-size: .9rem;
+    padding: 0 4rem;
+  }
+
+  .faq-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .faq-item {
+    padding: 1rem;
+  }
+
+  .contact-container {
+    grid-template-columns: 1fr;
+  }
+
+  .contact-info h2,
+  .contact-form h2 {
+    font-size: 1.6rem;
+  }
+
+  .contact-info p {
+    font-size: 1rem;
+  }
+
+  .social-icons a {
+    width: 36px;
+    height: 36px;
+    font-size: 1.1rem;
+  }
+
+  .login-model,
+  .register-model {
+    width: 90%;
+    height: auto;
+    padding: 1.5rem;
+  }
+
+  .login-model input,
+  .register-model input {
+    font-size: 0.95rem;
+  }
+
+  .login-submit,
+  .send-btn {
+    font-size: 0.9rem;
+    padding: 0.8rem;
+  }
+}
+
+/* --- Very small devices (max 480px) --- */
 @media (max-width: 480px) {
-    /* MAIN SECTION */
-    .main-section {
-        padding: 3rem 1.5rem;
-    }
+  .main-title {
+    font-size: 1.6rem;
+  }
 
-    .main-image {
-        display: none; /* 🚫 Hide main image */
-        overflow: hidden;
-    }
+  .main-description {
+    font-size: 0.85rem;
+  }
 
-    .main-text h2 {
-        font-size: 1.7rem;
-    }
+  .student-btn {
+    padding: 0.7rem 1.3rem;
+    font-size: 0.85rem;
+  }
 
-    .main-text p {
-        font-size: 1rem;
-    }
+  .second-text h2 {
+    font-size: 1.3rem;
+  }
 
-    .student-btn {
-        width: 80%;
-        font-size: 0.95rem;
-        padding: 0.9rem;
-    }
+  .second-text p {
+    font-size: 0.9rem;
+  }
 
-    /* SECOND SECTION */
-    .second-section {
-        flex-direction: column;
-        align-items: center;
-        text-align: center;
-        padding: 3rem 1.5rem;
-    }
+  .contact-info h2,
+  .contact-form h2 {
+    font-size: 1.4rem;
+  }
 
-    .second-image {
-        width: 100%;
-        height: auto;
-        margin-bottom: 1rem;
-        order: -1; /* 🆙 Image goes above description */
-        position: relative;
-    }
+  .faq-item h3 {
+    font-size: 1rem;
+  }
 
-    .second-text h2 {
-        font-size: 1.6rem;
-    }
+  .faq-item p {
+    font-size: 0.85rem;
+  }
 
-    .second-text p {
-        font-size: 1rem;
-    }
+  .login-model,
+  .register-model {
+    padding: 1rem;
+  }
 
-    /* THIRD SECTION */
-    .third-section {
-        padding: 6rem 1.5rem;
-    }
-
-    .third-section h2 {
-        font-size: 1.5rem;
-    }
-
-    .third-section p {
-        font-size: 1rem;
-    }
-
-    /* Ensure second-section images are static and not scrollable */
-    .second-image img {
-        width: 100%;
-        height: auto;
-        object-fit: contain;
-        overflow: hidden;
-        display: block;
-    }
-
-    /* Center and make sure there's no horizontal scroll */
-    body, html {
-        overflow-x: hidden;
-    }
-
-    /* Make modal buttons fit smaller viewports */
-    .login-form button {
-        font-size: 0.9rem;
-        padding: 0.7rem 1rem;
-    }
-
-    .login-form input {
-        font-size: 0.9rem;
-        padding: 0.6rem 0.9rem;
-    }
+  .toggle-btn {
+    font-size: 0.8rem;
+  }
 }

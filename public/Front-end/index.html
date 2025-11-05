@@ -14,7 +14,6 @@
     <link rel="stylesheet" href="/css/home-page.css">
     <link rel="icon" type="image/png" href="/asset/Logo.png">
     <title>Read Buddy - Reading Helper</title>
-
 </head>
 <body>
     <header>
@@ -29,80 +28,181 @@
             </div>
 
             <div class="link" id="nav-menu">
-                <a href="#" class="nav-btn home">Home</a>
-                <a href="#" class="nav-btn about-us">About Us</a>
-                <a href="#" class="nav-btn Contact-us">Contact Us</a>
-                <a href="#" class="nav-btn faq">FAQ</a>
+                <a href="#home" class="nav-btn home">Home</a>
+                <a href="#about" class="nav-btn about-us">About Us</a>
+                <a href="#faq" class="nav-btn faq">FAQ</a>
+                <a href="#contact" class="nav-btn contact-us">Contact Us</a>
                 <a href="#" class="nav-btn download">Download</a>
-                <a href="#" class="nav-btn login-btn">
-                    <i class="fa fa-user"></i> Log In</a>
+                <a href="#" class="nav-btn login-btn"><i class="fa fa-user"></i> Log In</a>
             </div>
         </div>
     </header>
     <main>
-        <section class="main-section">
-            <div class="main-image">
-                <img src="/asset/firstpic.png" alt="introPic">
-            </div>
-            <div class="main-text">
-                <h2>The Fun Way to Improve <br> Reading Comprehension</h2>
-                <p>
+        <section class="main-section" id="home">
+            <div class="main-content">
+                <h2 class="main-title">
+                    The Fun Way to Improve <br> Reading Comprehension
+                </h2>
+                <p class="main-description">
                     Read Buddy makes learning easy and fun! Students can read teacher-uploaded stories, 
                     answer AI-generated questions, and play educational games to boost comprehension skills.
                 </p>
                 <button class="student-btn">Log in as a student →</button>
             </div>
-        </section>
 
-        <section class="second-section">
-            <img class="second-image" src="/asset/sec1.png" alt="uploadPic">
-            <div class="second-text">
-                <h2>Uploaded Stories</h2>
-                <p>
-                    Upload a story as a PDF, and Read Buddy transforms it into a fun, level-based reading activity 
-                    with quizzes—helping students learn while they read!
-                </p>
+            <div class="illustration left">
+                <img src="/asset/main1.png" alt="Left Illustration">
+            </div>
+
+            <div class="illustration center">
+                <img src="/asset/main2.png" alt="Center Illustration">
+            </div>
+
+            <div class="illustration right">
+                <img src="/asset/main3.png" alt="Right Illustration">
             </div>
         </section>
 
         <section class="second-section">
-            <img class="second-image" src="/asset/sec2.png" alt="quizPic">
-            <div class="second-text">
-                <h2>Smart Quizzes</h2>
-                <p>
-                    Answer fun questions from the story you just read!
-                    Learn new things and see how awesome you're doing right away!
-                </p>
+            <div class="carousel-container">
+                <div class="carousel-track">
+                    <!-- Slide 1 -->
+                    <div class="slide">
+                        <img class="second-image" src="/asset/sec1.png" alt="uploadPic">
+                        <div class="second-text">
+                        <h2>Uploaded Stories</h2>
+                        <p>Upload a story as a PDF, and Read Buddy transforms it into a fun, level-based reading activity with quizzes—helping students learn while they read!</p>
+                        </div>
+                    </div>
+
+                    <!-- Slide 2 -->
+                    <div class="slide">
+                        <img class="second-image" src="/asset/sec2.png" alt="quizPic">
+                        <div class="second-text">
+                        <h2>Smart Quizzes</h2>
+                        <p>Answer fun questions from the story you just read! Learn new things and see how awesome you're doing right away!</p>
+                        </div>
+                    </div>
+
+                    <!-- Slide 3 -->
+                    <div class="slide">
+                        <img class="second-image" src="/asset/sec3.png" alt="trackPic">
+                        <div class="second-text">
+                        <h2>Track Progress</h2>
+                        <p>Watch how your students learn and grow! See who needs help and who’s doing great—right as they read and play.</p>
+                        </div>
+                    </div>
+
+                    <!-- Slide 4 -->
+                    <div class="slide">
+                        <img class="second-image" src="/asset/sec4.png" alt="activityPic">
+                        <div class="second-text">
+                        <h2>Learning Activities</h2>
+                        <p>Play fun games and do cool tasks that help you understand stories better. Learning is more fun when you play!</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Navigation Arrows -->
+                <button class="arrow left" id="prevBtn">❮</button>
+                <button class="arrow right" id="nextBtn">❯</button>
+
+                <!-- Dots (Indicators) -->
+                <div class="carousel-dots">
+                    <span class="dot active"></span>
+                    <span class="dot"></span>
+                    <span class="dot"></span>
+                    <span class="dot"></span>
+                </div>
             </div>
         </section>
 
-        <section class="second-section">
-            <img class="second-image" src="/asset/sec3.png" alt="trackPic">
-            <div class="second-text">
-                <h2>Track Progress</h2>
-                <p>
-                    Watch how your students learn and grow! 
-                    See who needs help and who’s doing great—right as they read and play.
-                </p>
-            </div>
-        </section>
-
-        <section class="second-section">
-            <img class="second-image" src="/asset/sec4.png" alt="activityPic">
-            <div class="second-text">
-                <h2>Learning Activities</h2>
-                <p>
-                    Play fun games and do cool tasks that help you understand stories better.
-                    Learning is more fun when you play!
-                </p>
-            </div>
-        </section>
-
-        <section class="third-section about us">
-            <h2>Bringing Every Child Closer to the Joy of Reading!</h2>
+        <section class="third-section about-us" id="about">
+            <h2>About Us</h2>
             <p>
-                Every day, Read Buddy helps young learners explore fun and exciting stories, answer smart questions, and enjoy playful learning—anytime, anywhere.
+                Welcome to Read Buddy, an innovative web-based learning platform designed to help elementary students 
+                improve their English reading comprehension. Our mission is to make reading fun, interactive, 
+                and accessible for every learner. 
             </p>
+            <p>
+                Through engaging story-based exercises, comprehension quizzes, and activities, Read Buddy supports both 
+                teachers and students in developing stronger reading skills. We believe learning should be enjoyable — 
+                our platform brings stories to life to spark curiosity and imagination.
+            </p>
+
+            <div class="character left">
+                <img src="asset/about-left.png" alt="Kids on left side" />
+            </div>
+            <div class="character right">
+                <img src="asset/about-right.png" alt="Kids on right side" />
+            </div>
+        </section>
+
+        <section class="fourth-section faq" id="faq">
+            <h2>Frequently Asked Questions (FAQ)</h2>
+                <div class="faq-grid">
+                    
+                    <div class="faq-item">
+                        <h3>+ What is Read Buddy?</h3>
+                        <p>Read Buddy is a web-based learning tool that helps students improve their English reading comprehension through interactive stories and quizzes.</p>
+                    </div>
+                    
+                    <div class="faq-item">
+                        <h3>+ Who can use Read Buddy?</h3>
+                        <p>It is designed primarily for elementary students, but teachers and parents can also use it to support reading development.</p>
+                    </div>
+                    
+                    <div class="faq-item">
+                        <h3>+ Can I track my reading progress?</h3>
+                        <p>Yes. Each user has a personal dashboard where progress, scores, and achievements are displayed.</p>
+                    </div>
+                    
+                    <div class="faq-item">
+                        <h3>+ Can teachers create their own reading activities?</h3>
+                        <p>Yes. Teachers can upload reading materials, create comprehension questions, and assign them to students.</p>
+                    </div>
+                    
+                    <div class="faq-item">
+                        <h3>+ What devices can I use to access Read Buddy?</h3>
+                        <p>You can use a computer, tablet, or smartphone with an internet connection and a web browser.</p>
+                    </div>
+                    
+                    <div class="faq-item">
+                        <h3>+ Is my data safe on the website?</h3>
+                        <p>Absolutely. We value your privacy and ensure that all user data is securely stored and protected.</p>
+                    </div>
+                </div>
+        </section>
+
+        <section class="fifth-section contact" id="contact">
+            <div class="contact-container">
+                <!-- Left Side: Contact Info -->
+                <div class="contact-info">
+                    <h2>Contact Us</h2>
+                    <p><strong>Email:</strong> readbuddyteam@gmail.com</p>
+                    <p><strong>Contact:</strong> +63 123 456 7890</p>
+                    <p><strong>Address:</strong> Santiago 1 Elementary School, Philippines</p>
+
+                    <div class="social-links">
+                        <h3>Follow Us</h3>
+                        <div class="social-icons">
+                            <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                            <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                            <a href="#" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+                        </div>
+                    </div>
+                </div>
+                <!-- Right Side: Contact Form -->
+                <div class="contact-form">
+                    <h2>Send Us a Message</h2>
+                    <form action="#" method="POST">
+                        <input type="text" name="name" placeholder="Your Name" required />
+                        <input type="email" name="email" placeholder="Your Email" required />
+                        <textarea name="message" rows="5" placeholder="Your Message" required></textarea>
+                        <button type="submit" class="send-btn">Send Message</button>
+                    </form>
+                </div>
+            </div>
         </section>
     </main>
 
@@ -176,7 +276,6 @@
         <p>&copy; 2025 ReadBuddy - Helping students love reading!</p>
     </footer>
 
-    <!--LOCAL SCRIPTS-->
     <script src="/js/header-func.js"></script>
     <script src="/js/home-func.js"></script>
 

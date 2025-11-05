@@ -1,5 +1,5 @@
 :root {
-    --primary: #FF6B6B;
+    --primary: #B57EDC;
     --secondary: #08C2FF;
     --accent: #FFE66D;
     --light: #F7FFF7;
@@ -10,10 +10,10 @@
     box-sizing: border-box;
     margin: 0;
     padding: 0;
+    font-family: 'Century Gothic', sans-serif;
 }
 
 body {
-    font-family: 'baloo 2', cursive;
     background-color: #F0F8FF;
     color: var(--dark);
     line-height: 1.6;
@@ -59,7 +59,6 @@ main {
 }
 
 .sidebar .logo-text {
-    font-family: 'Baloo 2', cursive;
     font-size: 1.8rem;
     font-weight: 700;
     color: white;
@@ -132,7 +131,7 @@ main {
 }
 
 .sidebar .login-btn:hover {
-    background-color: #f74d2b;
+    background-color: #9e5acf;
     color: var(--secondary);
     transform: translateY(-3px);
 }
@@ -331,7 +330,7 @@ main {
 }
 
 #submit-btn:hover {
-  background: #e85c5c;
+  background: #9e5acf;
 }
 
 /* --- BUTTONS --- */
@@ -341,7 +340,7 @@ main {
 }
 
 .start-btn {
-    background: #ff6b6b;
+    background: var(--primary);
     border: none;
     color: white;
     font-weight: bold;
@@ -353,7 +352,7 @@ main {
 }
 
 .start-btn:hover {
-    background: #f74d2b;
+    background: #9e5acf;
     transform: translateY(-2px);
 }
 
@@ -497,7 +496,6 @@ main {
 }
 
 .notification-message {
-    font-family: 'baloo 2', cursive;
     font-size: 1.2rem;
 }
 

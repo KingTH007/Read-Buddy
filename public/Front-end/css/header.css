@@ -1,5 +1,5 @@
 :root {
-    --primary: #FF6B6B;
+    --primary: #B57EDC;
     --secondary: #08C2FF;
     --accent: #FFE66D;
     --light: #F7FFF7;
@@ -37,7 +37,7 @@ header {
 }
 
 .logo-text {
-    font-family: 'Baloo 2', cursive;
+    font-family: 'Century Gothic', sans-serif;
     font-size: 1.8rem;
     font-weight: 700;
     text-shadow: 1px 1px 3px rgba(0,0,0,0.2);
@@ -52,7 +52,7 @@ header {
 }
 
 .link a {
-    font-family: 'Baloo 2', cursive;
+    font-family: 'Century Gothic', sans-serif;
     font-size: 1.1rem;
     text-decoration: none;
     color: white;
@@ -75,7 +75,7 @@ header {
 }
 
 .link .login-btn:hover {
-    background-color: #f74d2b;
+    background-color: #9e5acf;
 }
 
 /* Hamburger Menu (hidden by default) */

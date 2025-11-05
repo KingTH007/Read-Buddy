@@ -798,7 +798,7 @@ app.post("/api/generate-questions-all-modes", async (req, res) => {
       const prompt = `
         You are an expert educational content creator.
 
-        Generate exactly 20 multiple-choice comprehension questions for the story below.
+        Generate exactly 10 multiple-choice comprehension questions for the story below.
         Each question must have:
         - One correct answer and three wrong answers
         - Choices labeled A), B), C), D)
@@ -820,7 +820,7 @@ app.post("/api/generate-questions-all-modes", async (req, res) => {
         Answer: [letter]
 
         Q2: ...
-        ... (continue until Q20)
+        ... (continue until Q10)
         `;
 
       const options = {

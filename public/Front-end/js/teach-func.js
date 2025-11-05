@@ -90,7 +90,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const data = await response.json();
 
             // data should be an object with keys Easy/Medium/Hard arrays - but handle gracefully if not
-            const easyArr = Array.isArray(data.Easy) ? data.Easy : (Array.isArray(data.easy) ? data.easy : []);
+            const easyArr = Array.isArray(data.Easy) ? data.Easy : (Array.isArray(data.easy) ? data .easy : []);
             const medArr  = Array.isArray(data.Medium) ? data.Medium : (Array.isArray(data.medium) ? data.medium : []);
             const hardArr = Array.isArray(data.Hard) ? data.Hard : (Array.isArray(data.hard) ? data.hard : []);
 
@@ -594,40 +594,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                     console.log('Class created successfully.');
                 });
 
-                const li = document.createElement("li");
-                li.classList.add("class-card");
-                li.innerHTML = `
-                    <h3>${data.class.name}</h3>
-                    <p>
-                        Class Code: 
-                        <span class="class-code" data-code="${data.class.code}">****</span>
-                        <button class="toggle-code" aria-label="Toggle Code Visibility">
-                            <i class="fa fa-eye"></i>
-                        </button>
-                    </p>
-                    <p>Students: <span class="student-count">${data.class.no_students}</span></p>
-                `;
-
-                classListUl.appendChild(li);
-                classNameInput.value = "";
-                classOverlay.style.display = "none";
-                classOverlap.style.display = "none";
-
-                const toggleBtn = li.querySelector(".toggle-code");
-                const codeSpan = li.querySelector(".class-code");
-                let isHidden = true;
-
-                toggleBtn.addEventListener("click", (e) => {
-                    e.stopPropagation(); // ✅ prevent triggering openClassView
-                    if (isHidden) {
-                        codeSpan.textContent = codeSpan.dataset.code;
-                        toggleBtn.innerHTML = `<i class="fa fa-eye-slash"></i>`;
-                    } else {
-                        codeSpan.textContent = "****";
-                        toggleBtn.innerHTML = `<i class="fa fa-eye"></i>`;
-                    }
-                    isHidden = !isHidden;
-                });
+                // Optional: Give user feedback before reload
+                setTimeout(() => {
+                    location.reload(); // ✅ Reload the page after class creation
+                }, 1500); // waits 1.5 seconds before reloading
 
             } else {
                 showNotification('error', "Error: " + data.message);
@@ -732,24 +702,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     const classViewTitle = document.getElementById("class-view-title");
 
     let currentClassCode = null;
-    let pollingInterval = null;
-
-    async function loadTeacherClasses() {
-    try {
-        const teacher = JSON.parse(localStorage.getItem("teacher"));
-        if (!teacher) return;
-
-        const res = await fetch(`/api/get-classes/${teacher.id}`);
-        const data = await res.json();
-
-        if (data.success) {
-        console.log("✅ Classes loaded:", data.classes);
-        // Update your class list UI here if needed
-        }
-    } catch (err) {
-        console.error("❌ Error loading classes:", err);
-    }
-    }
 
     // Function to open class view
     async function openClassView(classCode, className) {
@@ -770,7 +722,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 return;
             }
 
-            studentList.innerHTML = "";
             data.students.forEach((student, index) => {
                 const tr = document.createElement("tr");
                 tr.innerHTML = `
@@ -798,22 +749,25 @@ document.addEventListener('DOMContentLoaded', async () => {
             document.querySelectorAll(".delete-student").forEach(btn => {
                 btn.addEventListener("click", async (e) => {
                     const studentId = e.target.dataset.id;
-                    const studentName = e.target.closest('tr').querySelector('td:nth-child(2)').textContent;
-                    showNotification('delete-student', studentName, async () => {
+                    showNotification('delete-student', e.target.closest('tr').querySelector('td:nth-child(2)').textContent, async () => {
                         try {
-                            const response = await fetch(`/api/delete-student/${studentId}`, { method: "DELETE" });
+                            const response = await fetch(`/api/delete-student/${studentId}`, {
+                                method: "DELETE"
+                            });
+
                             if (response.ok) {
-                            e.target.closest("tr").remove();
+                                // ✅ Remove the student row immediately
+                                e.target.closest("tr").remove();
 
-                            // Update student count on class card
-                            const classCard = document.querySelector(`.class-card[data-class-code='${currentClassCode}']`);
-                            if (classCard) {
-                                const countEl = classCard.querySelector(".student-count");
-                                const currentCount = parseInt(countEl.textContent, 10) || 0;
-                                countEl.textContent = Math.max(0, currentCount - 1);
-                            }
+                                // ✅ Update the student count in the class list
+                                const classCard = document.querySelector(`.class-card[data-class-code='${currentClassCode}']`);
+                                if (classCard) {
+                                    const countEl = classCard.querySelector(".student-count");
+                                    const currentCount = parseInt(countEl.textContent, 10) || 0;
+                                    countEl.textContent = Math.max(0, currentCount - 1); // avoid negative
+                                }
 
-                            console.log(`✅ Student ${studentId} deleted`);
+                                console.log(`Student ${studentId} deleted. Count updated.`);
                             } else {
                                 showNotification('error', "Failed to delete student.");
                             }
@@ -822,27 +776,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                             showNotification('error', "Error deleting student.");
                         }
                     });
+                });
             });
-        });
 
         } catch (err) {
             console.error("Error fetching students:", err);
         }
-    }
-
-    function startPolling() {
-        const teacher = JSON.parse(localStorage.getItem("teacher"));
-        if (!teacher) return;
-
-        // Clear previous polling
-        if (pollingInterval) clearInterval(pollingInterval);
-
-        pollingInterval = setInterval(async () => {
-            await loadTeacherClasses(); // refresh sidebar
-            if (currentClassCode) {
-            await openClassView(currentClassCode, classViewTitle.textContent); // refresh modal if open
-            }
-        }, 7000); // every 7 seconds
     }
 
     // Close modal
@@ -864,10 +803,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     const searchInput = document.getElementById("student-search");
-        if (searchInput) {
+    if (searchInput) {
         searchInput.addEventListener("click", () => {
             if (window.innerWidth <= 768) {
-            searchInput.classList.toggle("expanded");
+                searchInput.classList.toggle("expanded");
             if (searchInput.classList.contains("expanded")) {
                 searchInput.focus();
             } else {
@@ -876,9 +815,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         });
     }
-
-    loadTeacherClasses();
-    startPolling();
 
     // ========================== 🧩 STUDENT VIEW OVERLAY LOGIC ==========================
 

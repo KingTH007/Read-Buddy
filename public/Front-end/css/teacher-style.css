@@ -1,5 +1,5 @@
 :root {
-    --primary: #FF6B6B;
+    --primary: #B57EDC;
     --secondary: #08C2FF;
     --accent: #FFE66D;
     --light: #F7FFF7;
@@ -10,10 +10,10 @@
     box-sizing: border-box;
     margin: 0;
     padding: 0;
+    font-family: 'Century Gothic', sans-serif;
 }
         
 body {
-    font-family: 'Baloo 2', sans-serif;
     background-color: #F0F8FF;
     color: var(--dark);
     line-height: 1.6;
@@ -33,7 +33,6 @@ main {
 }
 
 .act-header {
-    font-family: 'Baloo 2', cursive;
     font-size: 24px;
     color: var(--secondaryA);
     margin-bottom: 1.5rem;
@@ -73,7 +72,6 @@ main {
     flex-direction: column; /* ✅ Stack text vertically */
     justify-content: center;
     align-items: center;
-    font-family: 'Baloo 2', cursive;
     font-size: 1.8rem;
     color: #D9D9D9;
     cursor: pointer; 
@@ -150,12 +148,12 @@ main {
     font-size: 1rem;
     cursor: pointer;
     transition: all 0.3s ease;
-    box-shadow: 0 4px 8px rgba(255,107,107,0.3);
+    box-shadow: 0 4px 8px #9e5acf;
 }
 
 .modify:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 12px rgba(255,107,107,0.4);
+    box-shadow: 0 6px 12px #9e5acf;
 }
 
 /*Overlap - UPLOAD */
@@ -182,7 +180,6 @@ main {
 }
 
 .overlap {
-    font-family: 'Baloo 2', cursive;
     font-size: 1.8rem;
     color: var(--primary);
 }
@@ -316,7 +313,7 @@ main {
 }
 
 .overlap-button {
-    background: var(--primary, #FE4F2D);
+    background: var(--primary, #9e5acf);
     color: white;
     margin-top: 1.5rem;
     padding: 0.5rem 1.5rem;
@@ -328,7 +325,7 @@ main {
 }
 
 .overlap-button:hover {
-    background: #d8431c;
+    background: #9e5acf;
 }
 
 /* 🔒 Locked (disabled) style */
@@ -441,7 +438,6 @@ main {
 
 /* Modal */ 
 .class-overlap {
-    font-family: 'Baloo 2', cursive;  
     color: var(--primary);
     position: fixed;
     top: 50%;
@@ -502,7 +498,7 @@ main {
 }
 
 .class-overlap-button:hover {
-  background: #d8431c;
+  background: #9e5acf;
 }
 
 /* Class View Overlay */
@@ -545,7 +541,7 @@ main {
 }
 
 .close-btn:hover {
-    color: red;
+    color: #9e5acf;
 }
 
 /* Header */
@@ -676,7 +672,7 @@ main {
     border: none;
     cursor: pointer;
     font-size: 18px;
-    color: red;
+    color: #9e5acf;
     transition: 0.2s;
 }
 
@@ -706,7 +702,6 @@ main {
     width: 90%;
     max-width: 500px;
     z-index: 1002;
-    font-family: 'Poppins', sans-serif;
 }
 
 .enroll-border h2 {
@@ -738,7 +733,6 @@ main {
 
 .enroll-overlap-button {
     background: var(--primary);
-    font-family: 'baloo 2', cursive;
     font-weight: 600;
     color: #fff;
     border: none;
@@ -749,7 +743,7 @@ main {
 }
 
 .enroll-overlap-button:hover {
-    background: #d8431c;
+    background: #9e5acf;
 }
 
 /* 🔹 Student Overlay Background */
@@ -884,7 +878,7 @@ main {
 }
 
 .notification-btn:nth-child(2):hover {
-  background: #e94e4e;
+  background: #9e5acf;
 }
 
 /* Each resource box (like lessons/videos) */
@@ -1200,7 +1194,7 @@ main {
 }
 
 .video-player-overlay .close-btn:hover {
-  color: #ff5555;
+  color: #9e5acf;
 }
 
 .video-player-content .video-title{

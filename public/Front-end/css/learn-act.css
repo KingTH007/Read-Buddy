@@ -1,5 +1,5 @@
 :root {
-    --primary: #FF6B6B;
+    --primary: #B57EDC;
     --secondary: #08C2FF;
     --accent: #FFE66D;
     --light: #F7FFF7;
@@ -10,10 +10,11 @@
     box-sizing: border-box;
     margin: 0;
     padding: 0;
+    font-family: 'Century Gothic', sans-serif;
+    font-size: 1.1rem;
 }
 
 body {
-    font-family: 'Poppins', sans-serif;
     background-color: #F0F8FF;
     color: var(--dark);
     line-height: 1.6;
@@ -59,7 +60,6 @@ main {
 }
 
 .sidebar .logo-text {
-    font-family: 'Baloo 2', cursive;
     font-size: 1.8rem;
     font-weight: 700;
     color: white;
@@ -132,7 +132,7 @@ main {
 }
 
 .sidebar .login-btn:hover {
-    background-color: #f74d2b;
+    background-color: #9e5acf;
     color: var(--secondary);
     transform: translateY(-3px);
 }
@@ -195,6 +195,11 @@ main {
     display: flex;
     justify-content: space-between;
     align-items: center;
+}
+
+.content-header h2 {
+    font-size: 1.5rem;
+    font-weight: bold;
 }
 
 /* --- Mode Buttons --- */
@@ -309,7 +314,7 @@ main {
     font-weight: 700;
     margin-bottom: 4px;
     margin-left: 4px;
-    color: #994040;
+    color: var(--primary);
 }
 
 /* --- AI Container Layout --- */
@@ -347,7 +352,7 @@ main {
     position: relative;
     display: flex;
     flex-direction: column;
-    background: linear-gradient(100deg, #994040 5%, #FF6B6B 25%);
+    background: linear-gradient(100deg, #9e5acf 5%, #B57EDC 25%);
     color: #fff;
     border-radius: 16px 16px 16px 16px;
     padding: 20px 25px;
@@ -444,7 +449,7 @@ main {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    background: linear-gradient(100deg, #994040 5%, #FF6B6B 25%);
+    background: linear-gradient(100deg, #9e5acf 5%, #B57EDC 25%);
     color: #fff;
     border-radius: 16px 16px 16px 0;
     padding: 10px 14px;
@@ -572,7 +577,7 @@ main {
 .openVoice,
 .skip-btn {
   position: relative;
-  background: linear-gradient(135deg, #ff5f6d, #ffc371);
+  background: linear-gradient(135deg, #B57EDC, #ffc371);
   border: none;
   border-radius: 50%;
   width: 70px;
@@ -591,7 +596,7 @@ main {
 .openVoice:hover,
 .skip-btn:hover {
   transform: scale(1.08);
-  box-shadow: 0 0 20px rgba(255, 107, 107, 0.8);
+  box-shadow: 0 0 20px #9e5acf;
 }
 
 .openVoice:active,
@@ -612,7 +617,7 @@ main {
   width: 100%;
   height: 100%;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(255,107,107,0.4) 0%, rgba(255,107,107,0) 70%);
+  background: radial-gradient(circle, #B57EDC 0%, rgba(255,107,107,0) 70%);
   animation: micPulse 1.5s infinite ease-in-out;
   opacity: 0.8;
 }
@@ -648,7 +653,7 @@ main {
 /* Right: Start & Restart Buttons */
 .start-btn,
 .restart-btn {
-    background: #ff6b6b;
+    background: var(--primary);
     border: none;
     color: white;
     font-weight: bold;
@@ -661,7 +666,7 @@ main {
 
 .start-btn:hover,
 .restart-btn:hover {
-    background: #f74d2b;
+    background: #9e5acf;
 }
 
 .word-display {
@@ -871,7 +876,8 @@ main {
   .answer-btn,
   .avatar .select-avatar {
     font-size: 0.9rem;
-    padding: 10px 12px;
+    padding: 15px 12px;
+    margin-top: 14px;
     width: 100%;
   }
 
@@ -898,6 +904,41 @@ main {
   .sidebar {
     width: 200px;
   }
+
+  .ai-container {
+        flex-direction: column; /* Stack vertically */
+        align-items: center;    /* Center everything */
+        justify-content: center;
+        top: 0;
+        gap: 10px;
+    }
+
+    .text-book-ai img {
+        width: 150px;
+        height: 150px;
+    }
+
+    .ai-text {
+        max-width: 90%;
+        font-size: 0.95rem;
+        padding: 15px 18px;
+        text-align: center;
+        align-items: center;
+    }
+
+    .text-content h2 {
+        font-size: 1.4rem;
+    }
+
+    .text-content p {
+        font-size: 1rem;
+    }
+
+    .ai-text .speak-btn {
+        font-size: 1.2rem;
+        align-self: center;
+        margin-top: 8px;
+    }
 }
 
 /* =========================================
@@ -952,8 +993,31 @@ main {
 
   .openVoice,
   .skip-btn {
-    width: 55px;
-    height: 55px;
-    font-size: 1.4rem;
-  }
+        width: 55px;
+        height: 55px;
+        font-size: 1.4rem;
+    }
+
+    .ai-container {
+        gap: 8px;
+    }
+
+    .text-book-ai img {
+        width: 120px;
+        height: 120px;
+    }
+
+    .ai-text {
+        max-width: 95%;
+        padding: 12px 14px;
+        border-radius: 14px;
+    }
+
+    .text-content h2 {
+        font-size: 1.2rem;
+    }
+
+    .text-content p {
+        font-size: 0.95rem;
+    }
 }
