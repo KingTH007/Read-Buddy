@@ -29,51 +29,101 @@ document.addEventListener("DOMContentLoaded", () => {
         window.location.href = "/index.html";
     });
 
-    // ✅ PWA INSTALL PROMPT HANDLER (Android only)
-  let deferredPrompt;
-  const downloadBtn = document.querySelector(".download");
-  const isAndroid = /Android/i.test(navigator.userAgent);
+    //pwa
+    let deferredPrompt;
+    const downloadBtn = document.querySelector(".download");
 
-  window.addEventListener("beforeinstallprompt", (e) => {
-    e.preventDefault(); // stop automatic prompt
-    deferredPrompt = e;
-    console.log("✅ beforeinstallprompt event saved");
-  });
+    // Detect Android
+    const isAndroid = /Android/i.test(navigator.userAgent);
 
-  if (downloadBtn) {
-    downloadBtn.addEventListener("click", async (e) => {
+    // Hide button initially
+    if (downloadBtn) downloadBtn.style.display = "none";
+
+    // Listen for install prompt event
+    window.addEventListener("beforeinstallprompt", (e) => {
       e.preventDefault();
+      deferredPrompt = e;
+      console.log("✅ beforeinstallprompt event captured");
 
-      if (!isAndroid) {
-        alert("This app can only be installed on Android devices.");
-        return;
-      }
+      // Show button once event is captured
+      if (downloadBtn) downloadBtn.style.display = "inline-block";
+    });
 
-      if (deferredPrompt) {
+    // Handle button click
+    if (downloadBtn) {
+      downloadBtn.addEventListener("click", async (e) => {
+        e.preventDefault();
+
+        if (!isAndroid) {
+          alert("⚠️ Installation is only supported on Android devices with Chrome.");
+          return;
+        }
+
+        if (!deferredPrompt) {
+          alert("❌ Install prompt not available. Try refreshing this page in Chrome.");
+          return;
+        }
+
         deferredPrompt.prompt();
-        const { outcome } = await deferredPrompt.userChoice;
-        console.log(`User response: ${outcome}`);
+        const result = await deferredPrompt.userChoice;
+        console.log("User choice:", result.outcome);
 
-        if (outcome === "accepted") {
-          alert("✅ ReadBuddy is now installing...");
+        if (result.outcome === "accepted") {
+          alert("🎉 ReadBuddy is now installing!");
         } else {
           alert("❌ Installation was cancelled.");
         }
 
-        deferredPrompt = null; // reset so it won’t block next time
-      } else {
-        alert("Please open this page in Chrome on your Android device to install.");
-      }
-    });
-  }
+        deferredPrompt = null;
+        downloadBtn.style.display = "none";
+      });
+    }
 
-  // ✅ SERVICE WORKER REGISTRATION
-  if ("serviceWorker" in navigator) {
-    window.addEventListener("load", () => {
-      navigator.serviceWorker
-        .register('/Front-end/service-worker.js')
-        .then(() => console.log("✅ Service Worker Registered"))
-        .catch((err) => console.error("❌ Service Worker failed:", err));
+    // Optional: detect if already installed
+    window.addEventListener("appinstalled", () => {
+      console.log("✅ ReadBuddy installed successfully!");
+      if (downloadBtn) downloadBtn.style.display = "none";
     });
-  }
+
+    const CACHE_NAME = "read-buddy-cache-v1";
+
+    const urlsToCache = [
+      "/Front-end/index.html",
+      "/Front-end/css/header.css",
+      "/Front-end/css/home-page.css",
+      "/Front-end/js/header-func.js",
+      "/Front-end/js/home-func.js",
+      "/Front-end/js/pwa-install.js",
+      "/Front-end/asset/Logo.png",
+      "/Front-end/asset/trans-logo.png",
+    ];
+
+    // Install service worker
+    self.addEventListener("install", (event) => {
+      event.waitUntil(
+        caches.open(CACHE_NAME).then((cache) => cache.addAll(urlsToCache))
+      );
+      console.log("✅ Service Worker Installed");
+    });
+
+    // Fetch cached content
+    self.addEventListener("fetch", (event) => {
+      event.respondWith(
+        caches.match(event.request).then((response) => response || fetch(event.request))
+      );
+    });
+
+    // Activate and clean old cache
+    self.addEventListener("activate", (event) => {
+      event.waitUntil(
+        caches.keys().then((cacheNames) =>
+          Promise.all(
+            cacheNames.map((cache) => {
+              if (cache !== CACHE_NAME) return caches.delete(cache);
+            })
+          )
+        )
+      );
+    });
+
 });

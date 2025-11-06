@@ -366,7 +366,7 @@ body {
 
 /* LEFT SIDE */
 .contact-info {
-  background: var(--primary);
+  background: var(--secondary);
   color: #fff;
   padding: 3rem 2.5rem;
   display: flex;
@@ -376,6 +376,7 @@ body {
 
 .contact-info h2 {
   font-size: 2rem;
+  font-weight: 800;
   margin-bottom: 1.5rem;
 }
 
@@ -433,6 +434,7 @@ body {
 .contact-form h2 {
   font-size: 2rem;
   color: var(--dark);
+  font-weight: 800;
   margin-bottom: 1.5rem;
 }
 
@@ -455,7 +457,7 @@ body {
 }
 
 .send-btn {
-  background: linear-gradient(90deg, var(--primary), var(--secondary));
+  background: var(--primary);
   color: #fff;
   border: none;
   padding: 0.9rem;
@@ -580,7 +582,7 @@ input.error {
 }
 
 .toggle-btn.active {
-    background: linear-gradient(90deg, var(--primary), var(--secondary));
+    background: var(--primary);
     color: #fff;
 }
 
@@ -643,7 +645,7 @@ input.error {
     font-weight: 600;
     cursor: pointer;
     color: #fff;
-    background: linear-gradient(90deg, var(--primary), var(--secondary));
+    background: var(--primary);
     transition: opacity 0.3s;
 }
 
@@ -771,7 +773,7 @@ html {
 
 @keyframes float {
     0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-10px); }
+    50% { transform: translateY(-25px); }
 }
 
 /* ========================= */

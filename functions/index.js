@@ -804,7 +804,7 @@ app.post("/api/generate-questions-all-modes", async (req, res) => {
         - Choices labeled A), B), C), D)
         - An answer line formatted as "Answer: [letter]"
         - No explanations, introductions, or extra commentary
-        - Output must start directly with "Q1:" and continue sequentially to "Q20:" with no skipped numbers
+        - Output must start directly with "Q1:" and continue sequentially to "Q10:" with no skipped numbers
 
         Difficulty Level: ${mode}
 

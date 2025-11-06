@@ -1,6 +1,6 @@
 {
   "name": "Read Buddy",
-  "short_name": "ReadBuddy",
+  "short_name": "Read Buddy",
   "description": "An interactive reading comprehension web app for Grade 3 students.",
   "start_url": "/Front-end/index.html",
   "scope": "/Front-end/",

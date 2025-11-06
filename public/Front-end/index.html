@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <link rel="manifest" href="manifest.json">
+    <link rel="manifest" href="/Front-end/manifest.json">
+
     <meta name="theme-color" content="#1E88E5">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -278,6 +279,14 @@
 
     <script src="/js/header-func.js"></script>
     <script src="/js/home-func.js"></script>
+    <script>
+        if ("serviceWorker" in navigator) {
+            navigator.serviceWorker
+            .register("/Front-end/sw.js")
+            .then(() => console.log("✅ Service Worker registered"))
+            .catch((err) => console.log("❌ Service Worker failed:", err));
+        }
+    </script>
 
 </body>
 </html>
