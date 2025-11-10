@@ -430,35 +430,6 @@
             startStory();
         });
 
-        // Restart confirmation logic
-        const restartNotification = document.getElementById("restart-notification");
-        const yesRestart = document.getElementById("yes-restart");
-        const noRestart = document.getElementById("no-restart");
-        const notifBackground = document.querySelector(".notification-overlay-background");
-
-        restartBtn.addEventListener("click", () => {
-            restartNotification.style.display = "flex";
-            notifBackground.classList.add("show"); // Show popup
-        });
-
-        // YES → restart activity
-        yesRestart.addEventListener("click", () => {
-            restartNotification.style.display = "none";
-            notifBackground.classList.remove("show");
-            resetAll(); // existing restart function
-        });
-
-        // NO → stay on current progress
-        noRestart.addEventListener("click", () => {
-            restartNotification.style.display = "none";
-            notifBackground.classList.remove("show");
-        });
-
-
-        function resetAll() {
-            window.location.href = "/learn-act.html?activity=readUnderstand";
-        }
-
         function startStory() {
             // guard: stories loaded
             if (!stories[selectedMode] || !stories[selectedMode][currentStoryIndex]) {

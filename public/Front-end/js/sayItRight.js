@@ -154,36 +154,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // Restart confirmation logic
-  const restartNotification = document.getElementById("restart-notification");
-  const yesRestart = document.getElementById("yes-restart");
-  const noRestart = document.getElementById("no-restart");
-  const notifBackground = document.querySelector(".notification-overlay-background");
-  const nofimg = document.getElementById("notif-icon");
-
-  restartBtn.addEventListener("click", () => {
-    restartNotification.style.display = "flex";
-    notifBackground.classList.add("show");
-    nofimg.classList.add("show");
-  });
-
-  yesRestart.addEventListener("click", () => {
-    restartNotification.style.display = "none";
-    notifBackground.classList.remove("show");
-    nofimg.classList.remove("show");
-    resetAll();
-  });
-
-  noRestart.addEventListener("click", () => {
-    restartNotification.style.display = "none";
-    notifBackground.classList.remove("show");
-    nofimg.classList.remove("show");
-  });
-
-  function resetAll() {
-    window.location.href = "/learn-act.html?activity=sayItRight";
-  }
-
   function renderAiText(wordObj) {
     const wordHeader = sirSection.querySelector("#word-pronouncation");
     const wordContext = sirSection.querySelector("#word-context");

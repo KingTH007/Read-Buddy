@@ -257,6 +257,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                     overlay.style.display = "none";
                     overlapModal.style.display = "none";
                     fileInput.value = "";
+
+                    document.querySelectorAll('textarea').forEach(t => t.value = '');
+                    const img = document.querySelector('.over-img img');
+                    if (img) img.src = '';
+                    const storyTitle = document.querySelector('.story-title');
+                    if (storyTitle) storyTitle.textContent = '';
+
                     await loadStories();
                 } else {
                     showNotification('error', data.message || "Upload failed.");
@@ -1065,7 +1072,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             return;
         }
 
-        const fullname = `${lastName}, ${firstName}`;
+        const fullname = `${firstName} ${lastName}`;
 
         try {
             const response = await fetch("/api/student-register", {

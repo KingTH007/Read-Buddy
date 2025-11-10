@@ -750,7 +750,7 @@ main {
     transform: translateX(-50%);
     width: 200px;
     height: 200px;
-    background-image: url("../asset/nof-img.png");
+    background-image: url("/asset/nof-img.png");
     background-size: contain;
     background-repeat: no-repeat;
     background-position: center;

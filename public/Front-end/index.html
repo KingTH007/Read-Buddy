@@ -1,9 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <link rel="manifest" href="/Front-end/manifest.json">
-
-    <meta name="theme-color" content="#1E88E5">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#08C2FF" />
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
@@ -144,32 +143,32 @@
                 <div class="faq-grid">
                     
                     <div class="faq-item">
-                        <h3>+ What is Read Buddy?</h3>
+                        <h3>What is Read Buddy?</h3>
                         <p>Read Buddy is a web-based learning tool that helps students improve their English reading comprehension through interactive stories and quizzes.</p>
                     </div>
                     
                     <div class="faq-item">
-                        <h3>+ Who can use Read Buddy?</h3>
+                        <h3>Who can use Read Buddy?</h3>
                         <p>It is designed primarily for elementary students, but teachers and parents can also use it to support reading development.</p>
                     </div>
                     
                     <div class="faq-item">
-                        <h3>+ Can I track my reading progress?</h3>
+                        <h3>Can I track my reading progress?</h3>
                         <p>Yes. Each user has a personal dashboard where progress, scores, and achievements are displayed.</p>
                     </div>
                     
                     <div class="faq-item">
-                        <h3>+ Can teachers create their own reading activities?</h3>
+                        <h3>Can teachers create their own reading activities?</h3>
                         <p>Yes. Teachers can upload reading materials, create comprehension questions, and assign them to students.</p>
                     </div>
                     
                     <div class="faq-item">
-                        <h3>+ What devices can I use to access Read Buddy?</h3>
+                        <h3>What devices can I use to access Read Buddy?</h3>
                         <p>You can use a computer, tablet, or smartphone with an internet connection and a web browser.</p>
                     </div>
                     
                     <div class="faq-item">
-                        <h3>+ Is my data safe on the website?</h3>
+                        <h3>Is my data safe on the website?</h3>
                         <p>Absolutely. We value your privacy and ensure that all user data is securely stored and protected.</p>
                     </div>
                 </div>
@@ -181,16 +180,16 @@
                 <div class="contact-info">
                     <h2>Contact Us</h2>
                     <p><strong>Email:</strong> readbuddyteam@gmail.com</p>
-                    <p><strong>Contact:</strong> +63 123 456 7890</p>
-                    <p><strong>Address:</strong> Santiago 1 Elementary School, Philippines</p>
+                    <p><strong>Contact:</strong> +63 966 914 6737</p>
+                    <p><strong>Address:</strong> San Isidro Elementary School, Philippines</p>
 
                     <div class="social-links">
                         <h3>Follow Us</h3>
                         <div class="social-icons">
-                            <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                            <a href="https://web.facebook.com/sanisidroes14" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
                             <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
                             <a href="#" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
-                        </div>
+                        </div>  
                     </div>
                 </div>
                 <!-- Right Side: Contact Form -->
@@ -234,10 +233,10 @@
                         <input type="text" id="classCode" placeholder="Class Code" required>
                         <span class="error-message"></span>
 
-                        <input type="text" id="studentSurname" placeholder="Surname" required>
+                        <input type="text" id="studentFirstname" placeholder="First Name" required>
                         <span class="error-message"></span>
 
-                        <input type="text" id="studentFirstname" placeholder="First Name" required>
+                        <input type="text" id="studentSurname" placeholder="Last Name" required>
                         <span class="error-message"></span>
                     </form>
                 </div>
@@ -274,19 +273,20 @@
     </div>
 
     <footer>
-        <p>&copy; 2025 ReadBuddy - Helping students love reading!</p>
+        <p>&copy; 2025 Read Buddy - Helping students who love reading!</p>
     </footer>
 
     <script src="/js/header-func.js"></script>
     <script src="/js/home-func.js"></script>
+    <script src="/js/pwa-install.js"></script>
     <script>
+        // === REGISTER SERVICE WORKER ===
         if ("serviceWorker" in navigator) {
-            navigator.serviceWorker
-            .register("/Front-end/sw.js")
+        navigator.serviceWorker
+            .register("/service-worker.js")
             .then(() => console.log("✅ Service Worker registered"))
-            .catch((err) => console.log("❌ Service Worker failed:", err));
+            .catch((err) => console.log("❌ Service Worker registration failed:", err));
         }
     </script>
-
 </body>
 </html>

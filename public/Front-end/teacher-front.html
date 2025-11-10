@@ -25,10 +25,14 @@
 
                 <div class="link" id="nav-menu">
                     <a href="#" class="nav-btn">Download</a>
-                    <a href="#" class="nav-btn login-btn" id="logout-btn">
+                    <a href="#" class="nav-btn login-btn" onclick="menu.hidden^=1">
                         <i class="fa fa-user"></i>
                         <span id="user-name"></span>
                     </a>
+                    <ul id="menu" hidden>
+                        <li>Profile</li>
+                        <li id="logout-btn">Log Out</li>
+                    </ul>
                 </div>
             </div>
         </header>

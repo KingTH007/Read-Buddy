@@ -1368,6 +1368,105 @@ main {
     .upload label p {
         font-size: 0.8rem;
     }
+
+    .class-overlap,
+    .enroll-overlap,                            
+    .video-overlay {
+        width: 90%;
+        max-width: 420px;
+        padding: 1.5rem;
+    }
+
+    .border {
+        padding: 1rem;
+        gap: 1rem;
+    }
+
+    .title-area label,
+    .context-area label,
+    .question-area label {
+        font-size: 1.3rem;
+    }
+
+    .title-area input,
+    .context-area textarea,
+    .question-area textarea {
+        font-size: 0.9rem;
+    }
+
+    .button-row,
+    .class-button-row {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .overlap-button,
+    .class-overlap-button {
+        width: 100%;
+        font-size: 0.95rem;
+    }
+
+    /* Class View Modal */
+    .class-view-modal {
+        width: 95%;
+        height: 90%;
+        padding: 15px;
+    }
+
+    .class-view-header {
+        flex-direction: column;
+        gap: 0.5rem;
+        align-items: flex-start;
+    }
+
+    .class-view-header h2 {
+        font-size: 20px;
+    }
+
+    #student-search {
+        width: 100%;
+    }
+
+    .student-table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+
+    .progress-bar {
+        width: 180px;
+        height: 16px;
+    }
+
+    /* Enroll & Create Overlays */
+    .enroll-overlap,
+    .class-overlap {
+        width: 90%;
+        max-width: 400px;
+        padding: 1.5rem;
+    }
+
+    .enroll-border input,
+    .class-border input {
+        font-size: 0.9rem;
+        padding: 0.5rem;
+    }
+
+    .enroll-border label {
+        font-size: 0.95rem;
+    }
+
+    /* Upload or Video Overlays */
+    .video-overlay .border,
+    .lesson-overlay .border {
+        width: 95%;
+        padding: 1rem;
+    }
+
+    .over-img {
+        width: 160px;
+        height: 120px;
+    }
 }
 
 @media (max-width: 480px) {
@@ -1477,5 +1576,53 @@ main {
         font-size: 0.85rem;
         padding: 0.5rem 1rem;
         width: 70px;
+    }
+
+    .class-overlap,
+    .video-overlay,
+    .enroll-overlap {
+        width: 95%;
+        padding: 1rem;
+    }
+
+    .class-border,
+    .border {
+        padding: 1rem;
+    }
+
+    .title-area label,
+    .context-area label {
+        font-size: 1.1rem;
+    }
+
+    .title-area input,
+    .context-area textarea {
+        font-size: 0.85rem;
+    }
+
+    .overlap-button,
+    .class-overlap-button {
+        font-size: 0.9rem;
+        padding: 0.6rem;
+    }
+
+    .class-view-header h2 {
+        font-size: 18px;
+    }
+
+    .class-card {
+        padding: 0.8rem;
+    }
+
+    .class-card h3 {
+        font-size: 16px;
+    }
+
+    .class-card p {
+        font-size: 13px;
+    }
+
+    .progress-bar {
+        width: 140px;
     }
 }

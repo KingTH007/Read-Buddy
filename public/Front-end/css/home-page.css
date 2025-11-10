@@ -645,7 +645,7 @@ input.error {
     font-weight: 600;
     cursor: pointer;
     color: #fff;
-    background: var(--primary);
+    background: var(--secondary);
     transition: opacity 0.3s;
 }
 
@@ -727,7 +727,7 @@ input.error {
     font-weight: 600;
     cursor: pointer;
     color: #fff;
-    background: linear-gradient(90deg, var(--secondary), var(--primary));
+    background: var(--secondary);
     transition: opacity 0.3s;
 }
 

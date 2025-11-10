@@ -786,47 +786,65 @@ app.get("/api/get-student-progress/:studentId", async (req, res) => {
  */
 app.post("/api/generate-questions-all-modes", async (req, res) => {
   const { context } = req.body;
-
   if (!context)
     return res.status(400).json({ error: "Missing required parameters" });
 
   const modes = ["Easy", "Medium", "Hard"];
   const result = {};
 
-  try {
-    for (const mode of modes) {
+  const RAPIDAPI_URL = "https://chatgpt-42.p.rapidapi.com/gpt4o";
+  const MAX_RETRIES = 3;
+
+  // Helper: fetch with timeout
+  const fetchWithTimeout = (url, options, timeout = 30000) =>
+    Promise.race([
+      fetch(url, options),
+      new Promise((_, reject) =>
+        setTimeout(() => reject(new Error("⏰ Timeout after 30s")), timeout)
+      ),
+    ]);
+
+  for (const mode of modes) {
+    let success = false;
+    let attempt = 0;
+    let questions = [];
+
+    while (!success && attempt < MAX_RETRIES) {
+      attempt++;
+      console.log(`🚀 Attempt ${attempt} for ${mode}`);
+
       const prompt = `
-        You are an expert educational content creator.
+You are an expert educational content creator.
 
-        Generate exactly 10 multiple-choice comprehension questions for the story below.
-        Each question must have:
-        - One correct answer and three wrong answers
-        - Choices labeled A), B), C), D)
-        - An answer line formatted as "Answer: [letter]"
-        - No explanations, introductions, or extra commentary
-        - Output must start directly with "Q1:" and continue sequentially to "Q10:" with no skipped numbers
+Generate exactly 10 multiple-choice comprehension questions for the story below.
+Each question must have:
+- One correct answer and three wrong answers
+- Choices labeled A), B), C), D)
+- An answer line formatted as "Answer: [letter]"
+- No explanations, introductions, or extra commentary
+- Output must start directly with "Q1:" and continue sequentially to "Q10:"
 
-        Difficulty Level: ${mode}
+Difficulty Level: ${mode}
 
-        Story:
-        ${context}
+Story:
+${context}
 
-        ⚠️ Output Format (strictly follow this):
-        Q1: [question]
-        A) [option]
-        B) [option]
-        C) [option]
-        D) [option]
-        Answer: [letter]
+⚠️ Output Format (strictly follow this):
+Q1: [question]
+A) [option]
+B) [option]
+C) [option]
+D) [option]
+Answer: [letter]
 
-        Q2: ...
-        ... (continue until Q10)
-        `;
+Q2: ...
+... (continue until Q10)
+      `;
 
       const options = {
         method: "POST",
         headers: {
-          "x-rapidapi-key": RAPIDAPI_KEY,
+          "x-rapidapi-key": process.env.RAPIDAPI_KEY,
           "x-rapidapi-host": "chatgpt-42.p.rapidapi.com",
           "Content-Type": "application/json",
         },
@@ -836,29 +854,50 @@ app.post("/api/generate-questions-all-modes", async (req, res) => {
         }),
       };
 
-      const response = await fetch("https://chatgpt-42.p.rapidapi.com/gpt4o", options);
-      const data = await response.json();
-      const textResult = data.result || "";
+      try {
+        const response = await fetchWithTimeout(RAPIDAPI_URL, options);
+        const data = await response.json();
 
-      // Split text into array of questions
-      const questions = textResult
-        .split(/\n(?=Q\d+:)/)
-        .map(q => q.trim())
-        .filter(q => q.length > 0);
-
-        if (questions.length < 20) {
-          console.warn(`⚠️ Only ${questions.length} questions generated for ${mode}`);
+        // Handle RapidAPI busy or error messages
+        if (data.error || data.status === false) {
+          console.warn(`⚠️ RapidAPI error for ${mode}:`, data);
+          if (data.error?.includes("busy")) {
+            console.log("⏳ Waiting 5 seconds before retry...");
+            await new Promise((r) => setTimeout(r, 5000));
+            continue; // retry
+          } else {
+            break;
+          }
         }
 
-      result[mode] = questions;
+        const textResult = data.result || data.response || "";
+        questions = textResult
+          .split(/\n(?=Q\d+:)/)
+          .map((q) => q.trim())
+          .filter((q) => q.length > 0);
+
+        if (questions.length >= 10) {
+          success = true;
+        } else {
+          console.warn(`⚠️ Only ${questions.length} questions generated for ${mode}`);
+          await new Promise((r) => setTimeout(r, 3000)); // short delay before retry
+        }
+      } catch (err) {
+        console.error(`❌ Error on attempt ${attempt} for ${mode}:`, err);
+        await new Promise((r) => setTimeout(r, 5000));
+      }
     }
 
-    res.json(result);
-
-  } catch (error) {
-    console.error("❌ AI Question Error:", error);
-    res.status(500).json({ error: "Failed to generate questions" });
+    // Fallback message if still no success
+    if (!success) {
+      console.error(`❌ Failed to generate ${mode} questions after ${MAX_RETRIES} attempts`);
+      result[mode] = ["⚠️ Could not generate questions due to API issues."];
+    } else {
+      result[mode] = questions;
+    }
   }
+
+  res.json(result);
 });
 
 /**

@@ -15,7 +15,7 @@
         console.log("Resetting activity and reloading page...");
         window.location.reload(); // ✅ fully reloads the page
     }
-
+    
     if (hamburger && sidebar && background) {
         hamburger.addEventListener("click", () => {
         sidebar.classList.toggle("show");
@@ -116,15 +116,84 @@
         window.location.href = "/index.html";
     });
 
+    // ===================
+    // GLOBAL RESTART LOGIC
+    // ===================
+
+    // Restart buttons for all activities
+    const raubtn = document.getElementById("restartRead");
+    const sirbtn = document.getElementById("restartVoice");
+    const sdbtn = document.getElementById("restartStory");
+
+    // Notification elements (shared across all)
+    const restartNotification = document.getElementById("restart-notification");
+    const yesRestart = document.getElementById("yes-restart");
+    const noRestart = document.getElementById("no-restart");
+    const notifBackground = document.querySelector(".notification-overlay-background");
+    const nofimg = document.getElementById("notif-icon");
+
+    // Variable to store which activity is being restarted
+    let currentActivity = "";
+
+    // ==========
+    // Event Listeners
+    // ==========
+    if (raubtn) {
+    raubtn.addEventListener("click", () => showRestartPopup("readUnderstand"));
+    }
+
+    if (sirbtn) {
+    sirbtn.addEventListener("click", () => showRestartPopup("sayItRight"));
+    }
+
+    if (sdbtn) {
+    sdbtn.addEventListener("click", () => showRestartPopup("storyDetectives"));
+    }
+
+    // ==========
+    // SHOW RESTART POPUP
+    // ==========
+    function showRestartPopup(activity) {
+    currentActivity = activity;
+    restartNotification.style.display = "flex";
+    notifBackground.classList.add("show");
+    nofimg.classList.add("show");
+    }
+
+    // ==========
+    // HANDLE CONFIRMATION
+    // ==========
+    if (yesRestart && noRestart) {
+    yesRestart.addEventListener("click", () => {
+        restartNotification.style.display = "none";
+        notifBackground.classList.remove("show");
+        nofimg.classList.remove("show");
+        resetAll(); // call shared function
+    });
+
+    noRestart.addEventListener("click", () => {
+        restartNotification.style.display = "none";
+        notifBackground.classList.remove("show");
+        nofimg.classList.remove("show");
+    });
+    }
+
+    // ==========
+    // SHARED RESET FUNCTION
+    // ==========
+    function resetAll() {
+    if (!currentActivity) return;
+    window.location.href = `/learn-act.html?activity=${currentActivity}`;
+    }
+
+
     // ===============================
     // 🔔 SWITCH LEARNER NOTIFICATION
     // ===============================
     const switchNotif = document.getElementById("switch-learner-notification");
-    const notifBackground = document.querySelector(".notification-overlay-background");
     const yesSwitch = document.getElementById("yes-switch-learner");
     const noSwitch = document.getElementById("no-switch-learner");
     const learnTitle = document.querySelector(".learn-title");
-    const nofimg = document.getElementById("notif-icon");
 
     let pendingActivity = null; // stores which activity to switch to
 
@@ -177,9 +246,8 @@ function loadVoices() {
 
     const preferredVoices = [
         "Microsoft Aria Online (Natural) - English (United States)",
-        "Microsoft Jenny Online (Natural) - English (United States)",
-        "Google UK English Female",
-        "Google English (United States)" 
+        "Microsoft Ava Online (Natural) - English (United States)",
+        "Microsoft Lani Online (Natural) - Filipino (Philippines)"
     ];
 
     window.selectedVoice =

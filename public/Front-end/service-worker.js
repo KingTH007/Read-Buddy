@@ -1,51 +1,39 @@
-const CACHE_NAME = "read-buddy-cache-v1";
-const urlsToCache = [
-  "/",
+const CACHE_NAME = "readbuddy-cache-v1";
+const ASSETS_TO_CACHE = [
   "/index.html",
-  "/style.css",
-  "/script.js",
+  "/css/header.css",
+  "/css/home-page.css",
+  "/asset/Logo.png",
+  "/asset/main1.png",
+  "/asset/main2.png",
+  "/asset/main3.png",
+  "/Front-end/js/header-func.js",
+  "/Front-end/js/home-func.js",
+  "/Front-end/js/pwa-install.js",
   "/manifest.json"
 ];
 
-// Install service worker
+// Install event
 self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll([
-        "/Front-end/index.html",
-        "/Front-end/css/header.css",
-        "/Front-end/css/home-page.css",
-        "/Front-end/js/header-func.js",
-        "/Front-end/js/home-func.js",
-        "/Front-end/js/pwa-install.js",
-        "/Front-end/asset/Logo.png",
-        "/Front-end/asset/trans-logo.png",
-      ]);
-    })
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS_TO_CACHE))
   );
-  console.log("✅ Service Worker Installed");
+  console.log("✅ Service Worker installed");
 });
 
-// Fetch cached content
-self.addEventListener("fetch", (event) => {
-  event.respondWith(
-    caches.match(event.request).then((response) => {
-      return response || fetch(event.request);
-    })
-  );
-});
-
-// Activate and clean old cache
+// Activate event
 self.addEventListener("activate", (event) => {
   event.waitUntil(
-    caches.keys().then((cacheNames) =>
-      Promise.all(
-        cacheNames.map((cache) => {
-          if (cache !== CACHE_NAME) {
-            return caches.delete(cache);
-          }
-        })
-      )
+    caches.keys().then((keys) =>
+      Promise.all(keys.map((key) => key !== CACHE_NAME && caches.delete(key)))
     )
+  );
+  console.log("✅ Service Worker activated");
+});
+
+// Fetch event
+self.addEventListener("fetch", (event) => {
+  event.respondWith(
+    caches.match(event.request).then((cachedResponse) => cachedResponse || fetch(event.request))
   );
 });
