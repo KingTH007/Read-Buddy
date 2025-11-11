@@ -11,7 +11,6 @@
     margin: 0;
     padding: 0;
     font-family: 'Century Gothic', sans-serif;
-    font-size: 1.1rem;
 }
 
 body {
@@ -457,6 +456,7 @@ main {
     max-width: 70%;
     word-wrap: break-word;
     animation: popFade 0.45s ease forwards;
+    font-size: 1.1rem;
 }
 
 .bubble.system .bubble-text {
@@ -791,16 +791,6 @@ main {
     padding: 15px;
   }
 
-  .sidebar {
-    transform: translateX(-100%);
-    position: fixed;
-    z-index: 1000;
-  }
-
-  .sidebar.active {
-    transform: translateX(0);
-  }
-
   .hamburger {
     display: block;
   }
@@ -856,12 +846,6 @@ main {
     padding: 10px;
   }
 
-  /* Smaller book AI image */
-  .text-book-ai img {
-    width: 180px;
-    height: 180px;
-  }
-
   /* Resize AI bubbles */
   .ai-text {
     max-width: 85%;
@@ -900,9 +884,25 @@ main {
     display: block;
   }
 
-  /* Sidebar width smaller on phones */
-  .sidebar {
-    width: 200px;
+    .sidebar {
+        position: fixed;
+        top: 0;
+        right: -240px; /* hidden off-screen */
+        left: auto;
+        width: 240px;
+        height: 100vh;
+        z-index: 1000;
+        transition: right 0.3s ease-in-out;
+        border-radius: 12px 0 0 12px;
+    }
+
+  .sidebar.show{
+    right: 0;
+  }
+
+  .book-ai img{
+    width: 90px;
+    height: 90px;
   }
 
   .ai-container {

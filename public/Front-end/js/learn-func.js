@@ -23,15 +23,15 @@
         background.classList.toggle("show");
         });
         
-        // Clicking the black overlay closes the sidebar
-        background.addEventListener("click", () => {
+    // Clicking the black overlay closes the sidebar
+    background.addEventListener("click", () => {
         sidebar.classList.remove("show");
         hamburger.classList.remove("show");
         background.classList.remove("show");
         });
 
-        // Click outside sidebar closes it too
-        document.addEventListener("click", (e) => {
+    // Click outside sidebar closes it too
+    document.addEventListener("click", (e) => {
         if (
             !sidebar.contains(e.target) &&
             !hamburger.contains(e.target) &&

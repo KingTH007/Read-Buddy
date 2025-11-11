@@ -288,14 +288,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // ✅ Enhanced bubble styling: larger font, bold, and wider line spacing
     const resultHTML = `
-      <div class="bubble-text" style="
-        color:#fff; 
-        font-size:1.1rem; 
-        font-weight:500; 
-        line-height:1.6; 
-        max-width:420px;
-        word-wrap: break-word;
-      ">
+      <div class="bubble-text">
         <strong style="font-size:1.2rem;">📊 HERE’S YOUR RESULT</strong><br><br>
         ✅ Correct words: <strong>${correctCount}/${total}</strong><br>
         ❌ Wrong words: <strong>${wrongCount}</strong><br>
