@@ -27,6 +27,9 @@ const upload = multer({
   limits: { fileSize: 200 * 1024 * 1024 } // 200 MB
 });
 
+const { getStorage, getDownloadURL } = require("firebase-admin/storage");
+const bucket = getStorage().bucket(); // uses your default Firebase bucket
+
 // 🔹 PostgreSQL Connection (Supabase)
 const { DATABASE_URL, RAPIDAPI_KEY } = process.env;
 
@@ -607,33 +610,49 @@ app.post("/api/save-learning-activity", async (req, res) => {
 });
 
 // ✅ Upload Video File
-app.post("/api/upload-video", upload.single("file"), async (req, res) => {
+app.post("/api/upload-video", upload.single("video"), async (req, res) => {
   try {
-    const bucket = admin.storage().bucket();
-    const file = req.file;
-    const { videoName, teachID } = req.body;
+    if (!req.file) {
+      return res.status(400).json({ success: false, message: "No video file uploaded." });
+    }
 
-    if (!file) return res.status(400).json({ success: false, message: "No video uploaded." });
-    if (!videoName) return res.status(400).json({ success: false, message: "Missing video name." });
+    const { teacher_id, story_id } = req.body; // optional metadata
+    const videoFile = req.file;
 
-    // Create a Firebase Storage reference
-    const fileName = `videos/${Date.now()}_${file.originalname}`;
-    const fileRef = bucket.file(fileName);
+    // ✅ create unique filename
+    const fileName = `videos/${Date.now()}-${videoFile.originalname}`;
 
-    await fileRef.save(file.buffer, { contentType: file.mimetype });
-    await fileRef.makePublic();
+    // ✅ upload video buffer to Firebase Storage
+    const file = bucket.file(fileName);
+    await file.save(videoFile.buffer, {
+      metadata: { contentType: videoFile.mimetype },
+      public: true,
+    });
 
-    const publicUrl = fileRef.publicUrl();
+    // ✅ make video public & get URL
+    const [url] = await file.getSignedUrl({
+      action: "read",
+      expires: "03-09-2030",
+    });
 
-    const result = await pool.query(
-      "INSERT INTO video_upload (teachid, videofile, videoname) VALUES ($1, $2, $3) RETURNING *",
-      [teachID || null, publicUrl, videoName]
+    await pool.query(
+     `INSERT INTO videos (teacher_id, story_id, video_url, file_name) VALUES ($1, $2, $3, $4)`,
+    [teacher_id, story_id, url, fileName]
     );
 
-    res.json({ success: true, video: result.rows[0] });
+    res.json({
+      success: true,
+      message: "Video uploaded successfully!",
+      videoUrl: url,
+      fileName,
+    });
   } catch (err) {
-    console.error("❌ Video upload error:", err.message);
-    res.status(500).json({ success: false, message: "Video upload failed." });
+    console.error("❌ Video Upload Error:", err);
+    res.status(500).json({
+      success: false,
+      message: "Video upload failed.",
+      error: err.message,
+    });
   }
 });
 

@@ -729,15 +729,17 @@ document.addEventListener('DOMContentLoaded', async () => {
                 return;
             }
 
-            data.students.forEach((student, index) => {
+            for (const [index, student] of data.students.entries()) {
                 const tr = document.createElement("tr");
+
+                // Base structure while loading
                 tr.innerHTML = `
                     <td>${index + 1}</td>
                     <td>${student.fullname}</td>
                     <td>
                         <div class="progress-bar">
-                            <div class="progress-bar-inner" style="width: ${student.progress || 0}%;">
-                                <span class="progress-text">${student.progress || 0}%</span>
+                            <div class="progress-bar-inner" style="width: 0%;">
+                                <span class="progress-text">Loading...</span>
                             </div>
                         </div>
                     </td>
@@ -746,7 +748,44 @@ document.addEventListener('DOMContentLoaded', async () => {
                     </td>
                 `;
                 studentList.appendChild(tr);
-            });
+
+                // 🔍 Fetch real progress per student
+                try {
+                    const res = await fetch(`/api/get-student-progress/${student.id}`);
+                    const progData = await res.json();
+
+                    if (progData.success) {
+                        const { storyStats, learningStats } = progData;
+
+                        // ✅ Compute progress dynamically (same formula as overlay)
+                        const totalTasks = storyStats.completed + learningStats.completed;
+                        const completedTasks = totalTasks; // since both stats already reflect completed ones
+                        const completionRate = totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0;
+                        const overallAverage = (storyStats.average + learningStats.average) / 2;
+                        const progress = Math.round((completionRate * 0.5) + (overallAverage * 0.5));
+
+                        // Update progress bar
+                        const barInner = tr.querySelector(".progress-bar-inner");
+                        const barText = tr.querySelector(".progress-text");
+                        barInner.style.width = `${progress}%`;
+                        barText.textContent = `${progress}%`;
+
+                        // Optional: color gradient depending on performance
+                        if (progress < 50) {
+                            barInner.style.backgroundColor = "#f87171"; // red
+                        } else if (progress < 80) {
+                            barInner.style.backgroundColor = "#facc15"; // yellow
+                        } else {
+                            barInner.style.backgroundColor = "#4ade80"; // green
+                        }
+                    } else {
+                        tr.querySelector(".progress-text").textContent = "N/A";
+                    }
+                } catch (err) {
+                    console.error(`Error loading progress for ${student.fullname}:`, err);
+                    tr.querySelector(".progress-text").textContent = "Error";
+                }
+            }
 
             // Open modal
             classViewOverlay.style.display = "block";
@@ -871,7 +910,14 @@ document.addEventListener('DOMContentLoaded', async () => {
             const data = await response.json();
 
             if (data.success) {
-                const { progress, storyStats, learningStats, activities } = data;
+                const { storyStats, learningStats, activities } = data;
+
+                // ✅ Compute progress dynamically
+                const totalTasks = storyStats.total + learningStats.total;
+                const completedTasks = storyStats.completed + learningStats.completed;
+                const completionRate = totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0;
+                const overallAverage = (storyStats.average + learningStats.average) / 2;
+                const progress = Math.round((completionRate * 0.5) + (overallAverage * 0.5));
 
                 // ✅ Update progress bar
                 studentProgressBar.style.width = `${progress}%`;
@@ -880,7 +926,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 // ✅ Update table stats
                 storyCompleted.textContent = storyStats.completed;
                 storyAverage.textContent = `${storyStats.average}%`;
-
                 learningCompleted.textContent = learningStats.completed;
                 learningAverage.textContent = `${learningStats.average}%`;
 
@@ -896,12 +941,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                     completedActivitiesList.innerHTML = "<li>No completed activities yet.</li>";
                 }
 
-                // ✅ Render chart visualization (bar chart)
+                // ✅ Render chart visualization
                 if (progressChartCanvas) {
                     if (studentChartInstance) {
                         studentChartInstance.destroy();
                     }
-
                     studentChartInstance = new Chart(progressChartCanvas, {
                         type: "bar",
                         data: {
