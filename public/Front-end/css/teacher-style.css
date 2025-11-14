@@ -636,7 +636,7 @@ main {
 .progress-bar {
     width: 250px;
     height: 20px;
-    background: #eee;
+    background: linear-gradient(90deg, #00bfff, #87ceeb);
     border-radius: 10px;
     overflow: hidden;
     position: relative;

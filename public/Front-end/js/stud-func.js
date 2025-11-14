@@ -127,22 +127,38 @@ function showStoryNotification(storyId, storyName) {
 }
 
 // ============================
-// Load Student Videos by Class Code
+// Student Video: Convert YouTube Link → EMBED
+// ============================
+function convertToEmbed(url) {
+    let id = "";
+
+    if (url.includes("watch?v=")) {
+        id = url.split("v=")[1].split("&")[0];
+    }
+    else if (url.includes("youtu.be/")) {
+        id = url.split("youtu.be/")[1].split("?")[0];
+    }
+    else if (url.includes("/shorts/")) {
+        id = url.split("/shorts/")[1].split("?")[0];
+    }
+    else {
+        return null;
+    }
+
+    return `https://www.youtube.com/embed/${id}?autoplay=1`;
+}
+
+// ============================
+// Load Student Videos (Same UI as Teacher)
 // ============================
 async function loadStudentVideos(code) {
     const container = document.querySelector(".res-video-list");
-    const videoList = document.getElementById("res-video-list-ul");
+    if (!container) return;
 
-    if (!container || !videoList) {
-        console.error("❌ Missing video container elements in HTML.");
-        return;
-    }
-
-    videoList.innerHTML = "<p>🎥 Loading available videos...</p>";
+    container.innerHTML = "<p>🎥 Loading videos...</p>";
 
     if (!code) {
-        videoList.innerHTML = "<p style='color:red;'>No class code found.</p>";
-        console.error("❌ Missing class code for student.");
+        container.innerHTML = "<p style='color:red;'>No class code found.</p>";
         return;
     }
 
@@ -151,78 +167,87 @@ async function loadStudentVideos(code) {
         const data = await response.json();
 
         if (!data.success) {
-            videoList.innerHTML = `<p style='color:red;'>${data.message || "Failed to load videos."}</p>`;
+            container.innerHTML = `<p style='color:red;'>${data.message}</p>`;
             return;
         }
 
-        const videos = data.videos || [];
+        const videos = data.videos;
         if (videos.length === 0) {
-            videoList.innerHTML = "<p>No videos available yet.</p>";
+            container.innerHTML = "<p>No videos available yet.</p>";
             return;
         }
 
-        // ✅ Clear existing content
-        videoList.innerHTML = "";
+        const list = document.createElement("ul");
+        list.className = "res-list-grid";
 
-        // ✅ Add each video
         videos.forEach(video => {
             const li = document.createElement("li");
-            li.className = "res-item";
-
-            const videoName = video.videoname || "Untitled Video";
-            const videoFile = video.videofile || "";
+            li.className = "res-item res-video-item"; // added class for easier targeting
 
             li.innerHTML = `
-                <div class="res-card" title="${videoName}">
+                <div class="res-card">
                     <i class="fa fa-video res-icon-file"></i>
-                    <p class="res-name">${videoName}</p>
+                    <p class="res-name">${video.videoname}</p>
                 </div>
             `;
 
-            // 🎥 Click to open player overlay
-            li.querySelector(".res-card").addEventListener("click", (e) => {
-                e.preventDefault();
-                openVideoPlayer(videoFile, videoName);
+            // FIX: click on LI, not on .res-card
+            li.addEventListener("click", () => {
+                openStudentVideoPlayer(video.videoname, video.videofile);
             });
 
-            videoList.appendChild(li);
+            list.appendChild(li);
         });
 
+        container.innerHTML = "";
+        container.appendChild(list);
+
     } catch (err) {
-        console.error("❌ Error loading student videos:", err);
-        videoList.innerHTML = "<p style='color:red;'>Failed to load videos.</p>";
+        console.error("❌ Student load error:", err);
+        container.innerHTML = "<p style='color:red;'>Failed to load videos.</p>";
     }
 }
 
 // ============================
-// Video Player Overlay
+// Open Student Video Player Overlay (MATCHES TEACHER VERSION)
 // ============================
-function openVideoPlayer(file, name) {
+function openStudentVideoPlayer(title, url) {
     const overlay = document.getElementById("video-player-overlay");
-    const player = document.getElementById("player-video");
-    const title = document.getElementById("player-video-title");
-    const bg = document.querySelector(".video-player-background");
+    const titleBox = document.getElementById("player-video-title");
+    const videoBox = document.getElementById("player-video-container");
 
-    if (!overlay || !player) return;
+    const embedUrl = convertToEmbed(url);
+    if (!embedUrl) {
+        alert("Invalid YouTube link.");
+        return;
+    }
 
-    player.src = file;
-    if (title) title.textContent = name;
+    titleBox.textContent = title;
+
+    videoBox.innerHTML = `
+        <iframe
+            width="100%"
+            height="350"
+            src="${embedUrl}&mute=1&playsinline=1"
+            frameborder="0"
+            allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
+            allowfullscreen>
+        </iframe>
+    `;
 
     overlay.style.display = "flex";
-    bg.style.display = "block";
-    player.play();
 }
 
+// ============================
+// Close Button (Student)
+// ============================
 document.querySelector(".close-btn").addEventListener("click", () => {
     const overlay = document.getElementById("video-player-overlay");
-    const bg = document.querySelector(".video-player-background");
-    const player = document.getElementById("player-video");
+    const videoBox = document.getElementById("player-video-container");
 
     overlay.style.display = "none";
-    bg.style.display = "none";
-    player.pause();
+    videoBox.innerHTML = ""; // remove iframe to stop video
 });
-
 
 window.addEventListener("DOMContentLoaded", async () => {
     const student = JSON.parse(localStorage.getItem("student"));

@@ -14,21 +14,12 @@ const multer = require("multer");
 // Firebase Admin SDK
 const { initializeApp } = require('firebase-admin/app');
 const admin = require("firebase-admin");
-admin.initializeApp();
+initializeApp();
 
 const app = express();
 app.use(cors({ origin: true }));
 app.use(express.json());
 app.use(bodyParser.json());
-
-// 🔹 Multer memory storage
-const upload = multer({
-  storage: multer.memoryStorage(),
-  limits: { fileSize: 200 * 1024 * 1024 } // 200 MB
-});
-
-const { getStorage, getDownloadURL } = require("firebase-admin/storage");
-const bucket = getStorage().bucket(); // uses your default Firebase bucket
 
 // 🔹 PostgreSQL Connection (Supabase)
 const { DATABASE_URL, RAPIDAPI_KEY } = process.env;
@@ -609,128 +600,128 @@ app.post("/api/save-learning-activity", async (req, res) => {
   }
 });
 
-// ✅ Upload Video File
-app.post("/api/upload-video", upload.single("video"), async (req, res) => {
+app.post("/api/fetch-video", async (req, res) => {
   try {
-    if (!req.file) {
-      return res.status(400).json({ success: false, message: "No video file uploaded." });
+    const { link, teacher_id, title } = req.body;
+
+    if (!link) {
+      return res.json({ success: false, message: "No link provided" });
     }
 
-    const { teacher_id, story_id } = req.body; // optional metadata
-    const videoFile = req.file;
+    // If title is empty, use fallback
+    const videoTitle = title && title.trim() !== "" ? title : "Untitled Video";
 
-    // ✅ create unique filename
-    const fileName = `videos/${Date.now()}-${videoFile.originalname}`;
-
-    // ✅ upload video buffer to Firebase Storage
-    const file = bucket.file(fileName);
-    await file.save(videoFile.buffer, {
-      metadata: { contentType: videoFile.mimetype },
-      public: true,
-    });
-
-    // ✅ make video public & get URL
-    const [url] = await file.getSignedUrl({
-      action: "read",
-      expires: "03-09-2030",
-    });
-
-    await pool.query(
-     `INSERT INTO videos (teacher_id, story_id, video_url, file_name) VALUES ($1, $2, $3, $4)`,
-    [teacher_id, story_id, url, fileName]
+    // Insert video into Supabase Postgres
+    const result = await pool.query(
+      `INSERT INTO video_upload (teachid, videofile, videoname) 
+       VALUES ($1, $2, $3) 
+       RETURNING videoid, videoname`,
+      [teacher_id, link, videoTitle]  // ✔ Save the REAL youtube title
     );
 
-    res.json({
+    return res.json({
       success: true,
-      message: "Video uploaded successfully!",
-      videoUrl: url,
-      fileName,
+      videoname: result.rows[0].videoname,
+      videoid: result.rows[0].videoid
     });
+
   } catch (err) {
-    console.error("❌ Video Upload Error:", err);
-    res.status(500).json({
+    console.error("❌ Upload Video Error:", err);
+    return res.status(500).json({
       success: false,
-      message: "Video upload failed.",
-      error: err.message,
+      message: "Error uploading video"
     });
   }
 });
 
-// Fetch videos for a specific student based on their class code
-app.get("/api/get-student-videos", async (req, res) => {
-  const { code } = req.query;
-
+// GET – Return uploaded videos
+app.get("/api/get-videos", async (req, res) => {
   try {
-    const teacherResult = await pool.query(
-      "SELECT teacher_id FROM class WHERE code = $1",
+    const result = await pool.query(
+      `SELECT videoid, teachid, videofile, videoname 
+       FROM video_upload 
+       ORDER BY videoid DESC`
+    );
+
+    return res.json({
+      success: true,
+      videos: result.rows
+    });
+
+  } catch (err) {
+    console.error("❌ Get Videos Error:", err);
+    return res.status(500).json({
+      success: false,
+      message: "Error fetching videos"
+    });
+  }
+});
+
+app.get("/api/get-student-videos", async (req, res) => {
+  try {
+    const { code } = req.query;
+
+    if (!code) {
+      return res.json({
+        success: false,
+        message: "No class code provided."
+      });
+    }
+
+    // 1️⃣ Get the class using the class code
+    const classResult = await pool.query(
+      `SELECT teacher_id FROM class WHERE code = $1`,
       [code]
     );
 
-    if (teacherResult.rows.length === 0) {
-      return res.json({ success: false, message: "Class not found" });
+    if (classResult.rows.length === 0) {
+      return res.json({
+        success: false,
+        message: "Class not found."
+      });
     }
 
-    const teacherId = teacherResult.rows[0].teacher_id;
+    const teacherId = classResult.rows[0].teacher_id;
 
-    const videoResult = await pool.query(
-      "SELECT videoid, videoname, videofile FROM video_upload WHERE teachid = $1 ORDER BY videoid DESC",
+    // 2️⃣ Retrieve teacher videos
+    const videosResult = await pool.query(
+      `SELECT videoid, videofile, videoname
+       FROM video_upload
+       WHERE teachid = $1
+       ORDER BY videoid DESC`,
       [teacherId]
     );
 
-    res.json({ success: true, videos: videoResult.rows });
+    return res.json({
+      success: true,
+      videos: videosResult.rows
+    });
+
   } catch (err) {
-    console.error("❌ Error fetching student videos:", err.message);
-    res.status(500).json({ success: false, message: "Server error" });
+    console.error("❌ Error fetching student videos:", err);
+    return res.status(500).json({
+      success: false,
+      message: "Server error while retrieving videos."
+    });
   }
 });
 
-/**
- * Get all uploaded videos
- */
-app.get("/api/get-videos", async (req, res) => {
-  try {
-    // Fetch all videos from your database table 'video_upload'
-    const result = await pool.query("SELECT * FROM video_upload ORDER BY videoid DESC");
-
-    // If there are no videos, return an empty array
-    if (result.rows.length === 0) {
-      return res.json({ success: true, videos: [] });
-    }
-
-    // Map and prepare the data for frontend
-    const videos = result.rows.map(video => ({
-      videoid: video.videoid,       // unique ID from DB
-      videoname: video.videoname,   // name set by teacher
-      videofile: video.videofile    // video file URL or path
-    }));
-
-    // Send success response
-    res.json({ success: true, videos });
-  } catch (err) {
-    console.error("❌ Error fetching videos:", err.message);
-    res.status(500).json({ success: false, message: "Failed to fetch videos" });
-  }
-});
-
-/**
- * 🧩 GET STUDENT PROGRESS
- */
 app.get("/api/get-student-progress/:studentId", async (req, res) => {
   try {
     const studentId = req.params.studentId;
 
-    // --- Fetch story comprehension data with storyname ---
+    // === FETCH STORY RESULTS ===
     const storyQuery = await pool.query(
-      `SELECT s_storyresult.*, ts.storyname, 'Story' AS category
+      `SELECT s_storyresult.*, ts.storyname
        FROM s_storyresult
        JOIN teach_story ts ON s_storyresult.story_id = ts.story_id
        WHERE s_storyresult.student_id = $1`,
       [studentId]
     );
 
-    // --- Fetch learning activities ---
+    // === FETCH LEARNING ACTIVITIES ===
     const learnQuery = await pool.query(
-      `SELECT learn_act.*, 'Learning' AS category, learnname AS title_id
+      `SELECT learn_act.*
        FROM learn_act
        WHERE studid = $1`,
       [studentId]
@@ -739,34 +730,39 @@ app.get("/api/get-student-progress/:studentId", async (req, res) => {
     const stories = storyQuery.rows;
     const learnings = learnQuery.rows;
 
-    // --- STORY STATS ---
+    // === STORY STATS ===
     const storyCompleted = stories.length;
-    const storyAvg = storyCompleted
-      ? Math.min(
-          100,
-          stories.reduce((acc, s) => acc + Number(s.final_grade || 0), 0) / storyCompleted
-        )
-      : 0;
+    const storyAvg =
+      storyCompleted > 0
+        ? stories.reduce((sum, s) => sum + Number(s.final_grade || 0), 0) /
+          storyCompleted
+        : 0;
 
-    // --- LEARNING STATS ---
+    // === LEARNING STATS ===
     const learnCompleted = learnings.length;
-    const learnAvg = learnCompleted
-      ? Math.min(
-          100,
-          learnings.reduce((acc, l) => acc + Number(l.f_result || 0), 0) / learnCompleted
-        )
-      : 0;
+    const learnAvg =
+      learnCompleted > 0
+        ? learnings.reduce((sum, l) => sum + Number(l.f_result || 0), 0) /
+          learnCompleted
+        : 0;
 
-    // --- OVERALL PROGRESS ---
+    // === OVERALL PROGRESS — FIXED ===
+    // Correct formula:
+    // Take total scores divided by number of total completed
+    const totalScoreSum =
+      stories.reduce((sum, s) => sum + Number(s.final_grade || 0), 0) +
+      learnings.reduce((sum, l) => sum + Number(l.f_result || 0), 0);
+
     const totalCompleted = storyCompleted + learnCompleted;
-    const totalPossible = totalCompleted > 0 ? totalCompleted : 1;
-    const progress = Math.min(100, (totalCompleted / totalPossible) * 100);
 
-    // --- COMPLETED ACTIVITIES LIST ---
+    const overallProgress =
+      totalCompleted > 0 ? Math.round(totalScoreSum / totalCompleted) : 0;
+
+    // === ACTIVITIES LIST ===
     const activities = [
       ...stories.map(s => ({
         category: "Story",
-        title: s.storyname || `Story #${s.story_id}`,
+        title: s.storyname,
         score: Number(s.final_grade || 0)
       })),
       ...learnings.map(l => ({
@@ -778,7 +774,7 @@ app.get("/api/get-student-progress/:studentId", async (req, res) => {
 
     res.json({
       success: true,
-      progress: Math.round(progress),
+      progress: overallProgress,
       storyStats: {
         completed: storyCompleted,
         average: Math.round(storyAvg)
@@ -997,4 +993,3 @@ exports.api = onRequest({
     region: "asia-southeast1", 
     invoker: 'public'
 }, app);
-

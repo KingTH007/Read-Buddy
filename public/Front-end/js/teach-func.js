@@ -731,8 +731,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             for (const [index, student] of data.students.entries()) {
                 const tr = document.createElement("tr");
-
-                // Base structure while loading
                 tr.innerHTML = `
                     <td>${index + 1}</td>
                     <td>${student.fullname}</td>
@@ -749,35 +747,21 @@ document.addEventListener('DOMContentLoaded', async () => {
                 `;
                 studentList.appendChild(tr);
 
-                // 🔍 Fetch real progress per student
                 try {
                     const res = await fetch(`/api/get-student-progress/${student.id}`);
                     const progData = await res.json();
 
                     if (progData.success) {
-                        const { storyStats, learningStats } = progData;
-
-                        // ✅ Compute progress dynamically (same formula as overlay)
-                        const totalTasks = storyStats.completed + learningStats.completed;
-                        const completedTasks = totalTasks; // since both stats already reflect completed ones
-                        const completionRate = totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0;
-                        const overallAverage = (storyStats.average + learningStats.average) / 2;
-                        const progress = Math.round((completionRate * 0.5) + (overallAverage * 0.5));
-
-                        // Update progress bar
+                        const progress = progData.progress; // ✅ same unified value
                         const barInner = tr.querySelector(".progress-bar-inner");
                         const barText = tr.querySelector(".progress-text");
+
                         barInner.style.width = `${progress}%`;
                         barText.textContent = `${progress}%`;
 
-                        // Optional: color gradient depending on performance
-                        if (progress < 50) {
-                            barInner.style.backgroundColor = "#f87171"; // red
-                        } else if (progress < 80) {
-                            barInner.style.backgroundColor = "#facc15"; // yellow
-                        } else {
-                            barInner.style.backgroundColor = "#4ade80"; // green
-                        }
+                        if (progress < 50) barInner.style.backgroundColor = "#f87171";
+                        else if (progress < 80) barInner.style.backgroundColor = "#facc15";
+                        else barInner.style.backgroundColor = "#4ade80";
                     } else {
                         tr.querySelector(".progress-text").textContent = "N/A";
                     }
@@ -910,18 +894,18 @@ document.addEventListener('DOMContentLoaded', async () => {
             const data = await response.json();
 
             if (data.success) {
-                const { storyStats, learningStats, activities } = data;
+                const { progress, storyStats, learningStats, activities } = data;
 
-                // ✅ Compute progress dynamically
-                const totalTasks = storyStats.total + learningStats.total;
-                const completedTasks = storyStats.completed + learningStats.completed;
-                const completionRate = totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0;
-                const overallAverage = (storyStats.average + learningStats.average) / 2;
-                const progress = Math.round((completionRate * 0.5) + (overallAverage * 0.5));
+                // ✅ Use unified backend progress (exact same as student list)
+                const finalProgress = progress ?? Math.round(
+                    ((storyStats.average + learningStats.average) / 2) * 0.5 +
+                    ((storyStats.completed + learningStats.completed) / 
+                    ((storyStats.total || storyStats.completed) + (learningStats.total || learningStats.completed))) * 100 * 0.5
+                );
 
                 // ✅ Update progress bar
-                studentProgressBar.style.width = `${progress}%`;
-                studentProgressBar.textContent = `${progress}%`;
+                studentProgressBar.style.width = `${finalProgress}%`;
+                studentProgressBar.textContent = `${finalProgress}%`;
 
                 // ✅ Update table stats
                 storyCompleted.textContent = storyStats.completed;
@@ -958,9 +942,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         },
                         options: {
                             responsive: true,
-                            scales: {
-                                y: { beginAtZero: true, max: 100 }
-                            }
+                            scales: { y: { beginAtZero: true, max: 100 } }
                         }
                     });
                 }
@@ -1225,17 +1207,21 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 
     // ============================
-    // Video Overlay Show / Hide Controls
+    // Video Overlay Controls
     // ============================
     const lessonOverlayBg = document.getElementById("lesson-overlay-background");
     const videoOverlay = document.getElementById("video-overlay");
     const createVideoBtn = document.getElementById("create-video-btn");
     const cancelVideoBtn = document.getElementById("cancel-video-btn");
-    const overlayplayer = document.getElementById("video-player-overlay");
-    const overlayVideo = document.getElementById("player-video");
-    const overlayTitle = document.getElementById("player-video-title");
-    const closeBtn = overlayplayer?.querySelector(".close-btn");
 
+    const overlayPlayer = document.getElementById("video-player-overlay");
+    const videoBox = document.getElementById("player-video-container");
+    const overlayTitle = document.getElementById("player-video-title");
+    const closeBtn = document.querySelector("#video-player-overlay .close-btn");
+
+    // ============================
+    // Add New Video (Teacher)
+    // ============================
     createVideoBtn.addEventListener("click", () => {
         lessonOverlayBg.style.display = "block";
         videoOverlay.style.display = "block";
@@ -1247,127 +1233,161 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById("video-name").value = '';
     });
 
-    // ✅ Close overlay safely
+    // ============================
+    // Close Video Player Overlay
+    // ============================
+    function closeVideoPlayer() {
+        overlayPlayer.style.display = "none";
+
+        // Remove iframe safely
+        if (videoBox) videoBox.innerHTML = "";
+
+        // Reset title
+        if (overlayTitle) overlayTitle.textContent = "";
+    }
+
     if (closeBtn) {
-        closeBtn.addEventListener("click", () => {
-            overlayplayer.style.display = "none";
-            overlayVideo.pause();
-            overlayVideo.src = "";
-            if (overlayTitle) overlayTitle.textContent = "";
-        });
+        closeBtn.addEventListener("click", closeVideoPlayer);
     }
 
-    // ✅ Optional: click outside video to close
-    if (overlayplayer) {
-        overlayplayer.addEventListener("click", (e) => {
-            if (e.target === overlayplayer) {
-                overlayplayer.style.display = "none";
-                overlayVideo.pause();
-                overlayVideo.src = "";
-                if (overlayTitle) overlayTitle.textContent = "";
-            }
-        });
-    }
-
-    // ============================
-    // File Preview & Label Control
-    // ============================
-    const videoInput = document.getElementById("uploadVideo");
-    const videoLabel = document.getElementById("video-upload-label");
-
-    videoInput.addEventListener("change", (e) => {
-        const file = e.target.files[0];
-        const statusDiv = document.getElementById("video-upload-status");
-        if (file) {
-            statusDiv.innerHTML = `<div class="file-item preview"><i class="fa fa-video"></i> ${file.name}</div>`;
-            videoLabel.style.display = "none"; // hide label when file is selected
-        } else {
-            statusDiv.innerHTML = "";
-            videoLabel.style.display = "block";
+    // Close when clicking outside the video box
+    overlayPlayer.addEventListener("click", (e) => {
+        if (e.target === overlayPlayer) {
+            closeVideoPlayer();
         }
     });
 
     // ============================
-    // Upload Video (Local Server)
+    // Fetch Video (Teacher Upload)
     // ============================
-    document.getElementById("upload-video-btn").addEventListener("click", async () => {
-        const file = document.getElementById("uploadVideo").files[0];
-        const videoName = document.getElementById("video-name").value.trim();
+    const fetchVideoBtn = document.getElementById("fetch-video-btn");
+
+    fetchVideoBtn.addEventListener("click", async () => {
+        const link = document.getElementById("video-link").value.trim();
+        const statusDiv = document.getElementById("video-fetch-status");
         const teacher = JSON.parse(localStorage.getItem("teacher") || "{}");
-        const statusDiv = document.getElementById("video-upload-status");
 
-        if (!file) return showNotification('error', "Please select a video file.");
-        if (!videoName) return showNotification('error', "Please enter a video name.");
+        if (!link) {
+            statusDiv.innerHTML = "<p style='color:red;'>Please paste a video link.</p>";
+            return;
+        }
 
-        const formData = new FormData();
-        formData.append("file", file);
-        formData.append("videoName", videoName);
-        formData.append("teachID", teacher.id || 1);
+        statusDiv.innerHTML = "⏳ Fetching YouTube title...";
 
-        statusDiv.innerHTML = `<div class="file-item loading">⏳ Uploading...</div>`;
-
+        // STEP 1: Get YouTube title using oEmbed
+        let videoTitle = "";
         try {
-            const response = await fetch("/api/upload-video", {
+            const oembed = await fetch(`https://www.youtube.com/oembed?url=${link}&format=json`);
+            const odata = await oembed.json();
+            videoTitle = odata.title;   // ✔ This is the REAL YouTube title
+        } catch (err) {
+            videoTitle = "Untitled Video"; // fallback
+        }
+
+        statusDiv.innerHTML = "⏳ Uploading video...";
+
+        // STEP 2: Send title + link to backend
+        try {
+            const response = await fetch("/api/fetch-video", {
                 method: "POST",
-                body: formData
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    link,
+                    title: videoTitle,     // ▶ ADD TITLE HERE
+                    teacher_id: teacher.id
+                })
             });
 
-            const text = await response.text();
-            let data;
-
-            try {
-                data = JSON.parse(text);
-            } catch {
-                throw new Error("Invalid server response: " + text);
-            }
+            const data = await response.json();
 
             if (data.success) {
-                statusDiv.innerHTML = `
-                    <div class="file-item success">
-                        ✅ <strong>${data.video.videoname}</strong> uploaded successfully!
-                    </div>
-                `;
-
-                addToList("video", data.video.videofile, data.video.videoname);
-                loadVideos(); // refresh video list
+                statusDiv.innerHTML = `<p style="color:green;">✔ Video added: ${videoTitle}</p>`;
+                closeVideoPlayer();
+                loadVideos();
             } else {
-                statusDiv.innerHTML = `<div class="file-item error">❌ ${data.message}</div>`;
+                statusDiv.innerHTML = `<p style="color:red;">❌ ${data.message}</p>`;
             }
+
         } catch (err) {
-            console.error("❌ Video Upload Error:", err);
-            statusDiv.innerHTML = `<div class="file-item error">❌ Upload failed: ${err.message}</div>`;
+            statusDiv.innerHTML = `<p style='color:red;'>❌ Error: ${err.message}</p>`;
         }
     });
 
+
     // ============================
-    // Load Videos from Database and Folder
+    // Convert YouTube Link → EMBED
+    // ============================
+    function convertToEmbed(url) {
+        let id = "";
+
+        if (url.includes("watch?v=")) {
+            id = url.split("v=")[1].split("&")[0];
+        }
+        else if (url.includes("youtu.be/")) {
+            id = url.split("youtu.be/")[1].split("?")[0];
+        }
+        else if (url.includes("/shorts/")) {
+            id = url.split("/shorts/")[1].split("?")[0];
+        }
+        else {
+            return null;
+        }
+
+        return `https://www.youtube.com/embed/${id}?autoplay=1`;
+    }
+
+    // ============================
+    // Open Video Overlay
+    // ============================
+    function openVideoPlayer(title, url) {
+        const embedUrl = convertToEmbed(url);
+
+        if (!embedUrl) {
+            alert("Invalid YouTube link.");
+            return;
+        }
+
+        overlayTitle.textContent = title;
+
+        // Insert iframe
+        videoBox.innerHTML = `
+            <iframe 
+                width="100%" 
+                height="350" 
+                src="${embedUrl}"
+                frameborder="0"
+                allow="autoplay; encrypted-media"
+                allowfullscreen>
+            </iframe>
+        `;
+
+        overlayPlayer.style.display = "flex";
+    }
+
+    // ============================
+    // Load Videos (Teacher List)
     // ============================
     async function loadVideos() {
         const container = document.querySelector(".res-video-list");
         if (!container) return;
 
-        container.innerHTML = "<p>🎥 Loading videos...</p>";
+        container.innerHTML = "<p>Loading...</p>";
 
         try {
-            // ✅ Use the correct route
-            const response = await fetch("/api/get-videos");
-            const data = await response.json();
+            const res = await fetch("/api/get-videos");
+            const data = await res.json();
 
-            // ✅ Validate and extract the array correctly
-            const videos = data.videos || [];
-
-            if (!data.success || !Array.isArray(videos)) {
-                container.innerHTML = "<p style='color:red;'>Invalid server response.</p>";
-                console.error("❌ Invalid response:", data);
+            if (!data.success) {
+                container.innerHTML = "<p>Error loading videos.</p>";
                 return;
             }
 
+            const videos = data.videos;
             if (videos.length === 0) {
-                container.innerHTML = "<p>No videos uploaded yet.</p>";
+                container.innerHTML = "<p>No videos uploaded.</p>";
                 return;
             }
 
-            // ✅ Build the list dynamically
             const list = document.createElement("ul");
             list.className = "res-list-grid";
 
@@ -1375,26 +1395,15 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const li = document.createElement("li");
                 li.className = "res-item";
 
-                // ✅ Use 'videoname' from the database, not the upload filename
-                const displayName = video.videoname;
-                const videoUrl = video.videofile;
-
                 li.innerHTML = `
-                    <div class="res-card" title="${displayName}">
+                    <div class="res-card">
                         <i class="fa fa-video res-icon-file"></i>
-                        <p class="res-name" style="cursor:pointer;">${displayName}</p>
+                        <p class="res-name" style="cursor:pointer;">${video.videoname}</p>
                     </div>
                 `;
 
                 li.querySelector(".res-card").addEventListener("click", () => {
-                    const overlayplayer = document.getElementById("video-player-overlay");
-                    const overlayVideo = document.getElementById("player-video");
-                    const overlayTitle = document.getElementById("player-video-title");
-
-                    overlayVideo.src = videoUrl;
-                    if (overlayTitle) overlayTitle.textContent = displayName;
-                    overlayplayer.style.display = "flex";
-                    overlayVideo.play();
+                    openVideoPlayer(video.videoname, video.videofile);
                 });
 
                 list.appendChild(li);
@@ -1404,8 +1413,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             container.appendChild(list);
 
         } catch (err) {
-            console.error("❌ Error loading videos:", err);
-            container.innerHTML = "<p style='color:red;'>Error loading videos.</p>";
+            console.error("loadVideos error:", err);
+            container.innerHTML = "<p>Error loading videos.</p>";
         }
     }
 

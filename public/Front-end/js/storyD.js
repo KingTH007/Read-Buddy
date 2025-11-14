@@ -73,7 +73,7 @@ document.addEventListener("DOMContentLoaded", () => {
         utter.voice = voice;
         utter.lang = voice.lang;
         utter.rate = 1.0;
-        utter.pitch = 2.2;
+        utter.pitch = 1.0;
         utter.volume = 1.0;
 
         const activeRow = sdBox.querySelector(".ai-row:last-child");
@@ -307,7 +307,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 total: currentStory.questions.length
             });
             currentStoryIndex++;
-            setTimeout(startNextStory, 1000);
+            setTimeout(startNextStory, 3000);
             return;
         }
 
@@ -335,12 +335,12 @@ document.addEventListener("DOMContentLoaded", () => {
                 correctCount++;
                 addAIMessage(`Correct! The correct answer is "${q.answer}".`, false, () => {
                     currentQuestionIndex++;
-                    setTimeout(showQuestion, 2500);
+                    setTimeout(showQuestion, 3000);
                 });
             } else {
                 addAIMessage(`Wrong. The correct answer is "${q.answer}".`, false, () => {
                     currentQuestionIndex++;
-                    setTimeout(showQuestion, 2500);
+                    setTimeout(showQuestion, 3000);
                 });
             }
         });

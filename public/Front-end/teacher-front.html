@@ -346,31 +346,30 @@
                 <button class="overlay-close-btn" id="cancel-video-btn">
                     <i class="fa fa-x"></i>
                 </button>
+
                 <div class="overlay-border">
-                    <h2>Video Upload</h2>
-                    <label for="video-name">Name:</label>
-                    <input type="text" id="video-name" placeholder="Enter video name" />
+                    <h2>Add Video via Link</h2>
 
-                    <div class="overlay-upload-container">
-                        <label class="overlay-upload" for="uploadVideo" id ="video-upload-label">
-                            + Upload Video <br><p>or drag and drop a file here</p>
-                            <input type="file" id="uploadVideo" accept=".mp4,.mp3">
-                        </label>
+                    <label>Paste YouTube Link:</label>
+                    <input type="text" id="video-link" placeholder="https://youtube.com/watch?v=xxxxx">
 
-                        <div class="upload-status" id="video-upload-status"></div>
-                    </div>
-
+                    <div id="video-fetch-status"></div>
+                    
                     <div class="overlay-button-row">
-                        <button class="overlap-button" id="upload-video-btn">Upload Video</button>
+                        <button class="overlap-button" id="fetch-video-btn">Upload Video</button>
                     </div>
                 </div>
             </div>
 
             <div id="video-player-overlay" class="video-player-overlay">
                 <div class="video-player-content">
-                    <span class="close-btn">&times;</span>
-                    <h2 class="video-title" id="player-video-title">Video Title</h2> 
-                    <video id="player-video" controls autoplay></video>
+                    <span id="close-video-player" class="close-btn">&times;</span>
+
+                    <h2 class="video-title" id="player-video-title">Video Title</h2>
+
+                    <div id="player-video-container" class="player-video-container">
+                        <!-- JS will insert iframe here -->
+                    </div>
                 </div>
             </div>
 
